@@ -1,6 +1,7 @@
 package de.ovgu.variantsync.applicationlayer.datamodel.monitoring;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 
@@ -13,9 +14,12 @@ import org.eclipse.core.resources.IResource;
  */
 public class MonitorSet {
 
-	private final static MonitorSet INSTANCE = new MonitorSet();
-	private HashSet<IResource> monitorItems;
+	private static final MonitorSet INSTANCE = new MonitorSet();
+	private Set<IResource> monitorItems;
 
+	/**
+	 * Initializes set of IResource-objects.
+	 */
 	private MonitorSet() {
 		monitorItems = new HashSet<IResource>();
 	}

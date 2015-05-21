@@ -1,9 +1,11 @@
-package de.ovgu.variantsync.applicationlayer.deltaCalculation;
+package de.ovgu.variantsync.applicationlayer.deltacalculation;
 
 import java.util.List;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.PatchException;
 import difflib.DiffUtils;
 import difflib.Patch;
+import difflib.PatchFailedException;
 
 /**
  * Provides functions to compute deltas (differences) between original and
@@ -16,7 +18,12 @@ import difflib.Patch;
 class ExternalDeltaCalculation {
 
 	public String getUnifiedDiff(List<String> content) {
-		return DiffUtilities.getUnifiedDiff(content);
+		StringBuilder uniDiff = new StringBuilder();
+		for (String s : content) {
+			uniDiff.append(s);
+			uniDiff.append("\n");
+		}
+		return uniDiff.toString();
 	}
 
 	public Patch createUnifiedDifference(List<String> content) {
@@ -41,8 +48,13 @@ class ExternalDeltaCalculation {
 
 	@SuppressWarnings("unchecked")
 	public List<String> computePatch(List<String> content, Patch patch)
-			throws Exception {
-		return (List<String>) DiffUtils.patch(content, patch);
+			throws PatchException {
+		try {
+			return (List<String>) DiffUtils.patch(content, patch);
+		} catch (PatchFailedException e) {
+			throw new PatchException("Patch could not be computed in diffLib.",
+					e);
+		}
 	}
 
 }

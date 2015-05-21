@@ -1,13 +1,15 @@
 package de.ovgu.variantsync.applicationlayer;
 
-import de.ovgu.variantsync.applicationlayer.deltaCalculation.DeltaOperationProvider;
-import de.ovgu.variantsync.applicationlayer.deltaCalculation.IDeltaOperations;
+import de.ovgu.variantsync.applicationlayer.deltacalculation.DeltaOperationProvider;
+import de.ovgu.variantsync.applicationlayer.deltacalculation.IDeltaOperations;
 import de.ovgu.variantsync.applicationlayer.features.FeatureProvider;
 import de.ovgu.variantsync.applicationlayer.features.IFeatureOperations;
 import de.ovgu.variantsync.applicationlayer.merging.IMergeOperations;
 import de.ovgu.variantsync.applicationlayer.merging.MergeOperationProvider;
 import de.ovgu.variantsync.applicationlayer.synchronization.ISynchronizationOperations;
 import de.ovgu.variantsync.applicationlayer.synchronization.SynchronizationProvider;
+import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
+import de.ovgu.variantsync.persistancelayer.PersistanceOperationProvider;
 
 /**
  * Creates operation provider which encapsulate functions of a module in
@@ -19,7 +21,7 @@ import de.ovgu.variantsync.applicationlayer.synchronization.SynchronizationProvi
  */
 public class ModuleFactory {
 
-	public ModuleFactory() {
+	private ModuleFactory() {
 	}
 
 	public static ISynchronizationOperations getSynchronizationOperations() {
@@ -36,5 +38,9 @@ public class ModuleFactory {
 
 	public static IMergeOperations getMergeOperations() {
 		return new MergeOperationProvider();
+	}
+
+	public static IPersistanceOperations getPersistanceOperations() {
+		return new PersistanceOperationProvider();
 	}
 }

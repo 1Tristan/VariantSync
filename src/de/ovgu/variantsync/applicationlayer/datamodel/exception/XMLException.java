@@ -11,23 +11,17 @@ package de.ovgu.variantsync.applicationlayer.datamodel.exception;
 @SuppressWarnings("serial")
 public class XMLException extends Exception {
 
-	public XMLException() {
-	}
-
-	public XMLException(String arg0) {
-		super(arg0);
-	}
-
-	public XMLException(Throwable arg0) {
-		super(arg0);
-	}
-
+	/**
+	 * Creates exception with individual error message and throwable object
+	 * containing stacktrace.
+	 * 
+	 * @param arg0
+	 *            individual error message
+	 * @param arg1
+	 *            throwable object containing stacktrace
+	 */
 	public XMLException(String arg0, Throwable arg1) {
 		super(arg0, arg1);
-	}
-
-	public XMLException(String arg0, Throwable arg1, boolean arg2, boolean arg3) {
-		super(arg0, arg1, arg2, arg3);
 	}
 
 }

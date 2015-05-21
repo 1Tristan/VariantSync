@@ -155,7 +155,7 @@ class TargetCalculation extends Synchronization {
 				(ResourceChangesFile) resourcePatch.getParent(), project);
 
 		Comparator<IChangedFile> comparator = Collections
-				.reverseOrder(ResourceChangesFilePatch.timeComparator);
+				.reverseOrder(ResourceChangesFilePatch.TIMECOMPARATOR);
 		Collections.sort(patchs, comparator);
 
 		Patch patch = deltaOperations.getPatch(resourcePatch);

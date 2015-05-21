@@ -2,9 +2,11 @@ package de.ovgu.variantsync.applicationlayer.datamodel.resources;
 
 import java.io.File;
 import java.text.DateFormat;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.graphics.Image;
@@ -31,36 +33,66 @@ public class ResourceChangesFilePatch implements IChangedFile {
 	private IChangedFile parent;
 	private String status;
 
+	/**
+	 * Sets timestamp and synchronization flag extracted from patch-file-name.
+	 * 
+	 * @param name
+	 *            name of patch file
+	 * @param project
+	 *            project of patch file
+	 */
 	public ResourceChangesFilePatch(String name, IProject project) {
 		this.patchFileName = name;
 		this.project = project;
-		String infoTxt[] = this.patchFileName.split("_");
+		String[] infoTxt = this.patchFileName.split("_");
 		if (infoTxt.length > 2) {
 			String time = infoTxt[infoTxt.length - 1];
 			this.timestamp = Long.parseLong(time);
 		}
-		this.synchro = infoTxt[infoTxt.length - 2].equals("1");
+		this.synchro = "1".equals(infoTxt[infoTxt.length - 2]);
 	}
 
+	/**
+	 * Returns unified diff.
+	 * 
+	 * @return unified diff string
+	 */
 	public String getUnidiff() {
 		return unidiff;
 	}
 
+	/**
+	 * Sets unified diff.
+	 * 
+	 * @param unidiff
+	 *            the diff string to set
+	 */
 	public void setUnidiff(String unidiff) {
 		this.unidiff = unidiff;
 	}
 
+	/**
+	 * Returns timestamp of file creation.
+	 * 
+	 * @return timestamp
+	 */
 	public long getTimestamp() {
 		return timestamp;
 	}
 
+	/**
+	 * Returns true if file patch was created by synchronization action.
+	 * 
+	 * @return true if file patch was created by synchronization action;
+	 *         otherwise false
+	 */
 	public boolean isSynchronized() {
 		return this.synchro;
 	}
 
 	@Override
-	public ArrayList<IChangedFile> getChildren() {
-		return null;
+	public List<IChangedFile> getChildren() {
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -86,6 +118,7 @@ public class ResourceChangesFilePatch implements IChangedFile {
 
 	@Override
 	public void addChildren(IChangedFile child) {
+		// not required
 	}
 
 	@Override
@@ -96,7 +129,7 @@ public class ResourceChangesFilePatch implements IChangedFile {
 
 	@Override
 	public String getTime() {
-		String timetxt[] = this.patchFileName.split("_");
+		String[] timetxt = this.patchFileName.split("_");
 		if (timetxt.length > 2) {
 			String time = timetxt[timetxt.length - 1];
 			Date date = new Date(Long.parseLong(time));
@@ -105,15 +138,16 @@ public class ResourceChangesFilePatch implements IChangedFile {
 		return "";
 	}
 
-	public long getTimeStamp() {
-		return this.timestamp;
-	}
-
 	@Override
 	public void linkFile(File file) {
 		this.file = file;
 	}
 
+	/**
+	 * Returns file reference.
+	 * 
+	 * @return file reference
+	 */
 	public File getFile() {
 		return file;
 	}
@@ -128,10 +162,10 @@ public class ResourceChangesFilePatch implements IChangedFile {
 				path = path.substring(path
 						.indexOf(VariantSyncConstants.ADMIN_FOLDER)
 						+ VariantSyncConstants.ADMIN_FOLDER.length());
-				String pathtile[] = path.split("_");
-				String infoText = "_" + pathtile[pathtile.length - 3] + "_"
-						+ pathtile[pathtile.length - 2] + "_"
-						+ pathtile[pathtile.length - 1];
+				String[] tmpPath = path.split("_");
+				String infoText = "_" + tmpPath[tmpPath.length - 3] + "_"
+						+ tmpPath[tmpPath.length - 2] + "_"
+						+ tmpPath[tmpPath.length - 1];
 				path = path.substring(0, path.indexOf(infoText));
 				return path;
 			} else {
@@ -155,22 +189,36 @@ public class ResourceChangesFilePatch implements IChangedFile {
 		return this.status;
 	}
 
+	/**
+	 * Returns project the file belongs to.
+	 * 
+	 * @return project
+	 */
 	public IProject getProject() {
 		return this.project;
 	}
 
+	/**
+	 * Returns name of file patch.
+	 * 
+	 * @return name of file patch
+	 */
 	public String getPatchFileName() {
 		return patchFileName;
 	}
 
-	public static Comparator<IChangedFile> timeComparator = new Comparator<IChangedFile>() {
+	/**
+	 * Compares timestamps. Returns differences between timestamps of compared
+	 * files if both files are instances of class ResourceChangesFilePatch.
+	 */
+	public final static Comparator<IChangedFile> TIMECOMPARATOR = new Comparator<IChangedFile>() {
 
 		@Override
 		public int compare(IChangedFile o1, IChangedFile o2) {
 			if (o1 instanceof ResourceChangesFilePatch
 					&& o2 instanceof ResourceChangesFilePatch) {
-				return (int) (((ResourceChangesFilePatch) o1).getTimeStamp() - ((ResourceChangesFilePatch) o2)
-						.getTimeStamp());
+				return (int) (((ResourceChangesFilePatch) o1).getTimestamp() - ((ResourceChangesFilePatch) o2)
+						.getTimestamp());
 			}
 			if (o1 instanceof ResourceChangesFile
 					&& o2 instanceof ResourceChangesFilePatch) {
@@ -184,7 +232,9 @@ public class ResourceChangesFilePatch implements IChangedFile {
 		}
 	};
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

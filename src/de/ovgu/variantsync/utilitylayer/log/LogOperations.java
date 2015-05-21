@@ -15,6 +15,9 @@ import de.ovgu.variantsync.VariantSyncPlugin;
  */
 public class LogOperations {
 
+	private LogOperations() {
+	}
+
 	/**
 	 * Logs specified information.
 	 * 
@@ -23,16 +26,6 @@ public class LogOperations {
 	 */
 	public static void logInfo(String message) {
 		log(IStatus.INFO, IStatus.OK, message, null);
-	}
-
-	/**
-	 * Logs specified error.
-	 * 
-	 * @param exception
-	 *            low-level exception
-	 */
-	public static void logError(Throwable exception) {
-		logError("Unexpected Exception", exception);
 	}
 
 	/**
@@ -87,8 +80,8 @@ public class LogOperations {
 	 */
 	public static IStatus createStatus(int severity, int code, String message,
 			Throwable exception) {
-		return new Status(severity, VariantSyncConstants.PLUGIN_ID, code, message,
-				exception);
+		return new Status(severity, VariantSyncConstants.PLUGIN_ID, code,
+				message, exception);
 	}
 
 	/**

@@ -1,9 +1,10 @@
-package de.ovgu.variantsync.presentationlayer.view.resourceChanges;
+package de.ovgu.variantsync.presentationlayer.view.resourcechanges;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.IChangedFile;
+
 /**
  * 
  * @author Lei Luo

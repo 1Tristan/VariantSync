@@ -1,9 +1,10 @@
-package de.ovgu.variantsync.applicationlayer.deltaCalculation;
+package de.ovgu.variantsync.applicationlayer.deltacalculation;
 
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.PatchException;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
 import difflib.Patch;
 
@@ -70,11 +71,11 @@ public interface IDeltaOperations {
 	 * @param patch
 	 *            given patch
 	 * @return revised text
-	 * @throws Exception
+	 * @throws PatchException
 	 *             patch could not be applied
 	 */
 	List<String> computePatch(List<String> content, Patch patch)
-			throws Exception;
+			throws PatchException;
 
 	/**
 	 * Computes the difference between original and revised list of string

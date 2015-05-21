@@ -59,7 +59,8 @@ class FeatureHandler {
 					break;
 				}
 			} catch (CoreException e) {
-				e.printStackTrace();
+				throw new FeatureException("Nature support of project "
+						+ p.getName() + " could not be checked.", e);
 			}
 		}
 		if (featureInfoProject != null) {
@@ -155,11 +156,6 @@ class FeatureHandler {
 				}
 			}
 		}
-		if (flag == features.length) {
-			return true;
-		} else {
-			return false;
-		}
+		return flag == features.length;
 	}
-
 }

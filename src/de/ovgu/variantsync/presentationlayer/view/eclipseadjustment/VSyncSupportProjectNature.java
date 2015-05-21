@@ -16,7 +16,7 @@ import org.eclipse.ui.PlatformUI;
 
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
-import de.ovgu.variantsync.presentationlayer.view.resourceChanges.ResourceChangesView;
+import de.ovgu.variantsync.presentationlayer.view.resourcechanges.ResourceChangesView;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
@@ -80,15 +80,17 @@ public class VSyncSupportProjectNature implements IProjectNature {
 	public static void addNature(IProject project) {
 
 		// Cannot modify closed projects.
-		if (!project.isOpen())
+		if (!project.isOpen()) {
 			return;
+		}
 
 		// Get the description.
 		IProjectDescription description;
 		try {
 			description = project.getDescription();
 		} catch (CoreException e) {
-			LogOperations.logError(e);
+			LogOperations.logError(
+					"Project description could not be retrieved.", e);
 			return;
 		}
 
@@ -96,8 +98,9 @@ public class VSyncSupportProjectNature implements IProjectNature {
 		List<String> newIds = new ArrayList<String>();
 		newIds.addAll(Arrays.asList(description.getNatureIds()));
 		int index = newIds.indexOf(NATURE_ID);
-		if (index != -1)
+		if (index != -1) {
 			return;
+		}
 
 		// Add the nature
 		newIds.add(NATURE_ID);
@@ -107,7 +110,7 @@ public class VSyncSupportProjectNature implements IProjectNature {
 		try {
 			project.setDescription(description, null);
 		} catch (CoreException e) {
-			LogOperations.logError(e);
+			LogOperations.logError("Project description could not be set.", e);
 		}
 	}
 
@@ -115,7 +118,8 @@ public class VSyncSupportProjectNature implements IProjectNature {
 		try {
 			return project.isOpen() && project.hasNature(NATURE_ID);
 		} catch (CoreException e) {
-			LogOperations.logError(e);
+			LogOperations.logError(
+					"Project nature support could not be checked.", e);
 			return false;
 		}
 	}
@@ -123,15 +127,17 @@ public class VSyncSupportProjectNature implements IProjectNature {
 	public static void removeNature(IProject project) {
 
 		// Cannot modify closed projects.
-		if (!project.isOpen())
+		if (!project.isOpen()) {
 			return;
+		}
 
 		// Get the description.
 		IProjectDescription description;
 		try {
 			description = project.getDescription();
 		} catch (CoreException e) {
-			LogOperations.logError(e);
+			LogOperations.logError(
+					"Project description could not be retrieved.", e);
 			return;
 		}
 
@@ -139,8 +145,9 @@ public class VSyncSupportProjectNature implements IProjectNature {
 		List<String> newIds = new ArrayList<String>();
 		newIds.addAll(Arrays.asList(description.getNatureIds()));
 		int index = newIds.indexOf(NATURE_ID);
-		if (index == -1)
+		if (index == -1) {
 			return;
+		}
 
 		// Remove the nature
 		newIds.remove(index);
@@ -150,7 +157,7 @@ public class VSyncSupportProjectNature implements IProjectNature {
 		try {
 			project.setDescription(description, null);
 		} catch (CoreException e) {
-			LogOperations.logError(e);
+			LogOperations.logError("Project description could not be set.", e);
 		}
 	}
 
@@ -162,13 +169,16 @@ public class VSyncSupportProjectNature implements IProjectNature {
 				public void run() {
 					IWorkbenchWindow window = PlatformUI.getWorkbench()
 							.getActiveWorkbenchWindow();
-					if (window == null)
+					if (window == null) {
 						return;
+					}
 					IWorkbenchPage page = window.getActivePage();
-					if (page == null)
+					if (page == null) {
 						return;
+					}
 					if (page.findView(ResourceChangesView.ID) != null) {
-						((ResourceChangesView) page.findView(ResourceChangesView.ID))
+						((ResourceChangesView) page
+								.findView(ResourceChangesView.ID))
 								.refreshTree();
 					}
 				}

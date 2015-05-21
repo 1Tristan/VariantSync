@@ -2,15 +2,16 @@ package de.ovgu.variantsync.persistancelayer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FolderOperationException;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.XMLException;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 
 /**
@@ -28,20 +29,20 @@ public interface IPersistanceOperations {
 	 * 
 	 * @param folder
 	 *            IFolder object
-	 * @throws CoreException
+	 * @throws FolderOperationException
 	 *             folder could not be created
 	 */
-	void mkdirs(IFolder folder) throws CoreException;
+	void mkdirs(IFolder folder) throws FolderOperationException;
 
 	/**
 	 * Deletes specified folder.
 	 * 
 	 * @param folder
 	 *            IFolder object
-	 * @throws CoreException
+	 * @throws FolderOperationException
 	 *             folder could not be deleted
 	 */
-	void deldirs(IFolder folder) throws CoreException;
+	void deldirs(IFolder folder) throws FolderOperationException;
 
 	/**
 	 * Creates file or folder in admin folder ".variantsync" which maps original
@@ -49,16 +50,20 @@ public interface IPersistanceOperations {
 	 * 
 	 * @param res
 	 *            resource to add
+	 * @throws FileOperationException
+	 *             file could not be created in admin folder
 	 */
-	void addAdminResource(IResource res);
+	void addAdminResource(IResource res) throws FileOperationException;
 
 	/**
 	 * Removes file or folder from admin folder ".variantsync".
 	 * 
 	 * @param res
 	 *            resource to remove
+	 * @throws FileOperationException
+	 *             file could not be created in admin folder
 	 */
-	void removeAdminFile(IResource res);
+	void removeAdminFile(IResource res) throws FileOperationException;
 
 	/**
 	 * Adds lines to specified file.
@@ -67,10 +72,11 @@ public interface IPersistanceOperations {
 	 *            lines to add
 	 * @param file
 	 *            target file
-	 * @throws IOException
+	 * @throws FileOperationException
 	 *             file could not be created
 	 */
-	void addLinesToFile(List<String> lines, File file) throws IOException;
+	void addLinesToFile(List<String> lines, File file)
+			throws FileOperationException;
 
 	/**
 	 * Reads TXT-file and adds each line to list of string elements.
@@ -78,10 +84,11 @@ public interface IPersistanceOperations {
 	 * @param inputStream
 	 *            input file
 	 * @return list of file content
-	 * @throws IOException
+	 * @throws FileOperationException
 	 *             file could not be read
 	 */
-	List<String> readFile(InputStream inputStream) throws IOException;
+	List<String> readFile(InputStream inputStream)
+			throws FileOperationException;
 
 	/**
 	 * Creates an IFile-object.
@@ -89,10 +96,10 @@ public interface IPersistanceOperations {
 	 * @param file
 	 *            file to create
 	 * @return created IFile
-	 * @throws CoreException
+	 * @throws FileOperationException
 	 *             file could not be created
 	 */
-	IFile createIFile(IFile file) throws CoreException;
+	IFile createIFile(IFile file) throws FileOperationException;
 
 	/**
 	 * Reads a xml file and creates a SynchroInfo object.
@@ -112,6 +119,18 @@ public interface IPersistanceOperations {
 	 * @throws FileNotFoundException
 	 *             target does not exists
 	 */
-	void writeXMLFile(File file, MonitorItemStorage info)
-			throws FileNotFoundException;
+	void writeXMLFile(File file, MonitorItemStorage info) throws XMLException;
+
+	/**
+	 * Reads content from file using buffered reader. Adds each line in file to
+	 * List<String>.
+	 * 
+	 * @param in
+	 *            buffered Reader for file
+	 * @param charset
+	 * @return list with file content
+	 * @throws FileOperationException
+	 */
+	List<String> readFile(InputStream in, String charset)
+			throws FileOperationException;
 }

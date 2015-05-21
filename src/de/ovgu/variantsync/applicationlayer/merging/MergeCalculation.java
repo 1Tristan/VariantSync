@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
-import de.ovgu.variantsync.applicationlayer.deltaCalculation.IDeltaOperations;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.PatchException;
+import de.ovgu.variantsync.applicationlayer.deltacalculation.IDeltaOperations;
+import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 import difflib.Delta;
 import difflib.Patch;
 
@@ -43,7 +45,7 @@ class MergeCalculation {
 		if (!checkConflict(deltas12, deltas13)) {
 
 			Patch patchTemp = new Patch();
-			HashSet<Delta> tempDeltas = new HashSet<Delta>();
+			Set<Delta> tempDeltas = new HashSet<Delta>();
 			tempDeltas.addAll(deltas12);
 			tempDeltas.addAll(deltas13);
 			for (Delta d : tempDeltas) {
@@ -51,8 +53,8 @@ class MergeCalculation {
 			}
 			try {
 				result = deltaOperations.computePatch(fList1, patchTemp);
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (PatchException e) {
+				LogOperations.logError("Patch could not be computed.", e);
 			}
 			return result;
 		} else {

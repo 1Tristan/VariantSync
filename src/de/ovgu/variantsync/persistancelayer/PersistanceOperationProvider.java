@@ -1,16 +1,16 @@
 package de.ovgu.variantsync.persistancelayer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FolderOperationException;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.XMLException;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 
 /**
@@ -28,45 +28,37 @@ public class PersistanceOperationProvider implements IPersistanceOperations {
 	private XMLOperations xmlOperations;
 	private AdminFolderManager adminFolderManager;
 
-	private static PersistanceOperationProvider instance;
-
-	private PersistanceOperationProvider() {
+	public PersistanceOperationProvider() {
 		fileOperations = new FileOperations();
 		folderOperations = new FolderOperations();
 		xmlOperations = new XMLOperations();
 		adminFolderManager = new AdminFolderManager();
 	}
 
-	public static PersistanceOperationProvider getInstance() {
-		if (instance == null) {
-			instance = new PersistanceOperationProvider();
-		}
-		return instance;
-	}
-
 	@Override
-	public void mkdirs(IFolder folder) throws CoreException {
+	public void mkdirs(IFolder folder) throws FolderOperationException {
 		folderOperations.mkdirs(folder);
 	}
 
 	@Override
-	public void deldirs(IFolder folder) throws CoreException {
+	public void deldirs(IFolder folder) throws FolderOperationException {
 		folderOperations.deldirs(folder);
 	}
 
 	@Override
 	public void addLinesToFile(List<String> lines, File file)
-			throws IOException {
+			throws FileOperationException {
 		fileOperations.addLinesToFile(lines, file);
 	}
 
 	@Override
-	public List<String> readFile(InputStream inputStream) throws IOException {
+	public List<String> readFile(InputStream inputStream)
+			throws FileOperationException {
 		return fileOperations.readFile(inputStream);
 	}
 
 	@Override
-	public IFile createIFile(IFile file) throws CoreException {
+	public IFile createIFile(IFile file) throws FileOperationException {
 		return fileOperations.createIFile(file);
 	}
 
@@ -77,18 +69,24 @@ public class PersistanceOperationProvider implements IPersistanceOperations {
 
 	@Override
 	public void writeXMLFile(File file, MonitorItemStorage info)
-			throws FileNotFoundException {
+			throws XMLException {
 		xmlOperations.writeXMLFile(file, info);
 	}
 
 	@Override
-	public void addAdminResource(IResource res) {
+	public void addAdminResource(IResource res) throws FileOperationException {
 		adminFolderManager.add(res);
 	}
 
 	@Override
-	public void removeAdminFile(IResource res) {
+	public void removeAdminFile(IResource res) throws FileOperationException {
 		adminFolderManager.remove(res);
+	}
+
+	@Override
+	public List<String> readFile(InputStream in, String charset)
+			throws FileOperationException {
+		return fileOperations.readFile(in, charset);
 	}
 
 }

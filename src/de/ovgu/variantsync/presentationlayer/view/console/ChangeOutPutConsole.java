@@ -8,6 +8,7 @@ import org.eclipse.ui.console.IOConsoleOutputStream;
 
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
+import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
  * 
@@ -57,7 +58,10 @@ public class ChangeOutPutConsole extends IOConsole {
 				messageStream.write(" " + msg);
 				messageStream.write('\n');
 			} catch (IOException e) {
-				e.printStackTrace();
+				LogOperations
+						.logError(
+								"Message could not be written in console output stream.",
+								e);
 			}
 		} else {
 			document.appendConsoleLine(msg);

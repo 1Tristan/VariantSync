@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.presentationlayer.view.resourceChanges;
+package de.ovgu.variantsync.presentationlayer.view.resourcechanges;
 
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;

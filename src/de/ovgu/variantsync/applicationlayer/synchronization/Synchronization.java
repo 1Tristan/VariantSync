@@ -8,15 +8,18 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.IChangedFile;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFile;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
-import de.ovgu.variantsync.applicationlayer.deltaCalculation.IDeltaOperations;
+import de.ovgu.variantsync.applicationlayer.deltacalculation.IDeltaOperations;
 import de.ovgu.variantsync.applicationlayer.merging.IMergeOperations;
-import de.ovgu.variantsync.persistancelayer.PersistanceOperationProvider;
+import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
+import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
  * Provides functions to synchronize projects.
@@ -31,6 +34,8 @@ abstract class Synchronization {
 			.getDeltaOperations();
 	protected IMergeOperations mergeOperations = ModuleFactory
 			.getMergeOperations();
+	protected IPersistanceOperations persistanceOperations = ModuleFactory
+			.getPersistanceOperations();
 
 	protected abstract void addFile();
 
@@ -56,14 +61,18 @@ abstract class Synchronization {
 		IFile file = project.getFile(patch.getPath());
 		List<String> fileLines = new LinkedList<String>();
 		if (file.exists() && file.getType() == IResource.FILE) {
-			try {
-				if (!file.isSynchronized(IResource.DEPTH_ZERO)) {
+			if (!file.isSynchronized(IResource.DEPTH_ZERO)) {
+				try {
 					file.refreshLocal(IResource.DEPTH_ZERO, null);
+				} catch (CoreException e) {
+					LogOperations.logError(
+							"File could not be refreshed in workspace.", e);
 				}
-				fileLines = PersistanceOperationProvider.getInstance()
-						.readFile(file.getContents());
-			} catch (Exception e) {
-				e.printStackTrace();
+			}
+			try {
+				fileLines = persistanceOperations.readFile(file.getContents());
+			} catch (FileOperationException | CoreException e) {
+				LogOperations.logError("File could not be accessed.", e);
 			}
 		}
 		return fileLines;
@@ -90,7 +99,7 @@ abstract class Synchronization {
 				patches.add((ResourceChangesFilePatch) temp);
 			}
 		}
-		Collections.sort(patches, ResourceChangesFilePatch.timeComparator);
+		Collections.sort(patches, ResourceChangesFilePatch.TIMECOMPARATOR);
 		return patches;
 	}
 
@@ -102,9 +111,8 @@ abstract class Synchronization {
 	 * @return list with project names
 	 */
 	public List<String> getSynchronizedProjects(ResourceChangesFilePatch patch) {
-		List<String> projectNames = VariantSyncPlugin.getDefault()
+		return VariantSyncPlugin.getDefault()
 				.getSynchroInfoFrom(patch.getProject())
 				.getMonitoredProjects(patch.getName());
-		return projectNames;
 	}
 }

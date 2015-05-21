@@ -1,7 +1,6 @@
 package de.ovgu.variantsync.applicationlayer.synchronization;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +17,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import de.ovgu.variantsync.VariantSyncConstants;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FolderOperationException;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.XMLException;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItem;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorSet;
@@ -25,7 +27,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.resources.ChangeTypes;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.IChangedFile;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFile;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
-import de.ovgu.variantsync.persistancelayer.PersistanceOperationProvider;
+import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 import difflib.Patch;
 
 /**
@@ -87,19 +89,14 @@ class ProjectSynchronization extends Synchronization {
 					source = patchProject.getFile(relativePath).getContents();
 					IPath iPath = project.getFile(relativePath).getParent()
 							.getProjectRelativePath();
-					if (!iPath.isEmpty()) {
-						IFolder folder = project.getFolder(iPath);
-						if (!folder.exists()) {
-							PersistanceOperationProvider.getInstance().mkdirs(
-									folder);
-						}
-					}
+					createDir(iPath, project);
 					IFile addFile = project.getFile(relativePath);
 					MonitorSet.getInstance().addSynchroItem(addFile);
 					addSynchronizationFocus(project, patchFileName);
 					addFile.create(source, IResource.FORCE, null);
 				} catch (CoreException e) {
-					e.printStackTrace();
+					LogOperations
+							.logError("File content could not be read.", e);
 				}
 			}
 		}
@@ -115,11 +112,11 @@ class ProjectSynchronization extends Synchronization {
 			IProject project = (IProject) object;
 			IFolder folder = project.getFolder(relativePath);
 			if (!folder.exists()) {
+				addSynchronizationFocus(project, patchFileName);
 				try {
-					addSynchronizationFocus(project, patchFileName);
-					PersistanceOperationProvider.getInstance().mkdirs(folder);
-				} catch (CoreException e) {
-					e.printStackTrace();
+					persistanceOperations.mkdirs(folder);
+				} catch (FolderOperationException e) {
+					LogOperations.logError("Folder could not be created.", e);
 				}
 			}
 		}
@@ -137,10 +134,9 @@ class ProjectSynchronization extends Synchronization {
 				try {
 					IFolder removeFolder = project.getFolder(relativePath);
 					addSynchronizationFocus(project, patchFileName);
-					PersistanceOperationProvider.getInstance().deldirs(
-							removeFolder);
-				} catch (CoreException e) {
-					e.printStackTrace();
+					persistanceOperations.deldirs(removeFolder);
+				} catch (FolderOperationException e) {
+					LogOperations.logError("Folder could not be removed.", e);
 				}
 			}
 		}
@@ -161,7 +157,7 @@ class ProjectSynchronization extends Synchronization {
 					addSynchronizationFocus(project, patchFileName);
 					removeFile.delete(true, null);
 				} catch (CoreException e) {
-					e.printStackTrace();
+					LogOperations.logError("File could not be deleted.", e);
 				}
 			}
 		}
@@ -182,10 +178,10 @@ class ProjectSynchronization extends Synchronization {
 		List<ResourceChangesFilePatch> patchs = getPatchsFromProject(
 				(ResourceChangesFile) patch.getParent(), patchProject);
 		Comparator<IChangedFile> comparator = Collections
-				.reverseOrder(ResourceChangesFilePatch.timeComparator);
+				.reverseOrder(ResourceChangesFilePatch.TIMECOMPARATOR);
 		Collections.sort(patchs, comparator);
 		List<String> fileLines = getFileContent(patchProject, patch);
-		if (fileLines.size() != 0) {
+		if (!fileLines.isEmpty()) {
 			boolean fileRemove = false;
 			for (ResourceChangesFilePatch p : patchs) {
 				if (p.getStatus().equals(ChangeTypes.REMOVEFILE)) {
@@ -232,8 +228,9 @@ class ProjectSynchronization extends Synchronization {
 								changeFile
 										.setContents(source, true, true, null);
 							}
-						} catch (Exception e) {
-							e.printStackTrace();
+						} catch (CoreException e) {
+							LogOperations.logError(
+									"File could not be deleted.", e);
 						}
 					}
 				}
@@ -242,7 +239,7 @@ class ProjectSynchronization extends Synchronization {
 	}
 
 	/**
-	 * Adds a file to admin folder.
+	 * Adds a file to admin folder .variantsync.
 	 * 
 	 * @param project
 	 *            project of file
@@ -256,41 +253,81 @@ class ProjectSynchronization extends Synchronization {
 			try {
 				infoFolder.refreshLocal(IResource.DEPTH_ZERO, null);
 			} catch (CoreException e) {
-				e.printStackTrace();
+				LogOperations
+						.logError(
+								"Info file .variantsyncInfo could not be refreshed in workspace.",
+								e);
 			}
 		}
 		IFile infoFile = project.getFolder(VariantSyncConstants.ADMIN_FOLDER)
 				.getFile(VariantSyncConstants.ADMIN_FILE);
 		try {
 			infoFile.refreshLocal(IResource.DEPTH_ZERO, null);
-		} catch (CoreException e1) {
-			e1.printStackTrace();
+		} catch (CoreException e) {
+			LogOperations
+					.logError(
+							"Info file .variantsyncInfo could not be refreshed in workspace.",
+							e);
 		}
 		MonitorItemStorage info = null;
 		if (!infoFile.exists()) {
 			info = new MonitorItemStorage();
 			try {
-				infoFile = PersistanceOperationProvider.getInstance()
-						.createIFile(infoFile);
-			} catch (CoreException e) {
-				e.printStackTrace();
+				infoFile = persistanceOperations.createIFile(infoFile);
+			} catch (FileOperationException e) {
+				LogOperations
+						.logError(
+								".variantsyncInfo file could not be created in admin folder .variantsync.",
+								e);
 			}
 		} else {
 			try {
-				info = PersistanceOperationProvider.getInstance()
-						.readSynchroXMLFile(infoFile.getContents());
+				info = persistanceOperations.readSynchroXMLFile(infoFile
+						.getContents());
 			} catch (CoreException e) {
-				e.printStackTrace();
+				LogOperations.logError(
+						".variantsyncInfo file could not be read.", e);
 			}
 		}
 		info.addMonitorItem(new MonitorItem(patchFileName, project.getName()));
 		try {
-			PersistanceOperationProvider.getInstance().writeXMLFile(
-					infoFile.getLocation().toFile(), info);
+			persistanceOperations.writeXMLFile(infoFile.getLocation().toFile(),
+					info);
+		} catch (XMLException e) {
+			LogOperations
+					.logError(
+							".variantsyncInfo file could not be written in admin folder .variantsync.",
+							e);
+		}
+		try {
 			infoFile.refreshLocal(IResource.DEPTH_ZERO, null);
-		} catch (FileNotFoundException | CoreException e) {
-			e.printStackTrace();
+		} catch (CoreException e) {
+			LogOperations
+					.logError(
+							"Info file .variantsyncInfo could not be refreshed in workspace.",
+							e);
 		}
 	}
 
+	/**
+	 * Checks if iPath refers to an existing folder. If the folder does not
+	 * exist, it will be created.
+	 * 
+	 * @param iPath
+	 *            path of folder
+	 * @param project
+	 *            project containing folder
+	 */
+	private void createDir(IPath iPath, IProject project) {
+		if (!iPath.isEmpty()) {
+			IFolder folder = project.getFolder(iPath);
+			if (!folder.exists()) {
+				try {
+					persistanceOperations.mkdirs(folder);
+				} catch (FolderOperationException e) {
+					LogOperations.logError("Folder could not be created.", e);
+				}
+			}
+		}
+	}
 }

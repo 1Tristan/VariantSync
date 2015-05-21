@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.presentationlayer.view.resourceChanges;
+package de.ovgu.variantsync.presentationlayer.view.resourcechanges;
 
 import java.beans.PropertyChangeEvent;
 import java.util.List;
@@ -30,6 +30,13 @@ public class ResourceChangesColumnLabelProvider extends CellLabelProvider
 	private Controller controller;
 	private ResourceChangesFilePatch patch;
 
+	/**
+	 * Registers this instance as view which can receive events from controller
+	 * as part of MCV-Implementation.
+	 * 
+	 * @param i
+	 * @param controller
+	 */
 	public ResourceChangesColumnLabelProvider(int i, final Controller controller) {
 		this.headID = i;
 		this.controller = controller;
@@ -57,25 +64,19 @@ public class ResourceChangesColumnLabelProvider extends CellLabelProvider
 				cell.setText(new ResourceChangesLabelProvider().getText(o));
 			}
 		}
-		if (headID == 1) {
-			if (o instanceof ResourceChangesFilePatch) {
-				IProject project = ((ResourceChangesFilePatch) o).getProject();
-				if (project != null) {
-					cell.setText(project.getName());
-				}
+		if (headID == 1 && o instanceof ResourceChangesFilePatch) {
+			IProject project = ((ResourceChangesFilePatch) o).getProject();
+			if (project != null) {
+				cell.setText(project.getName());
 			}
 		}
-		if (headID == 2) {
-			if (o instanceof ResourceChangesFilePatch) {
-				patch = (ResourceChangesFilePatch) o;
-				controller.getProjectNames(patch);
-			}
+		if (headID == 2 && o instanceof ResourceChangesFilePatch) {
+			patch = (ResourceChangesFilePatch) o;
+			controller.getProjectNames(patch);
 		}
-		if (headID == 3) {
-			if (o instanceof ResourceChangesFilePatch) {
-				patch = (ResourceChangesFilePatch) o;
-				controller.getSynchronizedProjects(patch);
-			}
+		if (headID == 3 && o instanceof ResourceChangesFilePatch) {
+			patch = (ResourceChangesFilePatch) o;
+			controller.getSynchronizedProjects(patch);
 		}
 	}
 

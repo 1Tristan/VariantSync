@@ -10,9 +10,12 @@ package de.ovgu.variantsync.applicationlayer.datamodel.resources;
  */
 public final class ChangeTypes {
 
-	public final static String CHANGE = "CHANGE";
-	public final static String REMOVEFOLDER = "REMOVEFOLDER";
-	public final static String REMOVEFILE = "REMOVEFILE";
-	public final static String ADDFOLDER = "ADDFOLDER";
-	public final static String ADDFILE = "ADDFILE";
+	public static final String CHANGE = "CHANGE";
+	public static final String REMOVEFOLDER = "REMOVEFOLDER";
+	public static final String REMOVEFILE = "REMOVEFILE";
+	public static final String ADDFOLDER = "ADDFOLDER";
+	public static final String ADDFILE = "ADDFILE";
+
+	private ChangeTypes() {
+	}
 }

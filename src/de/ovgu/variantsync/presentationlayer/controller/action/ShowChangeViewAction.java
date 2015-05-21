@@ -13,7 +13,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import de.ovgu.variantsync.VariantSyncPlugin;
-import de.ovgu.variantsync.presentationlayer.view.resourceChanges.ResourceChangesView;
+import de.ovgu.variantsync.presentationlayer.view.resourcechanges.ResourceChangesView;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
@@ -30,11 +30,13 @@ public class ShowChangeViewAction implements IObjectActionDelegate {
 	public void run(IAction action) {
 		IWorkbenchWindow window = PlatformUI.getWorkbench()
 				.getActiveWorkbenchWindow();
-		if (window == null)
+		if (window == null) {
 			return;
+		}
 		IWorkbenchPage page = window.getActivePage();
-		if (page == null)
+		if (page == null) {
 			return;
+		}
 		try {
 			if (page.findView(ResourceChangesView.ID) != null) {
 				((ResourceChangesView) page.findView(ResourceChangesView.ID))
@@ -42,7 +44,8 @@ public class ShowChangeViewAction implements IObjectActionDelegate {
 			}
 			page.showView(ResourceChangesView.ID);
 		} catch (PartInitException e) {
-			LogOperations.logError(e);
+			LogOperations
+					.logError("ResourceChangesView could not be shown.", e);
 		}
 	}
 

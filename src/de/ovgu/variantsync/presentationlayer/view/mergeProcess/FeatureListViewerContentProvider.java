@@ -11,7 +11,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
-import de.ovgu.variantsync.presentationlayer.view.resourceChanges.ResourceChangesView;
+import de.ovgu.variantsync.presentationlayer.view.resourcechanges.ResourceChangesView;
 
 /**
  * @author Lei Luo

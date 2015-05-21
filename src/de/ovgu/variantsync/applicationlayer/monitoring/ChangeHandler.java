@@ -20,11 +20,12 @@ import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
-import de.ovgu.variantsync.applicationlayer.deltaCalculation.IDeltaOperations;
-import de.ovgu.variantsync.persistancelayer.PersistanceOperationProvider;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
+import de.ovgu.variantsync.applicationlayer.deltacalculation.IDeltaOperations;
+import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerProperties;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
-import de.ovgu.variantsync.presentationlayer.view.resourceChanges.ResourceChangesView;
+import de.ovgu.variantsync.presentationlayer.view.resourcechanges.ResourceChangesView;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
@@ -42,6 +43,8 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 
 	private IDeltaOperations deltaOperations = ModuleFactory
 			.getDeltaOperations();
+	private IPersistanceOperations persistanceOperations = ModuleFactory
+			.getPersistanceOperations();
 
 	/**
 	 * Called from ResourceChangeListener if a resource change have happened.
@@ -64,8 +67,14 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 		case IResourceDelta.ADDED: {
 			if ((flag & IResourceDelta.MARKERS) == 0
 					|| (flag & IResourceDelta.MOVED_FROM) != 0) {
-				PersistanceOperationProvider.getInstance()
-						.addAdminResource(res);
+				try {
+					persistanceOperations.addAdminResource(res);
+				} catch (FileOperationException e) {
+					LogOperations
+							.logError(
+									"Change file could not be created in admin folder.",
+									e);
+				}
 				VariantSyncPlugin.getDefault().logMessage(
 						"Resource " + res.getFullPath() + " was added "
 								+ getFlagTxt(flag));
@@ -79,13 +88,19 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 			VariantSyncPlugin.getDefault().logMessage(
 					"Resource " + res.getFullPath() + " was removed "
 							+ getFlagTxt(delta.getFlags()));
-			PersistanceOperationProvider.getInstance().removeAdminFile(res);
+			try {
+				persistanceOperations.removeAdminFile(res);
+			} catch (FileOperationException e) {
+				LogOperations.logError(
+						"Change file could not be removed from admin folder.",
+						e);
+			}
 			update();
 			break;
 		}
 
 		// creates patch for changed file
-		case IResourceDelta.CHANGED:
+		case IResourceDelta.CHANGED: {
 			if (res.getType() == IResource.FILE
 					&& (delta.getFlags() & IResourceDelta.CONTENT) != 0) {
 				handleChangedResource(res);
@@ -96,6 +111,10 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 			}
 			break;
 		}
+		default:
+			break;
+		}
+
 		return true;
 	}
 
@@ -120,7 +139,7 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 				update();
 			}
 		} catch (CoreException e) {
-			e.printStackTrace();
+			LogOperations.logError("File states could not be retrieved.", e);
 		}
 	}
 
@@ -206,11 +225,13 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 				public void run() {
 					IWorkbenchWindow window = PlatformUI.getWorkbench()
 							.getActiveWorkbenchWindow();
-					if (window == null)
+					if (window == null) {
 						return;
+					}
 					IWorkbenchPage page = window.getActivePage();
-					if (page == null)
+					if (page == null) {
 						return;
+					}
 					if (page.findView(ResourceChangesView.ID) != null) {
 						((ResourceChangesView) page
 								.findView(ResourceChangesView.ID))

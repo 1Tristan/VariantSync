@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.presentationlayer.view.resourceChanges;
+package de.ovgu.variantsync.presentationlayer.view.resourcechanges;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesF
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFolder;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
+import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
  * Provides content for resource changes view. Extracts informations about
@@ -52,7 +53,8 @@ public class ResourceChangesContentProvider implements ITreeContentProvider {
 					this.projectList.add(project);
 				}
 			} catch (CoreException e) {
-				e.printStackTrace();
+				LogOperations.logError(
+						"Project nature support could not be checked.", e);
 			}
 		}
 		IChangedFile root;
@@ -102,7 +104,7 @@ public class ResourceChangesContentProvider implements ITreeContentProvider {
 				}
 			}
 			if (f.isFile()) {
-				String adminFileInfo[] = f.getName().split("_");
+				String[] adminFileInfo = f.getName().split("_");
 				if (adminFileInfo.length >= 4) {
 					String event = adminFileInfo[adminFileInfo.length - 3];
 					if (event.equals(ChangeTypes.ADDFOLDER)
@@ -164,7 +166,7 @@ public class ResourceChangesContentProvider implements ITreeContentProvider {
 					.getChildren();
 			if (elements != null) {
 				Collections.sort(elements,
-						ResourceChangesFilePatch.timeComparator);
+						ResourceChangesFilePatch.TIMECOMPARATOR);
 				return elements.toArray();
 			}
 		}

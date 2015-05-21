@@ -13,4 +13,7 @@ public final class VariantSyncConstants {
 	public static final String PLUGIN_ID = "de.ovgu.variantsync";
 	public static final String ADMIN_FOLDER = ".variantsync";
 	public static final String ADMIN_FILE = ".variantsyncInfo";
+
+	private VariantSyncConstants() {
+	}
 }

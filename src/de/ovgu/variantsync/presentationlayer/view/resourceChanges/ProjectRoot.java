@@ -1,7 +1,7 @@
-package de.ovgu.variantsync.presentationlayer.view.resourceChanges;
+package de.ovgu.variantsync.presentationlayer.view.resourcechanges;
 
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.FileInfoMatcherDescription;
@@ -27,10 +27,17 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 public class ProjectRoot implements IWorkspaceRoot {
-	private ArrayList<IProject> list;
+	private List<IProject> list;
 
-	public ProjectRoot(ArrayList<IProject> supportProjectList) {
+	public ProjectRoot(List<IProject> supportProjectList) {
 		this.list = supportProjectList;
+	}
+
+	@Override
+	public IProject[] getProjects() {
+		IProject[] result = new IProject[list.size()];
+		list.toArray(result);
+		return result;
 	}
 
 	@Override
@@ -637,13 +644,6 @@ public class ProjectRoot implements IWorkspaceRoot {
 	public IProject getProject(String name) {
 		// not required
 		return null;
-	}
-
-	@Override
-	public IProject[] getProjects() {
-		IProject[] result = new IProject[list.size()];
-		list.toArray(result);
-		return result;
 	}
 
 	@Override

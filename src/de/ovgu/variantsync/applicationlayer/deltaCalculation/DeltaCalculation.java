@@ -1,11 +1,6 @@
-package de.ovgu.variantsync.applicationlayer.deltaCalculation;
+package de.ovgu.variantsync.applicationlayer.deltacalculation;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -16,10 +11,13 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import de.ovgu.variantsync.VariantSyncConstants;
+import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorSet;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ChangeTypes;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
-import de.ovgu.variantsync.persistancelayer.PersistanceOperationProvider;
+import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
+import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 import difflib.Patch;
 
 /**
@@ -39,6 +37,8 @@ class DeltaCalculation {
 
 	private String unifiedDiff;
 	private ExternalDeltaCalculation externalDeltaOperations;
+	private IPersistanceOperations persistanceOperations = ModuleFactory
+			.getPersistanceOperations();
 
 	public DeltaCalculation() {
 		externalDeltaOperations = new ExternalDeltaCalculation();
@@ -85,30 +85,28 @@ class DeltaCalculation {
 		try {
 			states = currentFile.getHistory(null);
 		} catch (CoreException e) {
-			e.printStackTrace();
+			LogOperations.logError("File states could not be retrieved.", e);
 			return;
 		}
 		List<String> historyFilelines = null;
 		List<String> currentFilelines = null;
 		try {
-			historyFilelines = getFileContent(new BufferedReader(
-					new InputStreamReader(states[0].getContents(),
-							states[0].getCharset())));
-			currentFilelines = getFileContent(new BufferedReader(
-					new InputStreamReader(currentFile.getContents(),
-							currentFile.getCharset())));
-		} catch (UnsupportedEncodingException | CoreException e) {
-			e.printStackTrace();
+			historyFilelines = persistanceOperations.readFile(
+					states[0].getContents(), states[0].getCharset());
+			currentFilelines = persistanceOperations.readFile(
+					currentFile.getContents(), currentFile.getCharset());
+		} catch (CoreException | FileOperationException e) {
+			LogOperations.logError("File states could not be read.", e);
 		}
 
 		Patch patch = externalDeltaOperations.computeDifference(
 				historyFilelines, currentFilelines);
-		if (patch.getDeltas().size() == 0) {
+		if (patch.getDeltas().isEmpty()) {
 			return;
 		}
 		String filename = currentFile.getName();
 
-		List<String> unifiedDiff = externalDeltaOperations
+		List<String> tmpUnifiedDiff = externalDeltaOperations
 				.createUnifiedDifference(filename, filename, historyFilelines,
 						patch, 0);
 		int pointer = 0;
@@ -131,10 +129,12 @@ class DeltaCalculation {
 		File diffFile = new File(diffFilePath.append(diffFileName).toOSString());
 
 		try {
-			PersistanceOperationProvider.getInstance().addLinesToFile(
-					unifiedDiff, diffFile);
-		} catch (IOException e) {
-			e.printStackTrace();
+			persistanceOperations.addLinesToFile(tmpUnifiedDiff, diffFile);
+		} catch (FileOperationException e) {
+			LogOperations
+					.logError(
+							"Lines could not be added to diff file in admin folder.",
+							e);
 		}
 	}
 
@@ -145,8 +145,7 @@ class DeltaCalculation {
 	 *            changed file
 	 * @return patch object
 	 */
-	public synchronized Patch getPatch(
-			ResourceChangesFilePatch changedFile) {
+	public synchronized Patch getPatch(ResourceChangesFilePatch changedFile) {
 		Patch patch = null;
 		String parentFolder = changedFile.getFile().getParentFile().getPath();
 		IPath base = new Path(changedFile.getProject().getLocation()
@@ -160,21 +159,21 @@ class DeltaCalculation {
 					changedFile.getProject().getFile(relativePath)
 							.refreshLocal(IResource.DEPTH_ZERO, null);
 				} catch (CoreException e) {
-					e.printStackTrace();
+					LogOperations.logError(
+							"File could not be refreshed in workspace.", e);
 				}
 			}
 			if (changedFile.getProject().getFile(relativePath).exists()) {
 				try {
-					List<String> lines = PersistanceOperationProvider
-							.getInstance().readFile(
-									changedFile.getProject()
-											.getFile(relativePath)
-											.getContents());
+					List<String> lines = persistanceOperations
+							.readFile(changedFile.getProject()
+									.getFile(relativePath).getContents());
 					unifiedDiff = externalDeltaOperations.getUnifiedDiff(lines);
 					patch = externalDeltaOperations
 							.createUnifiedDifference(lines);
-				} catch (Exception e) {
-					e.printStackTrace();
+				} catch (CoreException | FileOperationException e) {
+					LogOperations.logError(
+							"Diff file in admin folder could not be read.", e);
 					unifiedDiff = "";
 				}
 			} else {
@@ -182,7 +181,8 @@ class DeltaCalculation {
 					changedFile.getProject().getFile(relativePath)
 							.refreshLocal(IResource.DEPTH_ZERO, null);
 				} catch (CoreException e) {
-					e.printStackTrace();
+					LogOperations.logError(
+							"File could not be refreshed in workspace.", e);
 				}
 			}
 		}
@@ -201,32 +201,5 @@ class DeltaCalculation {
 			getPatch(changedFile);
 		}
 		return unifiedDiff;
-	}
-
-	/**
-	 * Reads content from file using buffered reader. Adds each line in file to
-	 * List<String>.
-	 * 
-	 * @param reader
-	 *            buffered Reader for file
-	 * @return list with file content
-	 */
-	private List<String> getFileContent(BufferedReader reader) {
-		List<String> fileContent = new LinkedList<String>();
-		String line = "";
-		try {
-			while ((line = reader.readLine()) != null) {
-				fileContent.add(line);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return fileContent;
 	}
 }

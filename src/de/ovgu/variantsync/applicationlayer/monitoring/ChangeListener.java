@@ -10,6 +10,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
 import de.ovgu.variantsync.VariantSyncConstants;
+import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
  * Listener which notifies resource changes in workspace that have already
@@ -32,7 +33,7 @@ public class ChangeListener implements IResourceChangeListener,
 			try {
 				event.getDelta().accept(new ChangeHandler());
 			} catch (CoreException e) {
-				e.printStackTrace();
+				LogOperations.logError("ChangeHandler could not be set.", e);
 			}
 		}
 	}
@@ -63,22 +64,22 @@ public class ChangeListener implements IResourceChangeListener,
 
 	@Override
 	public void doneSaving(ISaveContext context) {
-
+		// not necessary
 	}
 
 	@Override
 	public void prepareToSave(ISaveContext context) throws CoreException {
-
+		// not necessary
 	}
 
 	@Override
 	public void rollback(ISaveContext context) {
-
+		// not necessary
 	}
 
 	@Override
 	public void saving(ISaveContext context) throws CoreException {
-
+		// not necessary
 	}
 
 }

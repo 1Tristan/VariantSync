@@ -56,7 +56,7 @@ public class ResourceChangesFile implements IChangedFile {
 	@Override
 	public boolean hasChildren() {
 		if (children != null) {
-			return this.children.size() > 0;
+			return !children.isEmpty();
 		} else {
 			return false;
 		}
@@ -86,7 +86,7 @@ public class ResourceChangesFile implements IChangedFile {
 
 	@Override
 	public String getTime() {
-		String timetxt[] = this.name.split("_");
+		String[] timetxt = this.name.split("_");
 		if (timetxt.length > 3) {
 			String time = timetxt[timetxt.length - 1];
 			Date date = new Date(Long.parseLong(time));
@@ -107,7 +107,7 @@ public class ResourceChangesFile implements IChangedFile {
 			path = path.substring(path
 					.indexOf(VariantSyncConstants.ADMIN_FOLDER)
 					+ VariantSyncConstants.ADMIN_FOLDER.length());
-			String pathtile[] = path.split("_");
+			String[] pathtile = path.split("_");
 			if (pathtile.length > 3) {
 				String infoText = "_" + pathtile[pathtile.length - 3] + "_"
 						+ pathtile[pathtile.length - 2] + "_"
@@ -119,6 +119,11 @@ public class ResourceChangesFile implements IChangedFile {
 		return null;
 	}
 
+	/**
+	 * Adds a project this file belongs to.
+	 * 
+	 * @param project 
+	 */
 	public void addProject(IProject project) {
 		if (!this.projectList.contains(project)) {
 			this.projectList.add(project);

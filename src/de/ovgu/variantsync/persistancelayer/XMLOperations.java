@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.XMLException;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 
 /**
@@ -39,12 +40,19 @@ class XMLOperations {
 	 *            target file
 	 * @param info
 	 *            SynchroInfo object
-	 * @throws FileNotFoundException
+	 * @throws XMLException
 	 *             target does not exists
 	 */
 	public void writeXMLFile(File file, MonitorItemStorage info)
-			throws FileNotFoundException {
-		XMLEncoder encoder = new XMLEncoder(new FileOutputStream(file));
+			throws XMLException {
+		XMLEncoder encoder = null;
+		try {
+			encoder = new XMLEncoder(new FileOutputStream(file));
+		} catch (FileNotFoundException e) {
+			throw new XMLException(
+					"XML-based synchro info file to write could not be found. Does target file exists?",
+					e);
+		}
 		encoder.writeObject(info);
 		encoder.close();
 	}

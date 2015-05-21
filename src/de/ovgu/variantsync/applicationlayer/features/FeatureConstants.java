@@ -15,4 +15,7 @@ final class FeatureConstants {
 	public static final String CONFIGS_PATH = "configs";
 	public static final String FEATURE_PROJECT_NATURE = "de.ovgu.featureide.core.featureProjectNature";
 	public static final String MODEL_FILE = "model.xml";
+
+	private FeatureConstants() {
+	}
 }

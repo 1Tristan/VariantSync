@@ -2,6 +2,7 @@ package de.ovgu.variantsync.applicationlayer.datamodel.resources;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.graphics.Image;
@@ -18,7 +19,7 @@ import org.eclipse.ui.PlatformUI;
 public class ResourceChangesFolder implements IChangedFile {
 
 	private String name;
-	private ArrayList<IChangedFile> children;
+	private List<IChangedFile> children;
 	private String status;
 
 	public ResourceChangesFolder(String name, IProject project) {
@@ -26,13 +27,13 @@ public class ResourceChangesFolder implements IChangedFile {
 	}
 
 	@Override
-	public ArrayList<IChangedFile> getChildren() {
-		return this.children;
+	public List<IChangedFile> getChildren() {
+		return children;
 	}
 
 	@Override
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	@Override
@@ -49,7 +50,7 @@ public class ResourceChangesFolder implements IChangedFile {
 	@Override
 	public boolean hasChildren() {
 		if (children != null) {
-			return this.children.size() > 0;
+			return !this.children.isEmpty();
 		} else {
 			return false;
 		}
@@ -66,6 +67,7 @@ public class ResourceChangesFolder implements IChangedFile {
 
 	@Override
 	public void setParent(IChangedFile parent) {
+		// not necessary
 	}
 
 	@Override
@@ -89,6 +91,7 @@ public class ResourceChangesFolder implements IChangedFile {
 
 	@Override
 	public void linkFile(File file) {
+		// not necessary
 	}
 
 	@Override

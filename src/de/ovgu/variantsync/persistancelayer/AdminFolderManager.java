@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
 import de.ovgu.variantsync.VariantSyncConstants;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorSet;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ChangeTypes;
 
@@ -30,8 +31,10 @@ class AdminFolderManager {
 	 * 
 	 * @param res
 	 *            resource to add
+	 * @throws FileOperationException
+	 *             file could not be created in admin folder
 	 */
-	public void add(IResource res) {
+	public void add(IResource res) throws FileOperationException {
 		IPath addInfoFilePath;
 		int pointer = 0;
 		if (MonitorSet.getInstance().removeSynchroItem(res)) {
@@ -66,7 +69,8 @@ class AdminFolderManager {
 			}
 			addInfoFilePath.toFile().createNewFile();
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new FileOperationException(
+					"File could not be created in admin folder.", e);
 		}
 	}
 
@@ -75,8 +79,10 @@ class AdminFolderManager {
 	 * 
 	 * @param res
 	 *            resource to remove
+	 * @throws FileOperationException
+	 *             file could not be created in admin folder
 	 */
-	public void remove(IResource res) {
+	public void remove(IResource res) throws FileOperationException {
 		IPath addInfoFilePath;
 		int zeiger = 0;
 		if (MonitorSet.getInstance().removeSynchroItem(res)) {
@@ -112,7 +118,8 @@ class AdminFolderManager {
 			}
 			addInfoFilePath.toFile().createNewFile();
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new FileOperationException(
+					"File could not be created in admin folder.", e);
 		}
 	}
 }

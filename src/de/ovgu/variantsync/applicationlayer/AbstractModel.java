@@ -16,26 +16,29 @@ import java.beans.PropertyChangeSupport;
  */
 public abstract class AbstractModel {
 
-	public PropertyChangeSupport propertyChangeSupport;
+	protected PropertyChangeSupport propertyChangeSupport;
 
 	public AbstractModel() {
-
 		propertyChangeSupport = new PropertyChangeSupport(this);
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
-
 		propertyChangeSupport.addPropertyChangeListener(listener);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
-
 		propertyChangeSupport.addPropertyChangeListener(listener);
 	}
 
+	/**
+	 * Fires event to views which are registered at controller.
+	 * 
+	 * @param propertyName
+	 * @param oldValue
+	 * @param newValue
+	 */
 	protected void firePropertyChange(String propertyName, Object oldValue,
 			Object newValue) {
-
 		propertyChangeSupport.firePropertyChange(propertyName, newValue,
 				newValue);
 	}

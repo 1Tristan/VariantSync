@@ -10,6 +10,7 @@ import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
+
 /**
  * 
  * @author Lei Luo
@@ -25,11 +26,12 @@ public class VSyncSupportProjectDecorator implements ILightweightLabelDecorator 
 
 	@Override
 	public void addListener(ILabelProviderListener listener) {
+		// not required
 	}
 
 	@Override
 	public void dispose() {
-
+		// not required
 	}
 
 	@Override
@@ -39,7 +41,7 @@ public class VSyncSupportProjectDecorator implements ILightweightLabelDecorator 
 
 	@Override
 	public void removeListener(ILabelProviderListener listener) {
-
+		// not required
 	}
 
 	@Override
@@ -51,7 +53,8 @@ public class VSyncSupportProjectDecorator implements ILightweightLabelDecorator 
 				decoration.addOverlay(OVERLAY, IDecoration.BOTTOM_LEFT);
 			}
 		} catch (CoreException e) {
-			LogOperations.logError(e);
+			LogOperations.logError(
+					"Project nature support could not be checked.", e);
 		}
 	}
 }

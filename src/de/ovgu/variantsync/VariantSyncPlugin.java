@@ -16,12 +16,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItem;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
-import de.ovgu.variantsync.applicationlayer.deltaCalculation.DeltaOperationProvider;
+import de.ovgu.variantsync.applicationlayer.deltacalculation.DeltaOperationProvider;
 import de.ovgu.variantsync.applicationlayer.monitoring.ChangeListener;
 import de.ovgu.variantsync.applicationlayer.synchronization.SynchronizationProvider;
-import de.ovgu.variantsync.persistancelayer.PersistanceOperationProvider;
+import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.Controller;
 import de.ovgu.variantsync.presentationlayer.view.AbstractView;
 import de.ovgu.variantsync.presentationlayer.view.console.ChangeOutPutConsole;
@@ -44,9 +45,11 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	private static VariantSyncPlugin plugin;
 	private ChangeOutPutConsole console;
 	private IProject changeViewProject = null;
-	private ArrayList<IProject> projectList = new ArrayList<IProject>(0);
+	private List<IProject> projectList = new ArrayList<IProject>(0);
 	private Map<IProject, MonitorItemStorage> synchroInfoMap = new HashMap<IProject, MonitorItemStorage>();
 	private ChangeListener resourceModificationListener;
+	private IPersistanceOperations persistanceOperations = ModuleFactory
+			.getPersistanceOperations();
 	private Controller controller = Controller.getInstance();
 
 	public VariantSyncPlugin() {
@@ -56,10 +59,6 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		console = new ChangeOutPutConsole();
-
-		List<String> changeEntries = getChangeEntries();
-		System.out.println(changeEntries.toString());
-
 		initMVC();
 		initResourceMonitoring();
 	}
@@ -180,8 +179,7 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 						"nature support could not be checked");
 			}
 		}
-		List<IProject> returnList = new ArrayList<IProject>(projectList);
-		return returnList;
+		return new ArrayList<IProject>(projectList);
 	}
 
 	/**
@@ -193,14 +191,14 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		List<String> changeEntries = new ArrayList<String>();
 		List<IProject> projects = getSupportProjectList();
 		for (IProject project : projects) {
-			IFile infoFile = project
-					.getFolder(VariantSyncConstants.ADMIN_FOLDER).getFile(
-							VariantSyncConstants.ADMIN_FILE);
+			IFile infoFile = project.getFolder(
+					VariantSyncConstants.ADMIN_FOLDER).getFile(
+					VariantSyncConstants.ADMIN_FILE);
 			MonitorItemStorage info = new MonitorItemStorage();
 			if (infoFile.exists()) {
 				try {
-					info = PersistanceOperationProvider.getInstance()
-							.readSynchroXMLFile(infoFile.getContents());
+					info = persistanceOperations.readSynchroXMLFile(infoFile
+							.getContents());
 					List<MonitorItem> items = info.getMonitorItems();
 					for (MonitorItem item : items) {
 						changeEntries.add(item.getPatchName());
@@ -222,14 +220,14 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		this.synchroInfoMap.clear();
 		List<IProject> projects = this.getSupportProjectList();
 		for (IProject project : projects) {
-			IFile infoFile = project
-					.getFolder(VariantSyncConstants.ADMIN_FOLDER).getFile(
-							VariantSyncConstants.ADMIN_FILE);
+			IFile infoFile = project.getFolder(
+					VariantSyncConstants.ADMIN_FOLDER).getFile(
+					VariantSyncConstants.ADMIN_FILE);
 			MonitorItemStorage info = new MonitorItemStorage();
 			if (infoFile.exists()) {
 				try {
-					info = PersistanceOperationProvider.getInstance()
-							.readSynchroXMLFile(infoFile.getContents());
+					info = persistanceOperations.readSynchroXMLFile(infoFile
+							.getContents());
 				} catch (CoreException e) {
 					UtilityModel.getInstance().handleError(e,
 							"info file could not be read");

@@ -24,6 +24,7 @@ public class RemoveSyncSupportAction implements IObjectActionDelegate {
 
 	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+		// not required
 	}
 
 	@Override
@@ -36,9 +37,10 @@ public class RemoveSyncSupportAction implements IObjectActionDelegate {
 				IResource res = (IResource) obj;
 				IProject project = res.getProject();
 				VSyncSupportProjectNature.removeNature(project);
-				IDecoratorManager decoratorManager = VariantSyncPlugin.getDefault()
-						.getWorkbench().getDecoratorManager();
-				decoratorManager.update(VSyncSupportProjectDecorator.DECORATOR_ID);
+				IDecoratorManager decoratorManager = VariantSyncPlugin
+						.getDefault().getWorkbench().getDecoratorManager();
+				decoratorManager
+						.update(VSyncSupportProjectDecorator.DECORATOR_ID);
 			}
 		}
 	}

@@ -16,6 +16,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
+
 /**
  * Provides operations to handle files on file system.
  *
@@ -24,6 +26,8 @@ import org.eclipse.core.runtime.CoreException;
  * @since 15.05.2015
  */
 class FileOperations {
+
+	private static final String ERROR_CODE_FILENOTREAD = "File could not be read.";
 
 	/**
 	 * Adds lines to specified file.
@@ -36,7 +40,7 @@ class FileOperations {
 	 *             file could not be created
 	 */
 	public void addLinesToFile(List<String> lines, File file)
-			throws IOException {
+			throws FileOperationException {
 		if (file.exists()) {
 			file.delete();
 		}
@@ -51,7 +55,7 @@ class FileOperations {
 				out.println(lines.get(i));
 			}
 		} catch (IOException e) {
-			throw new IOException("File could not be created.");
+			throw new FileOperationException(ERROR_CODE_FILENOTREAD, e);
 		} finally {
 			if (out != null) {
 				out.flush();
@@ -69,15 +73,53 @@ class FileOperations {
 	 * @throws IOException
 	 *             file could not be read
 	 */
-	public List<String> readFile(InputStream inputStream) throws IOException {
+	public List<String> readFile(InputStream inputStream)
+			throws FileOperationException {
 		List<String> fileLines = new LinkedList<String>();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				inputStream));
 		String line = "";
-		while ((line = reader.readLine()) != null) {
-			fileLines.add(line);
+		try {
+			while ((line = reader.readLine()) != null) {
+				fileLines.add(line);
+			}
+		} catch (IOException e) {
+			throw new FileOperationException(ERROR_CODE_FILENOTREAD, e);
 		}
 		return fileLines;
+	}
+
+	/**
+	 * Reads content from file using buffered reader. Adds each line in file to
+	 * List<String>.
+	 * 
+	 * @param in
+	 *            buffered Reader for file
+	 * @param charset
+	 * @return list with file content
+	 * @throws FileOperationException
+	 */
+	public List<String> readFile(InputStream in, String charset)
+			throws FileOperationException {
+		List<String> fileContent = new LinkedList<String>();
+		String line = "";
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(in, charset));
+			while ((line = reader.readLine()) != null) {
+				fileContent.add(line);
+			}
+		} catch (IOException e) {
+			throw new FileOperationException(ERROR_CODE_FILENOTREAD, e);
+		} finally {
+			try {
+				reader.close();
+			} catch (NullPointerException | IOException e) {
+				throw new FileOperationException(
+						"BufferedReader could not be closed.", e);
+			}
+		}
+		return fileContent;
 	}
 
 	/**
@@ -85,14 +127,18 @@ class FileOperations {
 	 * 
 	 * @param file
 	 *            file to create
-	 * @return created IFile
-	 * @throws CoreException
+	 * @return created IFile object
+	 * @throws FileOperationException
 	 *             file could not be created
 	 */
-	public IFile createIFile(IFile file) throws CoreException {
+	public IFile createIFile(IFile file) throws FileOperationException {
 		String content = "";
 		InputStream source = new ByteArrayInputStream(content.getBytes());
-		file.create(source, IResource.FORCE, null);
+		try {
+			file.create(source, IResource.FORCE, null);
+		} catch (CoreException e) {
+			new FileOperationException("File could not be created.", e);
+		}
 		return file;
 	}
 }

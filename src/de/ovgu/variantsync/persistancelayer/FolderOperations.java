@@ -5,6 +5,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FolderOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorSet;
 
 /**
@@ -28,16 +29,21 @@ class FolderOperations {
 	 * 
 	 * @param folder
 	 *            IFolder object
-	 * @throws CoreException
+	 * @throws FolderOperationException
 	 *             folder could not be created
 	 */
-	public void mkdirs(IFolder folder) throws CoreException {
+	public void mkdirs(IFolder folder) throws FolderOperationException {
 		IContainer container = folder.getParent();
 		if (!container.exists()) {
 			mkdirs((IFolder) container);
 		}
 		MonitorSet.getInstance().addSynchroItem(folder);
-		folder.create(true, true, null);
+		try {
+			folder.create(true, true, null);
+		} catch (CoreException e) {
+			throw new FolderOperationException("Folder could not be created.",
+					e);
+		}
 	}
 
 	/**
@@ -45,12 +51,17 @@ class FolderOperations {
 	 * 
 	 * @param folder
 	 *            IFolder object
-	 * @throws CoreException
+	 * @throws FolderOperationException
 	 *             folder could not be deleted
 	 */
-	public void deldirs(IFolder folder) throws CoreException {
-		recordDelItem(folder);
-		folder.delete(true, null);
+	public void deldirs(IFolder folder) throws FolderOperationException {
+		try {
+			recordDelItem(folder);
+			folder.delete(true, null);
+		} catch (CoreException e) {
+			throw new FolderOperationException("Folder could not be deleted.",
+					e);
+		}
 	}
 
 	/**
@@ -58,11 +69,17 @@ class FolderOperations {
 	 * 
 	 * @param folder
 	 *            IFolder object
-	 * @throws CoreException
+	 * @throws FolderOperationException
 	 */
-	private void recordDelItem(IFolder folder) throws CoreException {
+	private void recordDelItem(IFolder folder) throws FolderOperationException {
 		MonitorSet.getInstance().addSynchroItem(folder);
-		IResource[] members = folder.members();
+		IResource[] members;
+		try {
+			members = folder.members();
+		} catch (CoreException e) {
+			throw new FolderOperationException(
+					"Folder members could not be retrieved.", e);
+		}
 		for (IResource res : members) {
 			if (res instanceof IFolder) {
 				recordDelItem((IFolder) res);

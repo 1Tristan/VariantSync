@@ -1,10 +1,11 @@
-package de.ovgu.variantsync.applicationlayer.deltaCalculation;
+package de.ovgu.variantsync.applicationlayer.deltacalculation;
 
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.PatchException;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerProperties;
 import difflib.Patch;
@@ -59,20 +60,18 @@ public class DeltaOperationProvider extends AbstractModel implements
 	}
 
 	@Override
-	public List<String> computePatch(List<String> content,
-			Patch patch) throws Exception {
+	public List<String> computePatch(List<String> content, Patch patch)
+			throws PatchException {
 		return externalDeltaCalculation.computePatch(content, patch);
 	}
 
 	@Override
-	public Patch computeDifference(List<String> content1,
-			List<String> content2) {
+	public Patch computeDifference(List<String> content1, List<String> content2) {
 		return externalDeltaCalculation.computeDifference(content1, content2);
 	}
 
 	@Override
-	public List<String> unpatchText(List<String> content,
-			Patch patch) {
+	public List<String> unpatchText(List<String> content, Patch patch) {
 		return externalDeltaCalculation.unpatchText(content, patch);
 	}
 }
