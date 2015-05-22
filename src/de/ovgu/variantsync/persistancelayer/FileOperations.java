@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
+import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
  * Provides operations to handle files on file system.
@@ -115,8 +116,8 @@ class FileOperations {
 			try {
 				reader.close();
 			} catch (NullPointerException | IOException e) {
-				throw new FileOperationException(
-						"BufferedReader could not be closed.", e);
+				LogOperations
+						.logError("BufferedReader could not be closed.", e);
 			}
 		}
 		return fileContent;

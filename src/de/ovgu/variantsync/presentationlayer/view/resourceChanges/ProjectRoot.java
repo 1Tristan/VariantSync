@@ -97,26 +97,26 @@ public class ProjectRoot implements IWorkspaceRoot {
 	@Override
 	public IResource[] members() throws CoreException {
 		// not required
-		return null;
+		return new IResource[] {};
 	}
 
 	@Override
 	public IResource[] members(boolean includePhantoms) throws CoreException {
 		// not required
-		return null;
+		return new IResource[] {};
 	}
 
 	@Override
 	public IResource[] members(int memberFlags) throws CoreException {
 		// not required
-		return null;
+		return new IResource[] {};
 	}
 
 	@Override
 	public IFile[] findDeletedMembersWithHistory(int depth,
 			IProgressMonitor monitor) throws CoreException {
 		// not required
-		return null;
+		return new IFile[] {};
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public class ProjectRoot implements IWorkspaceRoot {
 	@Override
 	public IResourceFilterDescription[] getFilters() throws CoreException {
 		// not required
-		return null;
+		return new IResourceFilterDescription[] {};
 	}
 
 	@Override
@@ -244,7 +244,7 @@ public class ProjectRoot implements IWorkspaceRoot {
 	public IMarker[] findMarkers(String type, boolean includeSubtypes, int depth)
 			throws CoreException {
 		// not required
-		return null;
+		return new IMarker[] {};
 	}
 
 	@Override
@@ -594,38 +594,38 @@ public class ProjectRoot implements IWorkspaceRoot {
 	@Override
 	public IContainer[] findContainersForLocation(IPath location) {
 		// not required
-		return null;
+		return new IContainer[] {};
 	}
 
 	@Override
 	public IContainer[] findContainersForLocationURI(URI location) {
 		// not required
-		return null;
+		return new IContainer[] {};
 	}
 
 	@Override
 	public IContainer[] findContainersForLocationURI(URI location,
 			int memberFlags) {
 		// not required
-		return null;
+		return new IContainer[] {};
 	}
 
 	@Override
 	public IFile[] findFilesForLocation(IPath location) {
 		// not required
-		return null;
+		return new IFile[] {};
 	}
 
 	@Override
 	public IFile[] findFilesForLocationURI(URI location) {
 		// not required
-		return null;
+		return new IFile[] {};
 	}
 
 	@Override
 	public IFile[] findFilesForLocationURI(URI location, int memberFlags) {
 		// not required
-		return null;
+		return new IFile[] {};
 	}
 
 	@Override
@@ -649,7 +649,7 @@ public class ProjectRoot implements IWorkspaceRoot {
 	@Override
 	public IProject[] getProjects(int memberFlags) {
 		// not required
-		return null;
+		return new IProject[] {};
 	}
 
 	@Override

@@ -1,4 +1,5 @@
 package de.ovgu.variantsync.presentationlayer.view.console;
+
 /**
  * 
  * @author Lei Luo
@@ -24,10 +25,8 @@ public class ConsoleDocument {
 		if (++writeIndex >= BUFFER_SIZE) {
 			writeIndex = 0;
 		}
-		if (writeIndex == readIndex) {
-			if (++readIndex >= BUFFER_SIZE) {
-				readIndex = 0;
-			}
+		if (writeIndex == readIndex && ++readIndex >= BUFFER_SIZE) {
+			readIndex = 0;
 		}
 	}
 
@@ -35,7 +34,8 @@ public class ConsoleDocument {
 		if (isEmpty()) {
 			return new String[0];
 		}
-		String[] docLines = new String[readIndex > writeIndex ? BUFFER_SIZE : writeIndex];
+		String[] docLines = new String[readIndex > writeIndex ? BUFFER_SIZE
+				: writeIndex];
 		int index = readIndex;
 		for (int i = 0; i < docLines.length; i++) {
 			docLines[i] = lines[index++];

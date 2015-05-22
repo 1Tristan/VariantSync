@@ -168,7 +168,7 @@ class DeltaCalculation {
 					List<String> lines = persistanceOperations
 							.readFile(changedFile.getProject()
 									.getFile(relativePath).getContents());
-					unifiedDiff = externalDeltaOperations.getUnifiedDiff(lines);
+					unifiedDiff = parseListToString(lines);
 					patch = externalDeltaOperations
 							.createUnifiedDifference(lines);
 				} catch (CoreException | FileOperationException e) {
@@ -201,5 +201,22 @@ class DeltaCalculation {
 			getPatch(changedFile);
 		}
 		return unifiedDiff;
+	}
+
+	/**
+	 * Creates a string containing each line of given list of strings as new
+	 * line.
+	 * 
+	 * @param content
+	 *            the list to parse
+	 * @return String containing list content
+	 */
+	public String parseListToString(List<String> content) {
+		StringBuilder uniDiff = new StringBuilder();
+		for (String s : content) {
+			uniDiff.append(s);
+			uniDiff.append("\n");
+		}
+		return uniDiff.toString();
 	}
 }

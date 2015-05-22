@@ -161,7 +161,7 @@ class TargetCalculation extends Synchronization {
 		Patch patch = deltaOperations.getPatch(resourcePatch);
 
 		List<String> fileLines = getFileContent(project, resourcePatch);
-		if (fileLines.size() != 0) {
+		if (!fileLines.isEmpty()) {
 			boolean fileRemove = false;
 			for (ResourceChangesFilePatch p : patchs) {
 				if (p.getStatus().equals(ChangeTypes.REMOVEFILE)

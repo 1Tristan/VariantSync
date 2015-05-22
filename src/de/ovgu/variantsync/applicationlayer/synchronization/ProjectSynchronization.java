@@ -44,6 +44,7 @@ class ProjectSynchronization extends Synchronization {
 	private String patchFileName;
 	private IProject patchProject;
 	private List<IProject> result;
+	private static final String ERROR_REFRESH_INFOFILE = "Info file .variantsyncInfo could not be refreshed in workspace.";
 
 	/**
 	 * Synchronizes projects with patch.
@@ -253,10 +254,7 @@ class ProjectSynchronization extends Synchronization {
 			try {
 				infoFolder.refreshLocal(IResource.DEPTH_ZERO, null);
 			} catch (CoreException e) {
-				LogOperations
-						.logError(
-								"Info file .variantsyncInfo could not be refreshed in workspace.",
-								e);
+				LogOperations.logError(ERROR_REFRESH_INFOFILE, e);
 			}
 		}
 		IFile infoFile = project.getFolder(VariantSyncConstants.ADMIN_FOLDER)
@@ -264,10 +262,7 @@ class ProjectSynchronization extends Synchronization {
 		try {
 			infoFile.refreshLocal(IResource.DEPTH_ZERO, null);
 		} catch (CoreException e) {
-			LogOperations
-					.logError(
-							"Info file .variantsyncInfo could not be refreshed in workspace.",
-							e);
+			LogOperations.logError(ERROR_REFRESH_INFOFILE, e);
 		}
 		MonitorItemStorage info = null;
 		if (!infoFile.exists()) {
@@ -275,10 +270,7 @@ class ProjectSynchronization extends Synchronization {
 			try {
 				infoFile = persistanceOperations.createIFile(infoFile);
 			} catch (FileOperationException e) {
-				LogOperations
-						.logError(
-								".variantsyncInfo file could not be created in admin folder .variantsync.",
-								e);
+				LogOperations.logError(ERROR_REFRESH_INFOFILE, e);
 			}
 		} else {
 			try {
@@ -302,10 +294,7 @@ class ProjectSynchronization extends Synchronization {
 		try {
 			infoFile.refreshLocal(IResource.DEPTH_ZERO, null);
 		} catch (CoreException e) {
-			LogOperations
-					.logError(
-							"Info file .variantsyncInfo could not be refreshed in workspace.",
-							e);
+			LogOperations.logError(ERROR_REFRESH_INFOFILE, e);
 		}
 	}
 

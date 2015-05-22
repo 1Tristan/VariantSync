@@ -1,10 +1,7 @@
 package de.ovgu.variantsync.presentationlayer.controller.action;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -12,7 +9,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
-import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.presentationlayer.view.resourcechanges.ResourceChangesView;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
@@ -22,9 +18,6 @@ import de.ovgu.variantsync.utilitylayer.log.LogOperations;
  *
  */
 public class ShowChangeViewAction implements IObjectActionDelegate {
-
-	public ShowChangeViewAction() {
-	}
 
 	@Override
 	public void run(IAction action) {
@@ -51,16 +44,7 @@ public class ShowChangeViewAction implements IObjectActionDelegate {
 
 	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
-		IStructuredSelection iSSelection = null;
-		if (selection instanceof IStructuredSelection) {
-			iSSelection = (IStructuredSelection) selection;
-			Object obj = iSSelection.getFirstElement();
-			if (obj instanceof IResource) {
-				IResource res = (IResource) obj;
-				IProject project = res.getProject();
-				VariantSyncPlugin.getDefault().setChangeViewsProject(project);
-			}
-		}
+		// not required
 	}
 
 	@Override

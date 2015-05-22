@@ -55,11 +55,6 @@ public class DeltaOperationProvider extends AbstractModel implements
 	}
 
 	@Override
-	public String getUnifiedDiff(List<String> content) {
-		return externalDeltaCalculation.getUnifiedDiff(content);
-	}
-
-	@Override
 	public List<String> computePatch(List<String> content, Patch patch)
 			throws PatchException {
 		return externalDeltaCalculation.computePatch(content, patch);

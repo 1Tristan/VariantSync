@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -14,11 +16,15 @@ import org.eclipse.jface.viewers.Viewer;
 
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
+import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItem;
+import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ChangeTypes;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.IChangedFile;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFile;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFolder;
+import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
@@ -37,12 +43,17 @@ public class ResourceChangesContentProvider implements ITreeContentProvider {
 	private IChangedFile invisibleRoot;
 	private List<IProject> projectList = new ArrayList<IProject>();
 	private List<String> whitelist;
+	private IPersistanceOperations persistanceOperations = ModuleFactory
+			.getPersistanceOperations();
 
 	/**
 	 * Retrieves all projects from workspace and checks if they support project
 	 * nature to decide if a project is under synchronization.
+	 * 
+	 * @throws CoreException
+	 *             file states of info file (.variantsyncInfo) could not be read
 	 */
-	private void initalize() {
+	private void initalize() throws CoreException {
 		projectList.clear();
 		for (IProject project : ResourcesPlugin.getWorkspace().getRoot()
 				.getProjects()) {
@@ -59,7 +70,7 @@ public class ResourceChangesContentProvider implements ITreeContentProvider {
 		}
 		IChangedFile root;
 		invisibleRoot = new ResourceChangesFile("");
-		if (projectList.size() > 0) {
+		if (!projectList.isEmpty()) {
 			root = new ResourceChangesFolder("Project root", null);
 			invisibleRoot.addChildren(root);
 			for (IProject project : projectList) {
@@ -67,8 +78,7 @@ public class ResourceChangesContentProvider implements ITreeContentProvider {
 						VariantSyncConstants.ADMIN_FOLDER);
 				File admin = new File(adminPath.toOSString());
 				if (admin.exists()) {
-					whitelist = VariantSyncPlugin.getDefault()
-							.getChangeEntries();
+					whitelist = getChangeEntries();
 					scanAdminFiles(admin, root, project);
 				}
 			}
@@ -76,6 +86,35 @@ public class ResourceChangesContentProvider implements ITreeContentProvider {
 			root = new ResourceChangesFolder("no changes", null);
 			invisibleRoot.addChildren(root);
 		}
+	}
+
+	/**
+	 * Extracts patched file names from .variantsync file.
+	 * 
+	 * @return list of patched file names
+	 * @throws CoreException
+	 *             file states of info file (.variantsyncInfo) could not be read
+	 */
+	private List<String> getChangeEntries() throws CoreException {
+		List<String> changeEntries = new ArrayList<String>();
+		List<IProject> projects = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		for (IProject project : projects) {
+			IFile infoFile = project.getFolder(
+					VariantSyncConstants.ADMIN_FOLDER).getFile(
+					VariantSyncConstants.ADMIN_FILE);
+			MonitorItemStorage info = new MonitorItemStorage();
+			infoFile.refreshLocal(IResource.DEPTH_ZERO, null);
+			if (infoFile.exists()) {
+				info = persistanceOperations.readSynchroXMLFile(infoFile
+						.getContents());
+				List<MonitorItem> items = info.getMonitorItems();
+				for (MonitorItem item : items) {
+					changeEntries.add(item.getPatchName());
+				}
+			}
+		}
+		return changeEntries;
 	}
 
 	/**
@@ -156,7 +195,14 @@ public class ResourceChangesContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof ResourceChangesView) {
-			initalize();
+			try {
+				initalize();
+			} catch (CoreException e) {
+				LogOperations
+						.logError(
+								"file states of info file (.variantsyncInfo) could not be read",
+								e);
+			}
 			if (invisibleRoot.hasChildren()) {
 				return invisibleRoot.getChildren().toArray();
 			}

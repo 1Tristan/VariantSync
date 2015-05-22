@@ -41,10 +41,14 @@ import de.ovgu.variantsync.utilitylayer.log.LogOperations;
  */
 class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 
+	private IResource res;
+	private int flag;
+	private IResourceDelta delta;
 	private IDeltaOperations deltaOperations = ModuleFactory
 			.getDeltaOperations();
 	private IPersistanceOperations persistanceOperations = ModuleFactory
 			.getPersistanceOperations();
+	private static final String RESOURCE = "Resource ";
 
 	/**
 	 * Called from ResourceChangeListener if a resource change have happened.
@@ -52,8 +56,9 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 	 */
 	@Override
 	public boolean visit(IResourceDelta delta) throws CoreException {
-		IResource res = delta.getResource();
-		int flag = delta.getFlags();
+		this.delta = delta;
+		res = delta.getResource();
+		flag = delta.getFlags();
 		IProject project = res.getProject();
 		if (!filterResource(project, res)) {
 			return false;
@@ -61,61 +66,78 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 		if (!checkMembers(delta, project)) {
 			return false;
 		}
-		switch (delta.getKind()) {
+		analyseDeltaType(delta.getKind());
+		return true;
+	}
 
-		// adds resource to admin folder
-		case IResourceDelta.ADDED: {
-			if ((flag & IResourceDelta.MARKERS) == 0
-					|| (flag & IResourceDelta.MOVED_FROM) != 0) {
-				try {
-					persistanceOperations.addAdminResource(res);
-				} catch (FileOperationException e) {
-					LogOperations
-							.logError(
-									"Change file could not be created in admin folder.",
-									e);
-				}
-				VariantSyncPlugin.getDefault().logMessage(
-						"Resource " + res.getFullPath() + " was added "
-								+ getFlagTxt(flag));
-				update();
-			}
+	/**
+	 * Triggers action depending on kind of delta. Possible actions: add, remove
+	 * or change file in admin folder.
+	 * 
+	 * @param type
+	 *            kind of delta
+	 */
+	private void analyseDeltaType(int type) {
+		switch (type) {
+		case IResourceDelta.ADDED:
+			handleAddedResource(res, delta, flag);
 			break;
-		}
-
-		// removes resource from admin folder
-		case IResourceDelta.REMOVED: {
-			VariantSyncPlugin.getDefault().logMessage(
-					"Resource " + res.getFullPath() + " was removed "
-							+ getFlagTxt(delta.getFlags()));
-			try {
-				persistanceOperations.removeAdminFile(res);
-			} catch (FileOperationException e) {
-				LogOperations.logError(
-						"Change file could not be removed from admin folder.",
-						e);
-			}
-			update();
+		case IResourceDelta.REMOVED:
+			handleRemovedResource(res, delta);
 			break;
-		}
-
-		// creates patch for changed file
-		case IResourceDelta.CHANGED: {
-			if (res.getType() == IResource.FILE
-					&& (delta.getFlags() & IResourceDelta.CONTENT) != 0) {
-				handleChangedResource(res);
-				VariantSyncPlugin.getDefault().logMessage(
-						"Resource " + res.getFullPath() + " has changed "
-								+ getFlagTxt(delta.getFlags()));
-				update();
-			}
+		case IResourceDelta.CHANGED:
+			handleChangedResource(res, delta);
 			break;
-		}
 		default:
 			break;
 		}
+	}
 
-		return true;
+	/**
+	 * Adds patch file to admin folder.
+	 * 
+	 * @param res
+	 *            changed resource
+	 * @param delta
+	 *            resource delta
+	 * @param flag
+	 */
+	private void handleAddedResource(IResource res, IResourceDelta delta,
+			int flag) {
+		if ((flag & IResourceDelta.MARKERS) == 0
+				|| (flag & IResourceDelta.MOVED_FROM) != 0) {
+			try {
+				persistanceOperations.addAdminResource(res);
+			} catch (FileOperationException e) {
+				LogOperations.logError(
+						"Change file could not be created in admin folder.", e);
+			}
+			VariantSyncPlugin.getDefault().logMessage(
+					RESOURCE + res.getFullPath() + " was added "
+							+ getFlagTxt(flag));
+			update();
+		}
+	}
+
+	/**
+	 * Removes patch file from admin folder.
+	 * 
+	 * @param res
+	 *            changed resource
+	 * @param delta
+	 *            resource delta
+	 */
+	private void handleRemovedResource(IResource res, IResourceDelta delta) {
+		VariantSyncPlugin.getDefault().logMessage(
+				RESOURCE + res.getFullPath() + " was removed "
+						+ getFlagTxt(delta.getFlags()));
+		try {
+			persistanceOperations.removeAdminFile(res);
+		} catch (FileOperationException e) {
+			LogOperations.logError(
+					"Change file could not be removed from admin folder.", e);
+		}
+		update();
 	}
 
 	/**
@@ -123,23 +145,33 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 	 * 
 	 * @param res
 	 *            changed resource
+	 * @param delta
+	 *            resource delta
 	 */
-	private void handleChangedResource(IResource res) {
-		IFile file = (IFile) res;
-		IFileState[] states = null;
-		try {
-			states = file.getHistory(null);
-			if (states.length > 0) {
-				long t = states[0].getModificationTime();
-				Date d = new Date(t);
-				LogOperations.logInfo(DateFormat.getDateTimeInstance(
-						DateFormat.SHORT, DateFormat.SHORT).format(d)
-						+ "");
-				deltaOperations.createPatch(res);
-				update();
+	private void handleChangedResource(IResource res, IResourceDelta delta) {
+		if (res.getType() == IResource.FILE
+				&& (delta.getFlags() & IResourceDelta.CONTENT) != 0) {
+			IFile file = (IFile) res;
+			IFileState[] states = null;
+			try {
+				states = file.getHistory(null);
+				if (states.length > 0) {
+					long t = states[0].getModificationTime();
+					Date d = new Date(t);
+					LogOperations.logInfo(DateFormat.getDateTimeInstance(
+							DateFormat.SHORT, DateFormat.SHORT).format(d)
+							+ "");
+					deltaOperations.createPatch(res);
+					update();
+				}
+			} catch (CoreException e) {
+				LogOperations
+						.logError("File states could not be retrieved.", e);
 			}
-		} catch (CoreException e) {
-			LogOperations.logError("File states could not be retrieved.", e);
+			VariantSyncPlugin.getDefault().logMessage(
+					RESOURCE + res.getFullPath() + " has changed "
+							+ getFlagTxt(delta.getFlags()));
+			update();
 		}
 	}
 
@@ -161,27 +193,17 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 	 */
 	private boolean filterResource(IProject project, IResource res)
 			throws CoreException {
-		if (project != null) {
-			if (project.isOpen()) {
-				if (!project.hasNature(VSyncSupportProjectNature.NATURE_ID)) {
-					return false;
-				}
-			} else {
-				update();
-				return false;
-			}
-		}
-		if (res.getName().equals(VariantSyncConstants.ADMIN_FOLDER)) {
+		if (project != null && project.isOpen()
+				&& !project.hasNature(VSyncSupportProjectNature.NATURE_ID)) {
 			return false;
 		}
-		if (res.isDerived()) {
+		if (project != null && !project.isOpen()) {
+			update();
 			return false;
 		}
 		String name = res.getName();
-		if (name.startsWith(".")) {
-			return false;
-		}
-		return true;
+		return !(name.equals(VariantSyncConstants.ADMIN_FOLDER)
+				|| res.isDerived() || name.startsWith("."));
 	}
 
 	/**

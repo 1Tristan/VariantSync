@@ -2,7 +2,6 @@ package de.ovgu.variantsync.applicationlayer.datamodel.resources;
 
 import java.io.File;
 import java.text.DateFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -32,6 +31,31 @@ public class ResourceChangesFilePatch implements IChangedFile {
 	private String unidiff;
 	private IChangedFile parent;
 	private String status;
+
+	/**
+	 * Compares timestamps. Returns differences between timestamps of compared
+	 * files if both files are instances of class ResourceChangesFilePatch.
+	 */
+	public static final Comparator<IChangedFile> TIMECOMPARATOR = new Comparator<IChangedFile>() {
+
+		@Override
+		public int compare(IChangedFile o1, IChangedFile o2) {
+			if (o1 instanceof ResourceChangesFilePatch
+					&& o2 instanceof ResourceChangesFilePatch) {
+				return (int) (((ResourceChangesFilePatch) o1).getTimestamp() - ((ResourceChangesFilePatch) o2)
+						.getTimestamp());
+			}
+			if (o1 instanceof ResourceChangesFile
+					&& o2 instanceof ResourceChangesFilePatch) {
+				return 1;
+			}
+			if (o1 instanceof ResourceChangesFolder
+					&& o2 instanceof ResourceChangesFilePatch) {
+				return 1;
+			}
+			return 0;
+		}
+	};
 
 	/**
 	 * Sets timestamp and synchronization flag extracted from patch-file-name.
@@ -206,31 +230,6 @@ public class ResourceChangesFilePatch implements IChangedFile {
 	public String getPatchFileName() {
 		return patchFileName;
 	}
-
-	/**
-	 * Compares timestamps. Returns differences between timestamps of compared
-	 * files if both files are instances of class ResourceChangesFilePatch.
-	 */
-	public final static Comparator<IChangedFile> TIMECOMPARATOR = new Comparator<IChangedFile>() {
-
-		@Override
-		public int compare(IChangedFile o1, IChangedFile o2) {
-			if (o1 instanceof ResourceChangesFilePatch
-					&& o2 instanceof ResourceChangesFilePatch) {
-				return (int) (((ResourceChangesFilePatch) o1).getTimestamp() - ((ResourceChangesFilePatch) o2)
-						.getTimestamp());
-			}
-			if (o1 instanceof ResourceChangesFile
-					&& o2 instanceof ResourceChangesFilePatch) {
-				return 1;
-			}
-			if (o1 instanceof ResourceChangesFolder
-					&& o2 instanceof ResourceChangesFilePatch) {
-				return 1;
-			}
-			return 0;
-		}
-	};
 
 	/*
 	 * (non-Javadoc)

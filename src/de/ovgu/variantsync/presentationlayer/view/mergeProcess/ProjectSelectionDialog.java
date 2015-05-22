@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.presentationlayer.view.mergeProcess;
+package de.ovgu.variantsync.presentationlayer.view.mergeprocess;
 
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
@@ -58,8 +58,8 @@ public class ProjectSelectionDialog extends SelectionDialog implements
 	private IStructuredContentProvider projectContentProvider;
 	private static ProjectSelectionDialog projectSelectionDiaglog;
 
-	private final static int SIZING_SELECTION_WIDGET_HEIGHT = 200;
-	private final static int SIZING_SELECTION_WIDGET_WIDTH = 50;
+	private static final int SIZING_SELECTION_WIDGET_HEIGHT = 200;
+	private static final int SIZING_SELECTION_WIDGET_WIDTH = 50;
 
 	private Text changesText;
 	private String unifiedDiff;
@@ -162,7 +162,6 @@ public class ProjectSelectionDialog extends SelectionDialog implements
 				SWT.BORDER);
 		featuresListViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
-				Object[] selectedFeatures = getSelectedFeatures();
 				projectsListViewer.setAllChecked(true);
 				Object[] elements = projectsListViewer.getCheckedElements();
 				List<IProject> projects = new ArrayList<IProject>();
@@ -170,7 +169,7 @@ public class ProjectSelectionDialog extends SelectionDialog implements
 					projects.add((IProject) o);
 				}
 				Map<IProject, Boolean> checkedProjects = featureOperations
-						.checkFeatureSupport(projects, selectedFeatures);
+						.checkFeatureSupport(projects, getSelectedFeatures());
 				Set<IProject> p = checkedProjects.keySet();
 				Iterator<IProject> itProjects = p.iterator();
 				while (itProjects.hasNext()) {
@@ -188,10 +187,10 @@ public class ProjectSelectionDialog extends SelectionDialog implements
 
 		changesText = new Text(composite, SWT.BORDER | SWT.READ_ONLY
 				| SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL | SWT.MULTI);
-		GridData gd_text = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 3);
-		gd_text.widthHint = 500;
-		gd_text.heightHint = 79;
-		changesText.setLayoutData(gd_text);
+		GridData gdText = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 3);
+		gdText.widthHint = 500;
+		gdText.heightHint = 79;
+		changesText.setLayoutData(gdText);
 		changesText.setText(unifiedDiff);
 
 		Label labelProjects = new Label(composite, SWT.NONE);
@@ -233,10 +232,9 @@ public class ProjectSelectionDialog extends SelectionDialog implements
 		featuresListViewer.setInput(this);
 	}
 
-	protected void cancelPressed() {
-		super.cancelPressed();
-	}
-
+	/**
+	 * Collects selected target projects.
+	 */
 	protected void okPressed() {
 
 		// Get the input children.
@@ -256,8 +254,13 @@ public class ProjectSelectionDialog extends SelectionDialog implements
 		super.okPressed();
 	}
 
+	/**
+	 * Collects selected features.
+	 * 
+	 * @return feature array
+	 */
 	public Object[] getSelectedFeatures() {
-		ArrayList<Object> result = new ArrayList<Object>();
+		List<Object> result = new ArrayList<Object>();
 		Object[] obj = featureContentProvider.getElements(this);
 		for (Object o : obj) {
 			if (featuresListViewer.getChecked(o)) {
@@ -267,10 +270,12 @@ public class ProjectSelectionDialog extends SelectionDialog implements
 		return result.toArray();
 	}
 
-	public static ProjectSelectionDialog getDefault() {
-		return projectSelectionDiaglog;
-	}
-
+	/**
+	 * Get specified features of projects.
+	 * 
+	 * @param project
+	 * @return set of features
+	 */
 	public Set<Feature> getFeatures(IProject project) {
 		if (featureMap == null) {
 			featureMap = featureOperations.getFeatures(VariantSyncPlugin
@@ -283,4 +288,7 @@ public class ProjectSelectionDialog extends SelectionDialog implements
 	public void modelPropertyChange(PropertyChangeEvent evt) {
 	}
 
+	public static ProjectSelectionDialog getDefault() {
+		return projectSelectionDiaglog;
+	}
 }

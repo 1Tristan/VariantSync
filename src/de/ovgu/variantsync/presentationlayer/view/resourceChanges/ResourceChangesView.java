@@ -33,8 +33,8 @@ import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesF
 import de.ovgu.variantsync.presentationlayer.controller.Controller;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerProperties;
 import de.ovgu.variantsync.presentationlayer.view.AbstractView;
-import de.ovgu.variantsync.presentationlayer.view.mergeProcess.ProjectSelectionDialog;
-import de.ovgu.variantsync.presentationlayer.view.mergeProcess.SynchroFilter;
+import de.ovgu.variantsync.presentationlayer.view.mergeprocess.ProjectSelectionDialog;
+import de.ovgu.variantsync.presentationlayer.view.mergeprocess.SynchroFilter;
 
 /**
  * 
@@ -43,7 +43,7 @@ import de.ovgu.variantsync.presentationlayer.view.mergeProcess.SynchroFilter;
  */
 public class ResourceChangesView extends ViewPart implements AbstractView {
 
-	public static final String ID = "de.ovgu.variantsync.presentationlayer.view.resourceChanges.ResourceChanges";
+	public static final String ID = "de.ovgu.variantsync.presentationlayer.view.resourcechanges.ResourceChanges";
 
 	private TreeViewer viewer;
 	private Action synchroFilterAction;

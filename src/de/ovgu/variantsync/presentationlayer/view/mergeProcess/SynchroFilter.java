@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.presentationlayer.view.mergeProcess;
+package de.ovgu.variantsync.presentationlayer.view.mergeprocess;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -14,12 +14,11 @@ public class SynchroFilter extends ViewerFilter {
 
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (element instanceof ResourceChangesFilePatch) {
-			if (new SynchronizationProvider().getSynchronizedProjects(
-					(ResourceChangesFilePatch) element).size() != 0
-					|| ((ResourceChangesFilePatch) element).isSynchronized()) {
-				return false;
-			}
+		if (element instanceof ResourceChangesFilePatch
+				&& (!new SynchronizationProvider().getSynchronizedProjects(
+						(ResourceChangesFilePatch) element).isEmpty() || ((ResourceChangesFilePatch) element)
+						.isSynchronized())) {
+			return false;
 		}
 		return true;
 	}

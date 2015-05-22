@@ -46,8 +46,6 @@ class FeatureHandler {
 	 */
 	public Set<Feature> getFeatures(IProject project) throws FeatureException {
 		IProject featureInfoProject = null;
-		IFile modelFile = null;
-		IFile configFile = null;
 		for (IProject p : ResourcesPlugin.getWorkspace().getRoot()
 				.getProjects()) {
 			try {
@@ -63,6 +61,8 @@ class FeatureHandler {
 						+ p.getName() + " could not be checked.", e);
 			}
 		}
+		IFile modelFile = null;
+		IFile configFile = null;
 		if (featureInfoProject != null) {
 			modelFile = featureInfoProject.getFile(FeatureConstants.MODEL_FILE);
 			configFile = featureInfoProject.getFolder(

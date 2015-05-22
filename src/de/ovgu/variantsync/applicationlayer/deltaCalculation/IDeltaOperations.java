@@ -55,15 +55,6 @@ public interface IDeltaOperations {
 	Patch getPatch(ResourceChangesFilePatch changedFile);
 
 	/**
-	 * Parses given text in unified format. Creates list of deltas.
-	 * 
-	 * @param content
-	 *            text in unified format
-	 * @return string representing patch with deltas
-	 */
-	String getUnifiedDiff(List<String> content);
-
-	/**
 	 * Patches original text with given patch.
 	 * 
 	 * @param content

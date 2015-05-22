@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.presentationlayer.view.mergeProcess;
+package de.ovgu.variantsync.presentationlayer.view.mergeprocess;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,10 +22,12 @@ public class FeatureListViewerContentProvider implements
 
 	@Override
 	public void dispose() {
+		// not necessary
 	}
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		// not necessary
 	}
 
 	@Override
@@ -35,17 +37,7 @@ public class FeatureListViewerContentProvider implements
 				.getSelectedFilePatch();
 		IProject project = filePatch.getProject();
 		ProjectSelectionDialog dlg = ProjectSelectionDialog.getDefault();
-		// Set<Feature> features = dlg.getFeaturesFor(project);
-		// dlg.computeFeatures();
 		Set<Feature> features = dlg.getFeatures(project);
-		// if (features == null) {
-		// try {
-		// Thread.sleep(250);
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
-		// features = dlg.getFeatures(project);
-		// }
 		if (features == null) {
 			features = new HashSet<Feature>();
 		}

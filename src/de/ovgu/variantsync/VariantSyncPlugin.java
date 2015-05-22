@@ -11,13 +11,11 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
-import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItem;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 import de.ovgu.variantsync.applicationlayer.deltacalculation.DeltaOperationProvider;
 import de.ovgu.variantsync.applicationlayer.monitoring.ChangeListener;
@@ -28,6 +26,7 @@ import de.ovgu.variantsync.presentationlayer.view.AbstractView;
 import de.ovgu.variantsync.presentationlayer.view.console.ChangeOutPutConsole;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
 import de.ovgu.variantsync.utilitylayer.UtilityModel;
+import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
  * Entry point to start plugin variantsync. Variantsync supports developers to
@@ -44,7 +43,6 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	// shared instance
 	private static VariantSyncPlugin plugin;
 	private ChangeOutPutConsole console;
-	private IProject changeViewProject = null;
 	private List<IProject> projectList = new ArrayList<IProject>(0);
 	private Map<IProject, MonitorItemStorage> synchroInfoMap = new HashMap<IProject, MonitorItemStorage>();
 	private ChangeListener resourceModificationListener;
@@ -52,15 +50,83 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 			.getPersistanceOperations();
 	private Controller controller = Controller.getInstance();
 
-	public VariantSyncPlugin() {
-	}
-
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
+	@Override
+	public void start(BundleContext context) {
+		try {
+			super.start(context);
+		} catch (Exception e) {
+			LogOperations.logError("Plugin could not be started.", e);
+		}
 		plugin = this;
 		console = new ChangeOutPutConsole();
 		initMVC();
-		initResourceMonitoring();
+		try {
+			initResourceMonitoring();
+		} catch (CoreException e) {
+			LogOperations.logError(
+					"Resouce monitoring could not be initialized.", e);
+		}
+	}
+
+	@Override
+	public void stop(BundleContext context) {
+		plugin = null;
+		try {
+			super.stop(context);
+		} catch (Exception e) {
+			LogOperations.logError("Plugin could not be started.", e);
+		}
+		IWorkspace ws = ResourcesPlugin.getWorkspace();
+		ws.removeResourceChangeListener(resourceModificationListener);
+	}
+
+	/**
+	 * Returns list of projects which has eclipse nature support and variantsync
+	 * nature id.
+	 * 
+	 * @return list of projects
+	 */
+	public List<IProject> getSupportProjectList() {
+		this.projectList.clear();
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot()
+				.getProjects()) {
+			try {
+				if (project.isOpen()
+						&& project
+								.hasNature(VSyncSupportProjectNature.NATURE_ID)) {
+					this.projectList.add(project);
+				}
+			} catch (CoreException e) {
+				UtilityModel.getInstance().handleError(e,
+						"nature support could not be checked");
+			}
+		}
+		return new ArrayList<IProject>(projectList);
+	}
+
+	/**
+	 * Updates synchroInfoMap. This map contains IProject-objects mapped to
+	 * SynchroInfo objects.
+	 */
+	public void updateSynchroInfo() {
+		this.synchroInfoMap.clear();
+		List<IProject> projects = this.getSupportProjectList();
+		for (IProject project : projects) {
+			IFile infoFile = project.getFolder(
+					VariantSyncConstants.ADMIN_FOLDER).getFile(
+					VariantSyncConstants.ADMIN_FILE);
+			MonitorItemStorage info = new MonitorItemStorage();
+			if (infoFile.exists()) {
+				try {
+					info = persistanceOperations.readSynchroXMLFile(infoFile
+							.getContents());
+				} catch (CoreException e) {
+					UtilityModel.getInstance().handleError(e,
+							"info file could not be read");
+				}
+			}
+			this.synchroInfoMap.put(project, info);
+		}
 	}
 
 	/**
@@ -91,6 +157,20 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	}
 
 	/**
+	 * Returns monitored items of specific project.
+	 * 
+	 * @param project
+	 *            the project to get monitored items from
+	 * @return MonitorItemStorage
+	 */
+	public MonitorItemStorage getSynchroInfoFrom(IProject project) {
+		if (this.synchroInfoMap.get(project) == null) {
+			this.updateSynchroInfo();
+		}
+		return this.synchroInfoMap.get(project);
+	}
+
+	/**
 	 * Registers a view. If a model fires an event, all registered views receive
 	 * this element.
 	 * 
@@ -112,11 +192,39 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		controller.removeView(view);
 	}
 
-	public void stop(BundleContext context) throws Exception {
-		plugin = null;
-		super.stop(context);
-		IWorkspace ws = ResourcesPlugin.getWorkspace();
-		ws.removeResourceChangeListener(resourceModificationListener);
+	/**
+	 * @return the display
+	 */
+	public static Display getStandardDisplay() {
+		Display display = Display.getCurrent();
+		if (display == null) {
+			display = Display.getDefault();
+		}
+		return display;
+	}
+
+	/**
+	 * Logs a message on eclipse console.
+	 * 
+	 * @param msg
+	 *            the message to log
+	 */
+	public void logMessage(String msg) {
+		console.logMessage(msg);
+	}
+
+	/**
+	 * @return the console
+	 */
+	public ChangeOutPutConsole getConsole() {
+		return console;
+	}
+
+	/**
+	 * @return the controller
+	 */
+	public Controller getController() {
+		return controller;
 	}
 
 	/**
@@ -128,126 +236,4 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		return plugin;
 	}
 
-	/**
-	 * Returns an image descriptor for the image file at the given plug-in
-	 * relative path
-	 * 
-	 * @param path
-	 *            the path
-	 * @return the image descriptor
-	 */
-	public static ImageDescriptor getImageDescriptor(String path) {
-		return imageDescriptorFromPlugin(VariantSyncConstants.PLUGIN_ID, path);
-	}
-
-	public static Display getStandardDisplay() {
-		Display display = Display.getCurrent();
-		if (display == null) {
-			display = Display.getDefault();
-		}
-		return display;
-	}
-
-	public void logMessage(String msg) {
-		console.logMessage(msg);
-	}
-
-	public ChangeOutPutConsole getConsole() {
-		return console;
-	}
-
-	public IProject getChangeViewsProject() {
-		return this.changeViewProject;
-	}
-
-	public void setChangeViewsProject(IProject project) {
-		this.changeViewProject = project;
-	}
-
-	public List<IProject> getSupportProjectList() {
-		this.projectList.clear();
-		for (IProject project : ResourcesPlugin.getWorkspace().getRoot()
-				.getProjects()) {
-			try {
-				if (project.isOpen()
-						&& project
-								.hasNature(VSyncSupportProjectNature.NATURE_ID)) {
-					this.projectList.add(project);
-				}
-			} catch (CoreException e) {
-				UtilityModel.getInstance().handleError(e,
-						"nature support could not be checked");
-			}
-		}
-		return new ArrayList<IProject>(projectList);
-	}
-
-	/**
-	 * Extracts patched file names from .variantsync file.
-	 * 
-	 * @return list of patched file names
-	 */
-	public List<String> getChangeEntries() {
-		List<String> changeEntries = new ArrayList<String>();
-		List<IProject> projects = getSupportProjectList();
-		for (IProject project : projects) {
-			IFile infoFile = project.getFolder(
-					VariantSyncConstants.ADMIN_FOLDER).getFile(
-					VariantSyncConstants.ADMIN_FILE);
-			MonitorItemStorage info = new MonitorItemStorage();
-			if (infoFile.exists()) {
-				try {
-					info = persistanceOperations.readSynchroXMLFile(infoFile
-							.getContents());
-					List<MonitorItem> items = info.getMonitorItems();
-					for (MonitorItem item : items) {
-						changeEntries.add(item.getPatchName());
-					}
-				} catch (CoreException e) {
-					UtilityModel.getInstance().handleError(e,
-							"info file could not be read");
-				}
-			}
-		}
-		return changeEntries;
-	}
-
-	/**
-	 * Updates synchroInfoMap. This map contains IProject-objects mapped to
-	 * SynchroInfo objects.
-	 */
-	public void updateSynchroInfo() {
-		this.synchroInfoMap.clear();
-		List<IProject> projects = this.getSupportProjectList();
-		for (IProject project : projects) {
-			IFile infoFile = project.getFolder(
-					VariantSyncConstants.ADMIN_FOLDER).getFile(
-					VariantSyncConstants.ADMIN_FILE);
-			MonitorItemStorage info = new MonitorItemStorage();
-			if (infoFile.exists()) {
-				try {
-					info = persistanceOperations.readSynchroXMLFile(infoFile
-							.getContents());
-				} catch (CoreException e) {
-					UtilityModel.getInstance().handleError(e,
-							"info file could not be read");
-				}
-			}
-			this.synchroInfoMap.put(project, info);
-		}
-	}
-
-	public MonitorItemStorage getSynchroInfoFrom(IProject project) {
-		if (this.synchroInfoMap.get(project) == null) {
-			this.updateSynchroInfo();
-		}
-		return this.synchroInfoMap.get(project);
-	}
-
-	/**
-	 * @return the controller
-	 */
-	public Controller getController() {
-		return controller;
-	}
 }

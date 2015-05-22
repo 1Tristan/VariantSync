@@ -88,27 +88,25 @@ class MergeCalculation {
 		}
 		if (deltas13.containsAll(deltas12)) {
 			return true;
-		} else {
-			Set<Delta> tempDeltas = new HashSet<Delta>();
-			tempDeltas.addAll(deltas12);
-			tempDeltas.addAll(deltas13);
-			Patch patchTemp = new Patch();
-			for (Delta d : tempDeltas) {
-				patchTemp.addDelta(d);
-			}
-			List<Delta> deltas = patchTemp.getDeltas();
-			for (int i = 0; i < deltas.size(); i++) {
-				if (i + 1 < deltas.size()) {
-					Delta actualDelta = deltas.get(i + 1);
-					int nextStartPosition = actualDelta.getOriginal()
-							.getPosition();
-					Delta followingDelta = deltas.get(i);
-					int curEndPosition = followingDelta.getOriginal().last();
-					if (nextStartPosition - curEndPosition > 1) {
-						continue;
-					} else {
-						return true;
-					}
+		}
+		Set<Delta> tempDeltas = new HashSet<Delta>();
+		tempDeltas.addAll(deltas12);
+		tempDeltas.addAll(deltas13);
+		Patch patchTemp = new Patch();
+		for (Delta d : tempDeltas) {
+			patchTemp.addDelta(d);
+		}
+		List<Delta> deltas = patchTemp.getDeltas();
+		for (int i = 0; i < deltas.size(); i++) {
+			if (i + 1 < deltas.size()) {
+				Delta actualDelta = deltas.get(i + 1);
+				int nextStartPosition = actualDelta.getOriginal().getPosition();
+				Delta followingDelta = deltas.get(i);
+				int curEndPosition = followingDelta.getOriginal().last();
+				if (nextStartPosition - curEndPosition > 1) {
+					continue;
+				} else {
+					return true;
 				}
 			}
 		}
