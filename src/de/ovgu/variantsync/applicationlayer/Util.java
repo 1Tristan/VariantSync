@@ -1,21 +1,9 @@
 package de.ovgu.variantsync.applicationlayer;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import de.ovgu.variantsync.VariantSyncPlugin;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
-import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerHandler;
-import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerInformation;
 
 /**
  * 
@@ -30,18 +18,31 @@ public class Util {
 		// TODO Auto-generated constructor stub
 	}
 
-	public static void getClassesWithClassName(List<JavaElement> elements,
+	public static void getClassesByClassName(List<JavaElement> elements,
 			List<JavaClass> classes, String className) {
 		if (elements != null && !elements.isEmpty()) {
 			for (JavaElement je : elements) {
 				if (je instanceof JavaClass && je.getName().equals(className)) {
 					classes.add((JavaClass) je);
 				} else {
-					getClassesWithClassName(je.getChildren(), classes,
-							className);
+					getClassesByClassName(je.getChildren(), classes, className);
 				}
 			}
 		}
+	}
+
+	public static boolean containsClass(List<JavaElement> elements,
+			String className) {
+		if (elements != null && !elements.isEmpty()) {
+			for (JavaElement je : elements) {
+				if (je instanceof JavaClass && je.getName().equals(className)) {
+					return true;
+				} else {
+					return containsClass(je.getChildren(), className);
+				}
+			}
+		}
+		return false;
 	}
 
 	// TODO nur hier einmal zentral auslagern

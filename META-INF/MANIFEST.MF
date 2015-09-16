@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: VariantSync
-Bundle-SymbolicName: VariantSync;singleton:=true
+Bundle-SymbolicName: de.ovgu.variantsync;singleton:=true
 Bundle-Version: 2.0.0
 Bundle-Activator: de.ovgu.variantsync.VariantSyncPlugin
 Bundle-Vendor: University of Magdeburg

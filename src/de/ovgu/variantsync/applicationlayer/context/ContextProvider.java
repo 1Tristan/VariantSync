@@ -2,7 +2,9 @@ package de.ovgu.variantsync.applicationlayer.context;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.graphics.RGB;
@@ -90,17 +92,20 @@ public class ContextProvider extends AbstractModel implements
 	}
 
 	@Override
-	public List<JavaClass> findJavaClass(String projectName, String className) {
-		List<JavaClass> classes = new ArrayList<JavaClass>();
+	public Map<String, List<JavaClass>> findJavaClass(String projectName,
+			String className) {
+		Map<String, List<JavaClass>> result = new HashMap<String, List<JavaClass>>();
 		Collection<Context> contexts = ContextHandler.getInstance()
 				.getAllContexts();
 		for (Context c : contexts) {
+			List<JavaClass> classes = new ArrayList<JavaClass>();
 			JavaProject jp = c.getJavaProject();
 			if (jp.getName().equals(projectName)) {
-				Util.getClassesWithClassName(jp.getChildren(), classes,
-						className);
+				Util.getClassesByClassName(jp.getChildren(), classes, className);
 			}
+			result.put(c.getFeatureExpression(), classes);
 		}
-		return classes;
+		return result;
 	}
+
 }

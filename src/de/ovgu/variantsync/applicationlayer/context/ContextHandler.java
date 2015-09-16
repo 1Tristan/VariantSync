@@ -122,6 +122,8 @@ class ContextHandler {
 					activeContext.getId());
 
 			String file = "/src/" + packageName + "/" + className;
+			file = file.replace(".", "/");
+			file = file.replace("/java", ".java");
 			IPath path = new Path(file);
 			List<IProject> projects = VariantSyncPlugin.getDefault()
 					.getSupportProjectList();
@@ -156,7 +158,7 @@ class ContextHandler {
 		JavaProject jp = context.getJavaProject();
 		List<JavaElement> elements = jp.getChildren();
 		List<JavaClass> classes = new ArrayList<JavaClass>();
-		Util.getClassesWithClassName(elements, classes, className);
+		Util.getClassesByClassName(elements, classes, className);
 		for (JavaClass c : classes) {
 			List<CodeLine> cls = c.getCodeLines();
 			int i = 0;

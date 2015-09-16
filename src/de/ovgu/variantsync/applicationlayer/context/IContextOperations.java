@@ -1,6 +1,7 @@
 package de.ovgu.variantsync.applicationlayer.context;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.graphics.RGB;
@@ -37,5 +38,7 @@ public interface IContextOperations {
 	void addCode(String packageName, String className, List<String> code,
 			Context c);
 
-	List<JavaClass> findJavaClass(String projectName, String className);
+	Map<String, List<JavaClass>> findJavaClass(String projectName,
+			String className);
+
 }

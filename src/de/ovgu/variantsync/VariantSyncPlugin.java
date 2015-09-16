@@ -4,8 +4,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -23,6 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -91,7 +95,12 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		removeAllMarkers();
 		initMVC();
 		initContext();
-		hookToEditor();
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				hookToEditor();
+			}
+		});
 		try {
 			initResourceMonitoring();
 		} catch (CoreException e) {
@@ -101,8 +110,9 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	}
 
 	public void hookToEditor() {
-		IWorkbenchPage page = PlatformUI.getWorkbench()
-				.getActiveWorkbenchWindow().getActivePage();
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow ww = wb.getActiveWorkbenchWindow();
+		IWorkbenchPage page = ww.getActivePage();
 		if (page == null)
 			return;
 
@@ -116,42 +126,54 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 					if (((IEditorPart) part).getEditorInput() instanceof IFileEditorInput) {
 						IFile file = ((IFileEditorInput) ((EditorPart) part)
 								.getEditorInput()).getFile();
-						System.out.println(file.getLocation());
+						System.out
+								.println("LOCATION OF ACTIVE FILE IN EDITOR: "
+										+ file.getLocation());
 						// TODO: search file in contexts and display marker for
 						// code that is tagged
 						String projectName = file.getProject().getName();
 						String fileName = file.getName();
-						List<JavaClass> classes = contextOp.findJavaClass(
-								projectName, fileName);
-						System.out.println(classes.toString());
+						Map<String, List<JavaClass>> classes = contextOp
+								.findJavaClass(projectName, fileName);
 
 						MarkerHandler.getInstance().clearAllMarker(file);
 						List<MarkerInformation> markers = new ArrayList<MarkerInformation>();
-						for (JavaClass c : classes) {
-							List<CodeLine> cls = c.getCodeLines();
-							int i = 0;
-							List<CodeLine> tmp = new ArrayList<CodeLine>();
-							for (CodeLine cl : cls) {
-								tmp.add(cl);
-								if (cls.size() > i + 1
-										&& cls.get(i + 1).getLine() == cl
-												.getLine() + 1) {
-									tmp.add(cls.get(i + 1));
-								} else {
-									MarkerInformation mi = new MarkerInformation(
-											0, tmp.get(0).getLine(), tmp.get(
-													tmp.size() - 1).getLine(),
-											0, 0);
-									mi.setFeature("TODO");
-									markers.add(mi);
-									tmp.clear();
+						Set<Entry<String, List<JavaClass>>> set = classes
+								.entrySet();
+						Iterator<Entry<String, List<JavaClass>>> it = set
+								.iterator();
+						while (it.hasNext()) {
+							Entry<String, List<JavaClass>> entry = it.next();
+							List<JavaClass> listClasses = entry.getValue();
+							for (JavaClass c : listClasses) {
+								List<CodeLine> cls = c.getCodeLines();
+								int i = 0;
+								List<CodeLine> tmp = new ArrayList<CodeLine>();
+								for (CodeLine cl : cls) {
+									tmp.add(cl);
+									if (cls.size() > i + 1
+											&& cls.get(i + 1).getLine() == cl
+													.getLine() + 1) {
+										tmp.add(cls.get(i + 1));
+									} else {
+										MarkerInformation mi = new MarkerInformation(
+												0, tmp.get(0).getLine(), tmp
+														.get(tmp.size() - 1)
+														.getLine(), 0, 0);
+										mi.setFeature(entry.getKey());
+										markers.add(mi);
+										tmp.clear();
+									}
+									i++;
 								}
-								i++;
 							}
-
+							try {
+								MarkerHandler.getInstance().setMarker(file,
+										markers);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
-
-						MarkerHandler.getInstance().setMarker(file, markers);
 					}
 				}
 			}

@@ -391,8 +391,6 @@ public class TestSingleContextMapping {
 
 		System.out.println("\n" + jp.toString());
 
-		// TODO create new Test -> Überblick über Änderungen verloren!
-
 		int i = 0;
 		int line = 5;
 		CodeLine cl = codeOfClass.get(i);
@@ -462,6 +460,179 @@ public class TestSingleContextMapping {
 		assertEquals(cl.getLine(), ++line);
 		cl = codeOfClass.get(++i);
 		assertEquals(cl.getCode(), "}");
+		assertEquals(cl.getLine(), ++line);
+	}
+
+	/**
+	 * see TestSingleContextMapping.txt
+	 */
+	@Test
+	public void testAddCodeInsideExistingCode_Comprehensive3() {
+		List<String> diff = new ArrayList<String>();
+
+		// Step 0
+		String[] diffArray = "--- Main.java, +++ Main.java, @@ -5,1 +5,7 @@, -	, +	private int i;, +, +	public Main(int j) {, +		this.i = j;, +		this.i = j + 3;, +		System.out.println();, +	}"
+				.split(", ");
+		for (String s : diffArray) {
+			diff.add(s);
+		}
+		System.out.println("\n" + diff.toString());
+		co.addCode("mainpackage", "Main.java", diff, context);
+
+		JavaProject jp = context.getJavaProject();
+		System.out.println("\n" + jp.toString() + "\n");
+
+		// Step 1
+		diffArray = "--- Main.java, +++ Main.java, @@ -11,0 +11,1 @@, +		System.out.println();"
+				.split(", ");
+
+		diff.clear();
+		for (String s : diffArray) {
+			diff.add(s);
+		}
+		co.addCode("mainpackage", "Main.java", diff, context);
+
+		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
+				.get(0).getClonedCodeLines();
+
+		System.out.println("\n" + jp.toString());
+
+		int i = 0;
+		int line = 5;
+		CodeLine cl = codeOfClass.get(i);
+		assertEquals(cl.getCode(), "private int i;");
+		assertEquals(cl.getLine(), line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "public Main(int j) {");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "this.i = j;");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "this.i = j + 3;");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "System.out.println();");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "System.out.println();");
+		assertEquals(cl.getLine(), ++line);
+
+		// Step 2
+		diffArray = "--- Main.java, +++ Main.java, @@ -8,1 +8,1 @@, -		this.i = j;, +		"
+				.split(", ");
+
+		diff.clear();
+		for (String s : diffArray) {
+			diff.add(s);
+		}
+		co.addCode("mainpackage", "Main.java", diff, context);
+
+		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
+				.getClonedCodeLines();
+
+		System.out.println("\n" + jp.toString());
+
+		i = 0;
+		line = 5;
+		cl = codeOfClass.get(i);
+		assertEquals(cl.getCode(), "private int i;");
+		assertEquals(cl.getLine(), line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "public Main(int j) {");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "this.i = j + 3;");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "System.out.println();");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "System.out.println();");
+		assertEquals(cl.getLine(), ++line);
+
+		// Step 3
+		diffArray = "--- Main.java, +++ Main.java, @@ -8,1 +8,1 @@, -		, +		this.i = j;"
+				.split(", ");
+
+		diff.clear();
+		for (String s : diffArray) {
+			diff.add(s);
+		}
+		co.addCode("mainpackage", "Main.java", diff, context);
+
+		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
+				.getClonedCodeLines();
+
+		System.out.println("\n" + jp.toString());
+
+		i = 0;
+		line = 5;
+		cl = codeOfClass.get(i);
+		assertEquals(cl.getCode(), "private int i;");
+		assertEquals(cl.getLine(), line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "public Main(int j) {");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "this.i = j;");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "this.i = j + 3;");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "System.out.println();");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "System.out.println();");
+		assertEquals(cl.getLine(), ++line);
+
+		// Step 4
+		diffArray = "--- Main.java, +++ Main.java, @@ -11,1 +11,0 @@, -		System.out.println();"
+				.split(", ");
+
+		diff.clear();
+		for (String s : diffArray) {
+			diff.add(s);
+		}
+		co.addCode("mainpackage", "Main.java", diff, context);
+
+		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
+				.getClonedCodeLines();
+
+		System.out.println("\n" + jp.toString());
+
+		i = 0;
+		line = 5;
+		cl = codeOfClass.get(i);
+		assertEquals(cl.getCode(), "private int i;");
+		assertEquals(cl.getLine(), line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "public Main(int j) {");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "this.i = j;");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "this.i = j + 3;");
+		assertEquals(cl.getLine(), ++line);
+		cl = codeOfClass.get(++i);
+		assertEquals(cl.getCode(), "System.out.println();");
 		assertEquals(cl.getLine(), ++line);
 	}
 

@@ -9,9 +9,6 @@ import java.util.Map;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -37,12 +34,6 @@ public class CodeMarkerFactory {
 
 	private static Map<String, String> featureColorMap = new HashMap<String, String>();
 
-	static IMarker markerx;
-	static IResource resx;
-	static int startx;
-	static int endx;
-	static String featurex;
-
 	public static void setFeatureColor(String feature, String color) {
 		featureColorMap.put(feature, color);
 	}
@@ -58,43 +49,16 @@ public class CodeMarkerFactory {
 	/*
 	 * Creates a Marker
 	 */
-	public static IMarker createMarker(String id, IResource res, int start,
+	public static void createMarker(String id, IResource res, int start,
 			int end, String feature) throws CoreException {
-		resx = res;
-		startx = start;
-		endx = end;
-		featurex = feature;
-		// Job j = new PerformJavaCheck("JOB");
-		// j.setRule(CodeMarkerFactory.getResource().getWorkspace()
-		// .getRuleFactory().buildRule());
-		// j.schedule();
-
-		// Job job = new Job("My First Job") {
-		// protected IStatus run(IProgressMonitor monitor) {
-		// System.out.println("Hello World (from a background job)");
-		// try {
-		// // note: you use the id that is defined in your plugin.xml
-		// markerx = resx.createMarker(MARKER);
-		// markerx.setAttribute(IMarker.MESSAGE, "Feature: "
-		// + featurex);
-		// // compute and set char start and char end
-		// int start = startx;
-		// int end = endx;
-		// System.out.println("\n!!! " + start + ", " + end);
-		// markerx.setAttribute(IMarker.CHAR_START, start);
-		// markerx.setAttribute(IMarker.CHAR_END, end);
-		// System.out.println("\n!!! " + markerx.getId());
-		// } catch (CoreException e) {
-		// e.printStackTrace();
-		// }
-		// return Status.OK_STATUS;
-		// }
-		// };
-		Job job = new MarkerJob(feature + "§" + id, res, start, end,
-				feature, MARKER);
-		job.setPriority(Job.SHORT);
-		job.schedule();
-		return markerx;
+		try {
+			Job job = new CreateMarkerJob(feature + "§" + id, res, start, end,
+					feature, MARKER);
+			job.setPriority(Job.SHORT);
+			job.schedule();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/*

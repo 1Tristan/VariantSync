@@ -6,7 +6,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.IEditorInput;
@@ -72,20 +71,21 @@ public class CodeEditorMapping extends DynamicMapMenu {
 						IFile file = (IFile) editorPart.getEditorInput()
 								.getAdapter(IFile.class);
 						IPath path = file.getRawLocation().makeAbsolute();
-						MarkerInformation mi = new MarkerInformation(0,
-								startLine, endLine, offset, length);
-						IMarker marker = null;
+						// MarkerInformation mi = new MarkerInformation(0,
+						// startLine, endLine, offset, length);
+						// IMarker marker = null;
 						try {
-							marker = CodeMarkerFactory.createMarker(String.valueOf(0), file,
-									offset, offset + length, feature);
+							CodeMarkerFactory.createMarker(String.valueOf(0),
+									file, offset, offset + length, feature);
 						} catch (CoreException e) {
 							e.printStackTrace();
 						}
-						System.out
-								.println("\nOOOOOOOOOOOOOOOO OFFSET OOOOOOOOOOOOOOOO = "
-										+ offset + ", " + length);
-						MarkerHandler.getInstance().addMarker(mi, marker, file,
-								feature);
+						// System.out
+						// .println("\nOOOOOOOOOOOOOOOO OFFSET OOOOOOOOOOOOOOOO = "
+						// + offset + ", " + length);
+						// MarkerHandler.getInstance().addMarker(mi, marker,
+						// file,
+						// feature);
 
 						controller.addFeatureMapping(feature, title,
 								JavaElements.CODE_FRAGMENT, path, selectedText,

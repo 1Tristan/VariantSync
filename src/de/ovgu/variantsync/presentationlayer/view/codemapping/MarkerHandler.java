@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -64,17 +65,20 @@ public class MarkerHandler {
 	}
 
 	public void clearAllMarker(IFile file) {
+		Job job = new RemoveMarkerJob(file);
+		job.setPriority(Job.SHORT);
+		job.schedule();
 		// TODO clear Marker for the file that will be presented. Then, use
 		// IDocument to get offset by line number for new marker
-		List<IMarker> markers = CodeMarkerFactory.findMarkers(file);
-		for (IMarker marker : markers) {
-			try {
-				markerMap.remove(marker.getId());
-				marker.delete();
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
-		}
+		// List<IMarker> markers = CodeMarkerFactory.findMarkers(file);
+		// for (IMarker marker : markers) {
+		// try {
+		// markerMap.remove(marker.getId());
+		// marker.delete();
+		// } catch (CoreException e) {
+		// e.printStackTrace();
+		// }
+		// }
 	}
 
 	public void setMarker(IFile file, List<MarkerInformation> markers) {
