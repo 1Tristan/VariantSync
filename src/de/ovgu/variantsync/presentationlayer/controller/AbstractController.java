@@ -187,8 +187,52 @@ public abstract class AbstractController implements PropertyChangeListener {
 				method = model.getClass().getMethod(
 						propertyName,
 						new Class[] { firstArgument.getClass(),
-								secondArgument.getClass(), thirdArgument.getClass() });
-				method.invoke(model, firstArgument, secondArgument, thirdArgument);
+								secondArgument.getClass(),
+								thirdArgument.getClass() });
+				method.invoke(model, firstArgument, secondArgument,
+						thirdArgument);
+			} catch (NoSuchMethodException e) {
+				handleNoSuchMethodException(e);
+			} catch (IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				LogOperations.logError(ERROR_MESSAGE, e);
+			}
+		}
+	}
+
+	/**
+	 * Searches in all registered models for the specified method to call.
+	 * Method is called via reflection. Calling method has five arguments.
+	 * 
+	 * @param propertyName
+	 *            method name to call
+	 * @param firstArgument
+	 *            first argument of called method
+	 * @param secondArgument
+	 *            second argument of called method
+	 * @param thirdArgument
+	 *            third argument of called method
+	 * @param fourthArgument
+	 *            fourth argument of called method
+	 * @param fifthArgument
+	 *            fifth argument of called method
+	 */
+	protected void setModelProperty(String propertyName, Object firstArgument,
+			Object secondArgument, Object thirdArgument, Object fourthArgument,
+			Object fifthArgument) {
+
+		for (AbstractModel model : registeredModels) {
+			try {
+				Method method;
+				method = model.getClass().getMethod(
+						propertyName,
+						new Class[] { firstArgument.getClass(),
+								secondArgument.getClass(),
+								thirdArgument.getClass(),
+								fourthArgument.getClass(),
+								fifthArgument.getClass() });
+				method.invoke(model, firstArgument, secondArgument,
+						thirdArgument, fourthArgument, fifthArgument);
 			} catch (NoSuchMethodException e) {
 				handleNoSuchMethodException(e);
 			} catch (IllegalAccessException | IllegalArgumentException

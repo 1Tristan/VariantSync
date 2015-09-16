@@ -27,38 +27,40 @@ class MergeCalculation {
 	/**
 	 * Performs three way merge. Joins three development histories together.
 	 * 
+	 * @param fOrigin
+	 *            origin development history
 	 * @param fList1
-	 *            development history one
-	 * @param fList2
 	 *            development history two
-	 * @param fList3
+	 * @param fList2
 	 *            development history three
 	 * @return merged development branch
 	 */
-	public List<String> performThreeWayMerge(List<String> fList1,
-			List<String> fList2, List<String> fList3) {
+	public List<String> performThreeWayMerge(List<String> fOrigin,
+			List<String> fList1, List<String> fList2) {
 		List<String> result = null;
-		Patch pf12 = deltaOperations.computeDifference(fList1, fList2);
-		Patch pf13 = deltaOperations.computeDifference(fList1, fList3);
-		List<Delta> deltas12 = pf12.getDeltas();
-		List<Delta> deltas13 = pf13.getDeltas();
-		if (!checkConflict(deltas12, deltas13)) {
+		Patch patchOriginWithOne = deltaOperations.computeDifference(fOrigin,
+				fList1);
+		Patch patchOriginWithTwo = deltaOperations.computeDifference(fOrigin,
+				fList2);
+		List<Delta> deltasO1 = patchOriginWithOne.getDeltas();
+		List<Delta> deltasO2 = patchOriginWithTwo.getDeltas();
+		if (!checkConflict(deltasO1, deltasO2)) {
 
 			Patch patchTemp = new Patch();
 			Set<Delta> tempDeltas = new HashSet<Delta>();
-			tempDeltas.addAll(deltas12);
-			tempDeltas.addAll(deltas13);
+			tempDeltas.addAll(deltasO1);
+			tempDeltas.addAll(deltasO2);
 			for (Delta d : tempDeltas) {
 				patchTemp.addDelta(d);
 			}
 			try {
-				result = deltaOperations.computePatch(fList1, patchTemp);
+				result = deltaOperations.computePatch(fOrigin, patchTemp);
 			} catch (PatchException e) {
 				LogOperations.logError("Patch could not be computed.", e);
 			}
 			return result;
 		} else {
-			return fList3;
+			return fList2;
 		}
 	}
 
@@ -66,7 +68,7 @@ class MergeCalculation {
 	 * Checks conflicts between two deltas. A conflict is detected if one of the
 	 * following criteria is satisfied:<br>
 	 * <ul>
-	 * <li>changed Delta contains original delta</li>
+	 * <li>changed delta contains original delta</li>
 	 * <li>end position of change of delta is before starting position of change
 	 * of following delta
 	 * </ul>

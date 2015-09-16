@@ -31,7 +31,7 @@ class FileOperations {
 	private static final String ERROR_CODE_FILENOTREAD = "File could not be read.";
 
 	/**
-	 * Adds lines to specified file.
+	 * Creates file with specific content.
 	 * 
 	 * @param lines
 	 *            lines to add

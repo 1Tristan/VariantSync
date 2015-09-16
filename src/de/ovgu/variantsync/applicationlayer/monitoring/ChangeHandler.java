@@ -18,12 +18,10 @@ import org.eclipse.ui.PlatformUI;
 
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
-import de.ovgu.variantsync.applicationlayer.AbstractModel;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.deltacalculation.IDeltaOperations;
 import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
-import de.ovgu.variantsync.presentationlayer.controller.ControllerProperties;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
 import de.ovgu.variantsync.presentationlayer.view.resourcechanges.ResourceChangesView;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
@@ -39,7 +37,7 @@ import de.ovgu.variantsync.utilitylayer.log.LogOperations;
  * @version 1.0
  * @since 15.05.2015
  */
-class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
+class ChangeHandler implements IResourceDeltaVisitor {
 
 	private IResource res;
 	private int flag;
@@ -238,9 +236,7 @@ class ChangeHandler extends AbstractModel implements IResourceDeltaVisitor {
 	 */
 	private void update() {
 		VariantSyncPlugin.getDefault().updateSynchroInfo();
-		propertyChangeSupport.firePropertyChange(
-				ControllerProperties.REFRESHTREE_PROPERTY.getProperty(), null,
-				null);
+		MonitorNotifier.getInstance().notifyViews();
 		Display display = VariantSyncPlugin.getStandardDisplay();
 		if (!display.isDisposed()) {
 			display.asyncExec(new Runnable() {

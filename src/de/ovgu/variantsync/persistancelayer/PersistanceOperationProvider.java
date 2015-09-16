@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FolderOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.XMLException;
@@ -87,6 +88,16 @@ public class PersistanceOperationProvider implements IPersistanceOperations {
 	public List<String> readFile(InputStream in, String charset)
 			throws FileOperationException {
 		return fileOperations.readFile(in, charset);
+	}
+
+	@Override
+	public Context loadContext(String path) {
+		return JaxbOperations.loadContext(path);
+	}
+
+	@Override
+	public void saveContext(Context context, String path) {
+		JaxbOperations.writeContext(context, path);
 	}
 
 }

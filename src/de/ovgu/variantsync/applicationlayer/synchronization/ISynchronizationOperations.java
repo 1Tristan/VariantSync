@@ -57,4 +57,14 @@ public interface ISynchronizationOperations {
 	 * @return list with names of compatible projects
 	 */
 	List<String> getProjectNames(ResourceChangesFilePatch patch);
+
+	/**
+	 * Returns project of IProject-type retrieved on given project name if the
+	 * specified project exists.
+	 * 
+	 * @param projectName
+	 *            project to search
+	 * @return IProject-instance
+	 */
+	IProject getProjectByName(String projectName);
 }

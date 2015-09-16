@@ -13,7 +13,10 @@ public enum ControllerProperties {
 			"getProjectList"), PROJECTNAMES_PROPERTY("getProjectNames"), SYNCHRONIZEDPROJECTS_PROPERTY(
 			"getSynchronizedProjects"), UNIFIEDDIFF_PROPERTY("getChanges"), REFRESHTREE_PROPERTY(
 			"refreshTree"), FEATURECHECK("checkFeatureSupport"), FEATUREEXTRACTION(
-			"getFeatures");
+			"getFeatures"), PACKAGE_EXPLORER_ELEMENT_PROPERTY("addElement"), CODE_EDITOR_ELEMENT_PROPERTY(
+			"addCodeFragment"), REMOVE_MAPPING_PROPERTY("removeMapping"), CONSTRAINT_PROPERTY(
+			"addConstraint"),DELETE_EXPRESSION_PROPERTY(
+					"deleteFeatureExpression");
 
 	private String property;
 

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 
+import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerProperties;
@@ -64,5 +65,17 @@ public class SynchronizationProvider extends AbstractModel implements
 	@Override
 	public void synchronize(Object[] result, ResourceChangesFilePatch patch) {
 		projectSynchronization.synchronize(result, patch);
+	}
+
+	@Override
+	public IProject getProjectByName(String projectName) {
+		List<IProject> projectList = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		for (IProject project : projectList) {
+			if (project.getName().equals(projectName)) {
+				return project;
+			}
+		}
+		return null;
 	}
 }

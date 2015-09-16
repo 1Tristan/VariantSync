@@ -93,7 +93,7 @@ class ProjectSynchronization extends Synchronization {
 					createDir(iPath, project);
 					IFile addFile = project.getFile(relativePath);
 					MonitorSet.getInstance().addSynchroItem(addFile);
-					addSynchronizationFocus(project, patchFileName);
+					actualizeAdminFolder(project, patchFileName);
 					addFile.create(source, IResource.FORCE, null);
 				} catch (CoreException e) {
 					LogOperations
@@ -113,7 +113,7 @@ class ProjectSynchronization extends Synchronization {
 			IProject project = (IProject) object;
 			IFolder folder = project.getFolder(relativePath);
 			if (!folder.exists()) {
-				addSynchronizationFocus(project, patchFileName);
+				actualizeAdminFolder(project, patchFileName);
 				try {
 					persistanceOperations.mkdirs(folder);
 				} catch (FolderOperationException e) {
@@ -134,7 +134,7 @@ class ProjectSynchronization extends Synchronization {
 			if (project.getFolder(relativePath).exists()) {
 				try {
 					IFolder removeFolder = project.getFolder(relativePath);
-					addSynchronizationFocus(project, patchFileName);
+					actualizeAdminFolder(project, patchFileName);
 					persistanceOperations.deldirs(removeFolder);
 				} catch (FolderOperationException e) {
 					LogOperations.logError("Folder could not be removed.", e);
@@ -155,7 +155,7 @@ class ProjectSynchronization extends Synchronization {
 				try {
 					IFile removeFile = project.getFile(relativePath);
 					MonitorSet.getInstance().addSynchroItem(removeFile);
-					addSynchronizationFocus(project, patchFileName);
+					actualizeAdminFolder(project, patchFileName);
 					removeFile.delete(true, null);
 				} catch (CoreException e) {
 					LogOperations.logError("File could not be deleted.", e);
@@ -224,7 +224,7 @@ class ProjectSynchronization extends Synchronization {
 										.getFile(relativePath);
 								MonitorSet.getInstance().addSynchroItem(
 										changeFile);
-								addSynchronizationFocus(project,
+								actualizeAdminFolder(project,
 										patch.getPatchFileName());
 								changeFile
 										.setContents(source, true, true, null);
@@ -247,7 +247,7 @@ class ProjectSynchronization extends Synchronization {
 	 * @param patchFileName
 	 *            file to add
 	 */
-	private void addSynchronizationFocus(IProject project, String patchFileName) {
+	private void actualizeAdminFolder(IProject project, String patchFileName) {
 		IFolder infoFolder = project
 				.getFolder(VariantSyncConstants.ADMIN_FOLDER);
 		if (!infoFolder.exists()) {

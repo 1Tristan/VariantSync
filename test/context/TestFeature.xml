@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Context>
+    <featureExpression>Test</featureExpression>
+    <id>Test$TestProject</id>
+    <javaProject>
+        <member xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="javaPackage">
+            <member xsi:type="javaClass">
+                <code>
+                    <codeline code="private int a;" line="5"/>
+                    <codeline code="public Main(int g) {" line="7"/>
+                    <codeline code="a = g;" line="8"/>
+                    <codeline code="}" line="9"/>
+                    <codeline code="" line="10"/>
+                    <codeline code="public int getA() {" line="11"/>
+                    <codeline code="return a;" line="12"/>
+                    <codeline code="}" line="13"/>
+                    <codeline code="" line="14"/>
+                    <codeline code="public void setA(int a) {" line="15"/>
+                    <codeline code="this.a = a;" line="16"/>
+                    <codeline code="}" line="17"/>
+                </code>
+                <name>Main.java</name>
+                <path>arbitraryPathToProject/src/mainpackage/Main.java</path>
+            </member>
+            <name>mainpackage</name>
+            <path>arbitraryPathToProject/src/mainpackage</path>
+        </member>
+        <name>TestProject</name>
+        <path>arbitraryPathToProject</path>
+        <project>TestProject</project>
+    </javaProject>
+</Context>

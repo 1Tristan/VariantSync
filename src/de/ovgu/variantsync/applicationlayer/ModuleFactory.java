@@ -1,5 +1,7 @@
 package de.ovgu.variantsync.applicationlayer;
 
+import de.ovgu.variantsync.applicationlayer.context.ContextProvider;
+import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.deltacalculation.DeltaOperationProvider;
 import de.ovgu.variantsync.applicationlayer.deltacalculation.IDeltaOperations;
 import de.ovgu.variantsync.applicationlayer.features.FeatureProvider;
@@ -34,6 +36,10 @@ public class ModuleFactory {
 
 	public static IFeatureOperations getFeatureOperations() {
 		return new FeatureProvider();
+	}
+
+	public static IContextOperations getContextOperations() {
+		return new ContextProvider();
 	}
 
 	public static IMergeOperations getMergeOperations() {

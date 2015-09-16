@@ -6,8 +6,12 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 
+import de.ovgu.featureide.fm.core.Constraint;
 import de.ovgu.featureide.fm.core.Feature;
+import de.ovgu.featureide.fm.core.FeatureModel;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FeatureException;
+import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
+import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
 
 /**
  * Defines functions to manage features.
@@ -42,4 +46,18 @@ public interface IFeatureOperations {
 	 *             not be read
 	 */
 	Map<IProject, Set<Feature>> getFeatures(List<IProject> projects);
+
+	Set<String> getFeatureExpressions();
+
+	void addElement(MappingElement mapping, JavaProject project);
+
+	void addCodeFragment(MappingElement mapping, JavaProject project);
+
+	void removeMapping(MappingElement mapping, JavaProject project);
+
+	FeatureModel getFeatureModel();
+
+	void addConstraint(Constraint constraint);
+
+	void deleteFeatureExpression(String expr);
 }

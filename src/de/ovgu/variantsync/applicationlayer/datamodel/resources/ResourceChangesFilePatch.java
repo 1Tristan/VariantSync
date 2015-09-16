@@ -28,7 +28,6 @@ public class ResourceChangesFilePatch implements IChangedFile {
 	private File file;
 	private boolean synchro = false;
 	private long timestamp;
-	private String unidiff;
 	private IChangedFile parent;
 	private String status;
 
@@ -74,25 +73,6 @@ public class ResourceChangesFilePatch implements IChangedFile {
 			this.timestamp = Long.parseLong(time);
 		}
 		this.synchro = "1".equals(infoTxt[infoTxt.length - 2]);
-	}
-
-	/**
-	 * Returns unified diff.
-	 * 
-	 * @return unified diff string
-	 */
-	public String getUnidiff() {
-		return unidiff;
-	}
-
-	/**
-	 * Sets unified diff.
-	 * 
-	 * @param unidiff
-	 *            the diff string to set
-	 */
-	public void setUnidiff(String unidiff) {
-		this.unidiff = unidiff;
 	}
 
 	/**
@@ -240,7 +220,7 @@ public class ResourceChangesFilePatch implements IChangedFile {
 	public String toString() {
 		return "ResourceChangesFilePatch [patchFileName=" + patchFileName
 				+ ", project=" + project + ", file=" + file + ", synchro="
-				+ synchro + ", timestamp=" + timestamp + ", unidiff=" + unidiff
-				+ ", parent=" + parent + ", status=" + status + "]";
+				+ synchro + ", timestamp=" + timestamp + ", parent=" + parent
+				+ ", status=" + status + "]";
 	}
 }

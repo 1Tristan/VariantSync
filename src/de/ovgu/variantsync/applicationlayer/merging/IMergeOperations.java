@@ -27,8 +27,8 @@ public interface IMergeOperations {
 	/**
 	 * Performs three way merge. Joins three development histories together.
 	 * 
-	 * @param fList1
-	 *            development history one
+	 * @param fOrigin
+	 *            origin development history
 	 * @param fList2
 	 *            development history two
 	 * @param fList3

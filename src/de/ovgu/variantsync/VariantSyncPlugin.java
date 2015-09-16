@@ -1,28 +1,56 @@
 package de.ovgu.variantsync;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.texteditor.ITextEditor;
 import org.osgi.framework.BundleContext;
 
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.context.ContextProvider;
+import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
+import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeLine;
+import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 import de.ovgu.variantsync.applicationlayer.deltacalculation.DeltaOperationProvider;
+import de.ovgu.variantsync.applicationlayer.features.FeatureProvider;
 import de.ovgu.variantsync.applicationlayer.monitoring.ChangeListener;
+import de.ovgu.variantsync.applicationlayer.monitoring.MonitorNotifier;
 import de.ovgu.variantsync.applicationlayer.synchronization.SynchronizationProvider;
 import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
-import de.ovgu.variantsync.presentationlayer.controller.Controller;
+import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
+import de.ovgu.variantsync.presentationlayer.controller.ControllerTypes;
 import de.ovgu.variantsync.presentationlayer.view.AbstractView;
+import de.ovgu.variantsync.presentationlayer.view.codemapping.BytecodeReferenceView;
+import de.ovgu.variantsync.presentationlayer.view.codemapping.CodeMarkerFactory;
+import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerHandler;
+import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerInformation;
 import de.ovgu.variantsync.presentationlayer.view.console.ChangeOutPutConsole;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
 import de.ovgu.variantsync.utilitylayer.UtilityModel;
@@ -43,12 +71,13 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	// shared instance
 	private static VariantSyncPlugin plugin;
 	private ChangeOutPutConsole console;
-	private List<IProject> projectList = new ArrayList<IProject>(0);
+	private List<IProject> projectList = new ArrayList<IProject>();
 	private Map<IProject, MonitorItemStorage> synchroInfoMap = new HashMap<IProject, MonitorItemStorage>();
 	private ChangeListener resourceModificationListener;
-	private IPersistanceOperations persistanceOperations = ModuleFactory
+	private IPersistanceOperations persistanceOp = ModuleFactory
 			.getPersistanceOperations();
-	private Controller controller = Controller.getInstance();
+	private IContextOperations contextOp = ModuleFactory.getContextOperations();
+	private ControllerHandler controller = ControllerHandler.getInstance();
 
 	@Override
 	public void start(BundleContext context) {
@@ -59,12 +88,118 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		}
 		plugin = this;
 		console = new ChangeOutPutConsole();
+		removeAllMarkers();
 		initMVC();
+		initContext();
+		hookToEditor();
 		try {
 			initResourceMonitoring();
 		} catch (CoreException e) {
 			LogOperations.logError(
 					"Resouce monitoring could not be initialized.", e);
+		}
+	}
+
+	public void hookToEditor() {
+		IWorkbenchPage page = PlatformUI.getWorkbench()
+				.getActiveWorkbenchWindow().getActivePage();
+		if (page == null)
+			return;
+
+		// TODO: calculate and set marker for opened file!
+
+		page.addPartListener(new IPartListener() {
+
+			@Override
+			public void partActivated(IWorkbenchPart part) {
+				if (part instanceof IEditorPart) {
+					if (((IEditorPart) part).getEditorInput() instanceof IFileEditorInput) {
+						IFile file = ((IFileEditorInput) ((EditorPart) part)
+								.getEditorInput()).getFile();
+						System.out.println(file.getLocation());
+						// TODO: search file in contexts and display marker for
+						// code that is tagged
+						String projectName = file.getProject().getName();
+						String fileName = file.getName();
+						List<JavaClass> classes = contextOp.findJavaClass(
+								projectName, fileName);
+						System.out.println(classes.toString());
+
+						MarkerHandler.getInstance().clearAllMarker(file);
+						List<MarkerInformation> markers = new ArrayList<MarkerInformation>();
+						for (JavaClass c : classes) {
+							List<CodeLine> cls = c.getCodeLines();
+							int i = 0;
+							List<CodeLine> tmp = new ArrayList<CodeLine>();
+							for (CodeLine cl : cls) {
+								tmp.add(cl);
+								if (cls.size() > i + 1
+										&& cls.get(i + 1).getLine() == cl
+												.getLine() + 1) {
+									tmp.add(cls.get(i + 1));
+								} else {
+									MarkerInformation mi = new MarkerInformation(
+											0, tmp.get(0).getLine(), tmp.get(
+													tmp.size() - 1).getLine(),
+											0, 0);
+									mi.setFeature("TODO");
+									markers.add(mi);
+									tmp.clear();
+								}
+								i++;
+							}
+
+						}
+
+						MarkerHandler.getInstance().setMarker(file, markers);
+					}
+				}
+			}
+
+			@Override
+			public void partBroughtToTop(IWorkbenchPart part) {
+
+			}
+
+			@Override
+			public void partClosed(IWorkbenchPart arg0) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void partDeactivated(IWorkbenchPart arg0) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void partOpened(IWorkbenchPart arg0) {
+				System.out.println();
+			}
+
+		});
+		page.addPartListener(new BytecodeReferenceView());
+
+		IEditorPart editor = page.getActiveEditor();
+		if (editor == null)
+			return;
+		IResource resource = (IResource) editor.getEditorInput().getAdapter(
+				IResource.class);
+		if (resource == null)
+			return;
+
+		try {
+			resource.accept(new IResourceVisitor() {
+
+				@Override
+				public boolean visit(IResource arg0) throws CoreException {
+					System.out.println(arg0.toString());
+					return false;
+				}
+			});
+		} catch (CoreException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -78,6 +213,11 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		}
 		IWorkspace ws = ResourcesPlugin.getWorkspace();
 		ws.removeResourceChangeListener(resourceModificationListener);
+	}
+
+	public String getWorkspaceLocation() {
+		return ResourcesPlugin.getWorkspace().getRoot().getLocation()
+				.toString();
 	}
 
 	/**
@@ -118,7 +258,7 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 			MonitorItemStorage info = new MonitorItemStorage();
 			if (infoFile.exists()) {
 				try {
-					info = persistanceOperations.readSynchroXMLFile(infoFile
+					info = persistanceOp.readSynchroXMLFile(infoFile
 							.getContents());
 				} catch (CoreException e) {
 					UtilityModel.getInstance().handleError(e,
@@ -136,8 +276,33 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	private void initMVC() {
 
 		// register models as request handler for controller
-		controller.addModel(new SynchronizationProvider());
-		controller.addModel(new DeltaOperationProvider());
+		controller.addModel(new SynchronizationProvider(),
+				ControllerTypes.SYNCHRONIZATION);
+		controller
+				.addModel(new DeltaOperationProvider(), ControllerTypes.DELTA);
+		controller.addModel(new FeatureProvider(), ControllerTypes.FEATURE);
+		controller.addModel(new ContextProvider(), ControllerTypes.CONTEXT);
+		controller.addModel(MonitorNotifier.getInstance(),
+				ControllerTypes.MONITOR);
+	}
+
+	/**
+	 * Loads all contexts which are saved in a XML-file.
+	 */
+	private void initContext() {
+		List<IProject> projects = getSupportProjectList();
+		for (IProject p : projects) {
+			IPath pathToFolder = p.getLocation().append(
+					VariantSyncConstants.CONTEXT_PATH);
+			File folder = new File(pathToFolder.toString());
+			if (folder.exists() && folder.isDirectory()) {
+				File[] files = folder.listFiles();
+				for (File f : files) {
+					contextOp
+							.addContext(persistanceOp.loadContext(f.getPath()));
+				}
+			}
+		}
 	}
 
 	/**
@@ -177,8 +342,8 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	 * @param view
 	 *            view to register
 	 */
-	public void registerView(AbstractView view) {
-		controller.addView(view);
+	public void registerView(AbstractView view, ControllerTypes type) {
+		controller.addView(view, type);
 	}
 
 	/**
@@ -188,8 +353,8 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	 * @param view
 	 *            view to remove
 	 */
-	public void removeView(AbstractView view) {
-		controller.removeView(view);
+	public void removeView(AbstractView view, ControllerTypes type) {
+		controller.removeView(view, type);
 	}
 
 	/**
@@ -223,7 +388,7 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	/**
 	 * @return the controller
 	 */
-	public Controller getController() {
+	public ControllerHandler getController() {
 		return controller;
 	}
 
@@ -236,4 +401,46 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	/**
+	 * Always good to have this static method as when dealing with IResources
+	 * having a interface to get the editor is very handy
+	 * 
+	 * @return
+	 */
+	public static ITextEditor getEditor() {
+		return (ITextEditor) getActiveWorkbenchWindow().getActivePage()
+				.getActiveEditor();
+	}
+
+	public static Shell getShell() {
+		return getActiveWorkbenchWindow().getShell();
+	}
+
+	public static IWorkbenchWindow getActiveWorkbenchWindow() {
+		return getDefault().getWorkbench().getActiveWorkbenchWindow();
+	}
+
+	private void removeAllMarkers() {
+		List<IProject> projects = getSupportProjectList();
+		for (IProject p : projects) {
+			try {
+				List<IMarker> markers = Arrays.asList(p.findMarkers(
+						CodeMarkerFactory.MARKER, true,
+						IResource.DEPTH_INFINITE));
+				for (IMarker marker : markers) {
+					try {
+						marker.delete();
+					} catch (CoreException e) {
+						e.printStackTrace();
+					}
+				}
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public ImageDescriptor getImageDescriptor(String path) {
+		return imageDescriptorFromPlugin(VariantSyncConstants.PLUGIN_ID, path);
+	}
 }

@@ -9,6 +9,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FolderOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.XMLException;
@@ -66,7 +67,7 @@ public interface IPersistanceOperations {
 	void removeAdminFile(IResource res) throws FileOperationException;
 
 	/**
-	 * Adds lines to specified file.
+	 * Creates file with specific content.
 	 * 
 	 * @param lines
 	 *            lines to add
@@ -133,4 +134,23 @@ public interface IPersistanceOperations {
 	 */
 	List<String> readFile(InputStream in, String charset)
 			throws FileOperationException;
+
+	/**
+	 * Reads context information from its storage.
+	 * 
+	 * @param path
+	 *            path to storage
+	 * @return context-object
+	 */
+	Context loadContext(String path);
+
+	/**
+	 * Saves a context to specified storage.
+	 * 
+	 * @param context
+	 *            the context to save
+	 * @param path
+	 *            storage location
+	 */
+	void saveContext(Context context, String path);
 }

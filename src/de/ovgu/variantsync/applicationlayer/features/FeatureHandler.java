@@ -1,8 +1,11 @@
 package de.ovgu.variantsync.applicationlayer.features;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +15,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 
+import de.ovgu.featureide.fm.core.Constraint;
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.featureide.fm.core.FeatureModel;
 import de.ovgu.featureide.fm.core.configuration.Configuration;
@@ -31,7 +35,18 @@ import de.ovgu.variantsync.applicationlayer.datamodel.exception.FeatureException
  */
 class FeatureHandler {
 
-	public FeatureHandler() {
+	private static FeatureHandler instance;
+	private Set<Constraint> constraints;
+
+	private FeatureHandler() {
+		constraints = new LinkedHashSet<Constraint>();
+	}
+
+	public static FeatureHandler getInstance() {
+		if (instance == null) {
+			instance = new FeatureHandler();
+		}
+		return instance;
 	}
 
 	/**
@@ -44,23 +59,9 @@ class FeatureHandler {
 	 *             configuration object could not be created and features could
 	 *             not be read
 	 */
-	public Set<Feature> getFeatures(IProject project) throws FeatureException {
-		IProject featureInfoProject = null;
-		for (IProject p : ResourcesPlugin.getWorkspace().getRoot()
-				.getProjects()) {
-			try {
-				if (p.isOpen()
-						&& p.getName().equals(
-								FeatureConstants.FEATUREINFO_PROJECT_NAME)
-						&& p.hasNature(FeatureConstants.FEATURE_PROJECT_NATURE)) {
-					featureInfoProject = p;
-					break;
-				}
-			} catch (CoreException e) {
-				throw new FeatureException("Nature support of project "
-						+ p.getName() + " could not be checked.", e);
-			}
-		}
+	public Set<Feature> getConfiguredFeaturesOfProject(IProject project)
+			throws FeatureException {
+		IProject featureInfoProject = getFeatureInfoProject();
 		IFile modelFile = null;
 		IFile configFile = null;
 		if (featureInfoProject != null) {
@@ -78,6 +79,44 @@ class FeatureHandler {
 		} else {
 			return new HashSet<Feature>();
 		}
+	}
+
+	/**
+	 * Get all features of feature model as set.
+	 * 
+	 * @return set of features
+	 * @throws FeatureException
+	 *             configuration object could not be created and features could
+	 *             not be read
+	 */
+	public Set<String> getFeatures() throws FeatureException {
+		IProject featureInfoProject = getFeatureInfoProject();
+		if (featureInfoProject != null) {
+			return getFeatureModel().getFeatureNames();
+		}
+		return null;
+	}
+
+	/**
+	 * Get all features of feature model as set.
+	 * 
+	 * @return set of features
+	 * @throws FeatureException
+	 *             configuration object could not be created and features could
+	 *             not be read
+	 */
+	public Set<String> getFeatureExpressions() throws FeatureException {
+		IProject featureInfoProject = getFeatureInfoProject();
+		if (featureInfoProject != null) {
+			Set<String> expressions = new LinkedHashSet<String>(
+					getFeatureModel().getFeatureNames());
+			Iterator<Constraint> itConstraints = constraints.iterator();
+			while (itConstraints.hasNext()) {
+				expressions.add(itConstraints.next().toString());
+			}
+			return expressions;
+		}
+		return null;
 	}
 
 	/**
@@ -101,6 +140,65 @@ class FeatureHandler {
 			checkedProjects.put(project, value);
 		}
 		return checkedProjects;
+	}
+
+	// TODO: Synchronize feature model in file (.variantsyncfeatureinfo)
+	// TODO: synchronize constraints in feature model in file => Layer to
+	// decouple feature expression and feature model with features and
+	// constraints?
+	// TODO: stop context
+	// TODO: create data structure to manage context recordings (see code
+	// mapping and old variant sync tool)
+	// TODO: create persistence function for data model
+	// TODO: retrieve changes after stop recording (abbild des projektes beim
+	// start des contextes nehmen und nach Beendigung -> Diff?)
+	// TODO: fill data structure and save changes
+
+	// TODO: develop algorithm
+
+	public FeatureModel getFeatureModel() throws FeatureException {
+		FeatureModel fm = new FeatureModel();
+		fm.setRoot(new Feature(fm));
+		try {
+			new FeatureModelReaderIFileWrapper(new XmlFeatureModelReader(fm))
+					.readFromFile(getFeatureInfoProject().getFile(
+							FeatureConstants.MODEL_FILE));
+		} catch (FileNotFoundException | UnsupportedModelException e) {
+			throw new FeatureException(
+					"Features from feature model could not be read.", e);
+		}
+		return fm;
+	}
+
+	public void addConstraint(Constraint constraint) {
+		constraints.add(constraint);
+	}
+
+	public void deleteFeatureExpression(String expr) {
+		boolean isRemoved = false;
+		Iterator<Constraint> itConstraint = constraints.iterator();
+		while (itConstraint.hasNext()) {
+			Constraint c = itConstraint.next();
+			String name = c.toString();
+			if (name.equals(expr)) {
+				constraints.remove(c);
+				isRemoved = true;
+				break;
+			}
+		}
+		if (!isRemoved) {
+			FeatureModel fm = null;
+			try {
+				fm = getFeatureModel();
+			} catch (FeatureException e) {
+				// TODO handle exception
+				e.printStackTrace();
+			}
+			Feature f = fm.getFeature(expr);
+			if (f != null) {
+				fm.deleteFeature(f);
+			}
+		}
 	}
 
 	/**
@@ -146,7 +244,7 @@ class FeatureHandler {
 	 */
 	private boolean checkFeatureSupport(IProject project, Object[] features)
 			throws FeatureException {
-		Set<Feature> projectFeatures = getFeatures(project);
+		Set<Feature> projectFeatures = getConfiguredFeaturesOfProject(project);
 		int flag = 0;
 		for (Object feature : features) {
 			for (Feature f : projectFeatures) {
@@ -158,4 +256,25 @@ class FeatureHandler {
 		}
 		return flag == features.length;
 	}
+
+	private IProject getFeatureInfoProject() throws FeatureException {
+		IProject featureInfoProject = null;
+		for (IProject p : ResourcesPlugin.getWorkspace().getRoot()
+				.getProjects()) {
+			try {
+				if (p.isOpen()
+						&& p.getName().equals(
+								FeatureConstants.FEATUREINFO_PROJECT_NAME)
+						&& p.hasNature(FeatureConstants.FEATURE_PROJECT_NATURE)) {
+					featureInfoProject = p;
+					break;
+				}
+			} catch (CoreException e) {
+				throw new FeatureException("Nature support of project "
+						+ p.getName() + " could not be checked.", e);
+			}
+		}
+		return featureInfoProject;
+	}
+
 }
