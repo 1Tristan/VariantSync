@@ -1,7 +1,6 @@
 package de.ovgu.variantsync.applicationlayer.features;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -9,11 +8,11 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 
-import de.ovgu.featureide.fm.core.Constraint;
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.featureide.fm.core.FeatureModel;
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FeatureException;
+import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerProperties;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
@@ -108,7 +107,7 @@ public class FeatureProvider extends AbstractModel implements
 	}
 
 	@Override
-	public Set<String> getFeatureExpressions() {
+	public FeatureExpressions getFeatureExpressions() {
 		try {
 			return featureHandler.getFeatureExpressions();
 		} catch (FeatureException e) {
@@ -119,7 +118,7 @@ public class FeatureProvider extends AbstractModel implements
 							"Features of variantsyncFeatureInfo-Project could not be read.",
 							e);
 		}
-		return new HashSet<String>();
+		return new FeatureExpressions();
 	}
 
 	@Override
@@ -134,8 +133,8 @@ public class FeatureProvider extends AbstractModel implements
 	}
 
 	@Override
-	public void addConstraint(Constraint constraint) {
-		featureHandler.addConstraint(constraint);
+	public void addFeatureExpression(String featureExpression) {
+		featureHandler.addFeatureExpression(featureExpression);
 		propertyChangeSupport.firePropertyChange(
 				ControllerProperties.CONSTRAINT_PROPERTY.getProperty(), null,
 				null);
@@ -144,6 +143,14 @@ public class FeatureProvider extends AbstractModel implements
 	@Override
 	public void deleteFeatureExpression(String expr) {
 		featureHandler.deleteFeatureExpression(expr);
+	}
+
+	@Override
+	public void addFeatureExpression(Set<String> featureExpressions) {
+		featureHandler.addFeatureExpressions(featureExpressions);
+		propertyChangeSupport.firePropertyChange(
+				ControllerProperties.CONSTRAINT_PROPERTY.getProperty(), null,
+				null);
 	}
 
 }

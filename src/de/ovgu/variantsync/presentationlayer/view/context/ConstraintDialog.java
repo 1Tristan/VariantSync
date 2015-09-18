@@ -334,7 +334,7 @@ public class ConstraintDialog implements GUIDefaults {
 
 		static final String CONSTRAINT_IS_NOT_SATISFIABLE = "constraint is unsatisfiable";
 
-		static final String HREF_HELP_LINK = "http://www.cs.utexas.edu/~schwartz/ATS/fopdocs/guidsl.html";
+		static final String HREF_HELP_LINK = "https://github.com/1Tristan/VariantSync";
 
 		static final String PLEASE_INSERT_CONSTRAINT = "Please insert a constraint.";
 
@@ -624,14 +624,8 @@ public class ConstraintDialog implements GUIDefaults {
 			op = new ConstraintCreateOperation(propNode, featureModel);
 		}
 		op.addContext((IUndoContext) featureModel.getUndoContext());
-		// try {
-		// PlatformUI.getWorkbench().getOperationSupport()
-		// .getOperationHistory().execute(op, null, null);
-		// } catch (ExecutionException e) {
-		// FMUIPlugin.getDefault().logError(e);
-		// }
 
-		featureController.addConstraint(new Constraint(featureModel, propNode));
+		featureController.addFeatureExpression(input);
 	}
 
 	/**
@@ -799,7 +793,7 @@ public class ConstraintDialog implements GUIDefaults {
 		constraintText.setText(initialConstraint);
 		constraintText.setMargins(10, 5, 3, 5);
 		constraintText.setPossibleWords(featureController
-				.getFeatureExpressions());
+				.getFeatureExpressions().getFeatureExpressionsAsSet());
 
 		constraintText.addModifyListener(new ModifyListener() {
 
@@ -1030,7 +1024,7 @@ public class ConstraintDialog implements GUIDefaults {
 			adapter = new ContentProposalAdapter(constraintText,
 					new SimpleSyntaxHighlighterConstraintContentAdapter(),
 					new ConstraintContentProposalProvider(featureController
-							.getFeatureExpressions()),
+							.getFeatureExpressions().getFeatureExpressionsAsSet()),
 					keyStroke, autoActivationCharacters);
 
 			adapter.setAutoActivationDelay(PROPOSAL_AUTO_ACTIVATION_DELAY);

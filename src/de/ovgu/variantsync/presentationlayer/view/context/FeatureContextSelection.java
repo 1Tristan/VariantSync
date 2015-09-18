@@ -1,25 +1,18 @@
 package de.ovgu.variantsync.presentationlayer.view.context;
 
 import java.beans.PropertyChangeEvent;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.ContributionItem;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
@@ -61,7 +54,8 @@ public class FeatureContextSelection extends ContributionItem implements
 	}
 
 	private static void buildPulldownMenu(final Menu menu, int index) {
-		Set<String> features = featureController.getFeatureExpressions();
+		Set<String> features = featureController.getFeatureExpressions()
+				.getFeatureExpressionsAsSet();
 		for (final String feature : features) {
 			staticMenuItem = new MenuItem(menu, SWT.BALLOON, index);
 			staticMenuItem.setText(feature);
@@ -80,28 +74,8 @@ public class FeatureContextSelection extends ContributionItem implements
 	private static void handleSelection(String feature) {
 		System.out.println("Feature-Context: " + feature + " is chosen.");
 		activeContext = feature;
-		ElementListSelectionDialog dialog = new ElementListSelectionDialog(
-				new Shell(Display.getCurrent(), SWT.APPLICATION_MODAL
-						| SWT.SHEET), new LabelProvider());
-		List<IProject> projectList = VariantSyncPlugin.getDefault()
-				.getSupportProjectList();
-		String[] projectNames = new String[projectList.size()];
-		int i = 0;
-		for (IProject project : projectList) {
-			projectNames[i] = project.getName();
-			i++;
-		}
-		dialog.setElements(projectNames);
-		dialog.setTitle("Choose the project you are working on.");
-		if (dialog.open() != Window.OK) {
-			return;
-		}
-		Object[] result = dialog.getResult();
-		String chosenProject = (String) result[0];
-		activeProject = chosenProject;
-		System.out.println("Project: " + chosenProject + " is chosen");
 		ControllerHandler.getInstance().getContextController()
-				.activateContext(feature, chosenProject);
+				.activateContext(feature);
 		FeatureContextActivity.refreshMenuItem();
 		time = System.nanoTime();
 	}

@@ -68,17 +68,6 @@ public class MarkerHandler {
 		Job job = new RemoveMarkerJob(file);
 		job.setPriority(Job.SHORT);
 		job.schedule();
-		// TODO clear Marker for the file that will be presented. Then, use
-		// IDocument to get offset by line number for new marker
-		// List<IMarker> markers = CodeMarkerFactory.findMarkers(file);
-		// for (IMarker marker : markers) {
-		// try {
-		// markerMap.remove(marker.getId());
-		// marker.delete();
-		// } catch (CoreException e) {
-		// e.printStackTrace();
-		// }
-		// }
 	}
 
 	public void setMarker(IFile file, List<MarkerInformation> markers) {
@@ -101,7 +90,6 @@ public class MarkerHandler {
 					}
 					CodeMarkerFactory.createMarker(String.valueOf(i), file,
 							start, end, mi.getFeature());
-					// addMarker(mi, marker, file, mi.getFeature());
 				} catch (CoreException e) {
 					e.printStackTrace();
 				}

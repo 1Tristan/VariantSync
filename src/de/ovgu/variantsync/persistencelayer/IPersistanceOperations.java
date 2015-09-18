@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.persistancelayer;
+package de.ovgu.variantsync.persistencelayer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,6 +13,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FolderOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.XMLException;
+import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 
 /**
@@ -153,4 +154,8 @@ public interface IPersistanceOperations {
 	 *            storage location
 	 */
 	void saveContext(Context context, String path);
+
+	FeatureExpressions loadFeatureExpressions(String path);
+
+	void saveFeatureExpressions(FeatureExpressions fe, String path);
 }

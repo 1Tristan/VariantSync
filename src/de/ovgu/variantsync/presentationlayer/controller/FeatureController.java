@@ -8,10 +8,10 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 
-import de.ovgu.featureide.fm.core.Constraint;
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.featureide.fm.core.FeatureModel;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.features.IFeatureOperations;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
@@ -84,10 +84,10 @@ public class FeatureController extends AbstractController {
 				mapping);
 	}
 
-	public void addConstraint(Constraint constraint) {
+	public void addFeatureExpression(String fe) {
 		setModelProperty(
 				ControllerProperties.CONSTRAINT_PROPERTY.getProperty(),
-				constraint);
+				fe);
 	}
 
 	public void deleteFeatureExpression(String expr) {
@@ -96,7 +96,7 @@ public class FeatureController extends AbstractController {
 				expr);
 	}
 
-	public Set<String> getFeatureExpressions() {
+	public FeatureExpressions getFeatureExpressions() {
 		return featureOperations.getFeatureExpressions();
 	}
 }

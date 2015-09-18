@@ -34,11 +34,11 @@ public class ContextProvider extends AbstractModel implements
 	}
 
 	@Override
-	public void activateContext(String featureExpression, String projectName) {
-		if (contextHandler.existsContext(featureExpression, projectName)) {
-			contextHandler.continueRecording(featureExpression, projectName);
+	public void activateContext(String featureExpression) {
+		if (contextHandler.existsContext(featureExpression)) {
+			contextHandler.continueRecording(featureExpression);
 		} else {
-			contextHandler.startNewContext(featureExpression, projectName);
+			contextHandler.startNewContext(featureExpression);
 		}
 	}
 
@@ -53,13 +53,14 @@ public class ContextProvider extends AbstractModel implements
 	}
 
 	@Override
-	public void recordCodeChange(List<String> changedCode, IFile res) {
+	public void recordCodeChange(List<String> changedCode, String projectName,
+			String pathToProject, IFile res) {
 		String packageName = res.getLocation().toString();
 		packageName = packageName.substring(packageName.indexOf("src") + 4,
 				packageName.lastIndexOf("/"));
 		packageName = packageName.replace("/", ".");
-		contextHandler
-				.recordCodeChange(changedCode, res.getName(), packageName);
+		contextHandler.recordCodeChange(projectName, pathToProject,
+				changedCode, res.getName(), packageName);
 	}
 
 	@Override
@@ -78,17 +79,18 @@ public class ContextProvider extends AbstractModel implements
 	}
 
 	@Override
-	public void addCode(String packageName, String className, List<String> code) {
+	public void addCode(String projectName, String packageName,
+			String className, List<String> code) {
 		ContextAlgorithm ca = new ContextAlgorithm(ContextHandler.getInstance()
 				.getActiveContext());
-		ca.addCode(packageName, className, code);
+		ca.addCode(projectName, packageName, className, code);
 	}
 
 	@Override
-	public void addCode(String packageName, String className,
-			List<String> code, Context c) {
+	public void addCode(String projectName, String packageName,
+			String className, List<String> code, Context c) {
 		ContextAlgorithm ca = new ContextAlgorithm(c);
-		ca.addCode(packageName, className, code);
+		ca.addCode(projectName, packageName, className, code);
 	}
 
 	@Override
@@ -99,8 +101,8 @@ public class ContextProvider extends AbstractModel implements
 				.getAllContexts();
 		for (Context c : contexts) {
 			List<JavaClass> classes = new ArrayList<JavaClass>();
-			JavaProject jp = c.getJavaProject();
-			if (jp.getName().equals(projectName)) {
+			JavaProject jp = c.getJavaProject(projectName);
+			if (jp != null && jp.getName().equals(projectName)) {
 				Util.getClassesByClassName(jp.getChildren(), classes, className);
 			}
 			result.put(c.getFeatureExpression(), classes);

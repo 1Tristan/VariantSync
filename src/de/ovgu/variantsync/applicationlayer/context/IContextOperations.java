@@ -19,13 +19,14 @@ import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
  */
 public interface IContextOperations {
 
-	void activateContext(String featureExpression, String projectName);
+	void activateContext(String featureExpression);
 
 	String getActiveFeatureContext();
 
 	String getActiveProject();
 
-	void recordCodeChange(List<String> changedCode, IFile res);
+	void recordCodeChange(List<String> changedCode, String projectName,
+			String pathToProject, IFile res);
 
 	void setContextColor(String featureExpression, RGB color);
 
@@ -33,10 +34,11 @@ public interface IContextOperations {
 
 	void addContext(Context c);
 
-	void addCode(String packageName, String className, List<String> code);
+	void addCode(String projectName, String packageName, String className,
+			List<String> code);
 
-	void addCode(String packageName, String className, List<String> code,
-			Context c);
+	void addCode(String projectName, String packageName, String className,
+			List<String> code, Context c);
 
 	Map<String, List<JavaClass>> findJavaClass(String projectName,
 			String className);

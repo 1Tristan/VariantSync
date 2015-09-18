@@ -10,8 +10,8 @@ import de.ovgu.variantsync.applicationlayer.merging.IMergeOperations;
 import de.ovgu.variantsync.applicationlayer.merging.MergeOperationProvider;
 import de.ovgu.variantsync.applicationlayer.synchronization.ISynchronizationOperations;
 import de.ovgu.variantsync.applicationlayer.synchronization.SynchronizationProvider;
-import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
-import de.ovgu.variantsync.persistancelayer.PersistanceOperationProvider;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
+import de.ovgu.variantsync.persistencelayer.PersistanceOperationProvider;
 
 /**
  * Creates operation provider which encapsulate functions of a module in

@@ -1,13 +1,12 @@
 package de.ovgu.variantsync.applicationlayer.datamodel.context;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.eclipse.swt.graphics.RGB;
 
-import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
 
 /**
@@ -21,24 +20,25 @@ import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
 public class Context {
 
 	private String featureExpression;
-	private JavaProject javaProject;
-	private String id;
-	private String pathToProject;
+	private Map<String, JavaProject> javaProjects;
 	private RGB color;
 
 	public Context() {
+		this.javaProjects = new HashMap<String, JavaProject>();
 	}
 
-	public Context(String projectName, String pathToProject,
-			String featureExpression) {
+	public Context(String featureExpression) {
 		this.featureExpression = featureExpression;
-		this.javaProject = new JavaProject(projectName, pathToProject);
-		this.id = featureExpression + "$" + projectName;
-		this.pathToProject = pathToProject;
+		this.javaProjects = new HashMap<String, JavaProject>();
 	}
 
-	public List<CodeLine> getCodeLines() {
-		return javaProject.getClonedCodeLines();
+	public void initProject(String projectName, String pathToProject) {
+		javaProjects.put(projectName, new JavaProject(projectName,
+				pathToProject));
+	}
+
+	public boolean containsProject(String projectName) {
+		return javaProjects.containsKey(projectName);
 	}
 
 	/**
@@ -59,8 +59,8 @@ public class Context {
 	/**
 	 * @return the javaProject
 	 */
-	public JavaProject getJavaProject() {
-		return javaProject;
+	public JavaProject getJavaProject(String projectName) {
+		return javaProjects.get(projectName);
 	}
 
 	/**
@@ -68,20 +68,26 @@ public class Context {
 	 *            the javaProject to set
 	 */
 	public void setJavaProject(JavaProject javaProject) {
-		this.javaProject = javaProject;
+		this.javaProjects.put(javaProject.getName(), javaProject);
 	}
 
-	/**
-	 * @return the id
+	public String getPathToProject(String projectName) {
+		return javaProjects.get(projectName).getPath();
+	}
+
+	public void setPathToProject(String projectName, String path) {
+		javaProjects.get(projectName).setPath(path);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
 	 */
-	public String getId() {
-		return id;
-	}
-
 	@Override
 	public String toString() {
 		return "Context [featureExpression=" + featureExpression
-				+ ", javaProject=" + javaProject + ", id=" + id + "]";
+				+ ", javaProject=" + javaProjects + ", color=" + color + "]";
 	}
 
 	/**
@@ -100,43 +106,18 @@ public class Context {
 	}
 
 	/**
-	 * @param id
-	 *            the id to set
+	 * @return the javaProjects
 	 */
-	public void setId(String id) {
-		this.id = id;
+	public Map<String, JavaProject> getJavaProjects() {
+		return javaProjects;
 	}
 
 	/**
-	 * @return the pathToProject
+	 * @param javaProjects
+	 *            the javaProjects to set
 	 */
-	public String getPathToProject() {
-		return pathToProject;
+	public void setJavaProjects(Map<String, JavaProject> javaProjects) {
+		this.javaProjects = javaProjects;
 	}
 
-	/**
-	 * @param pathToProject
-	 *            the pathToProject to set
-	 */
-	public void setPathToProject(String pathToProject) {
-		this.pathToProject = pathToProject;
-	}
-
-	/**
-	 * 
-	 * @return the pathOfJavaProject
-	 */
-	@XmlTransient
-	public String getPathOfJavaProject() {
-		return javaProject.getPath();
-	}
-
-	/**
-	 * 
-	 * @return the nameOfJavaProject
-	 */
-	@XmlTransient
-	public String getNameOfJavaProject() {
-		return javaProject.getName();
-	}
 }

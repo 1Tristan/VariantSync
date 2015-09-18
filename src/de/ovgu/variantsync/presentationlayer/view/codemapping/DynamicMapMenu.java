@@ -1,10 +1,9 @@
 package de.ovgu.variantsync.presentationlayer.view.codemapping;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.ContributionItem;
@@ -14,8 +13,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
-import de.ovgu.featureide.fm.core.Feature;
-import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
 import de.ovgu.variantsync.presentationlayer.controller.FeatureController;
 
@@ -30,7 +27,6 @@ import de.ovgu.variantsync.presentationlayer.controller.FeatureController;
  */
 public abstract class DynamicMapMenu extends ContributionItem {
 
-	private Map<IProject, Set<Feature>> features;
 	protected FeatureController controller = ControllerHandler.getInstance()
 			.getFeatureController();
 
@@ -78,15 +74,12 @@ public abstract class DynamicMapMenu extends ContributionItem {
 	 * @return list with name´s of features
 	 */
 	protected List<String> getFeatureList(IProject project) {
-		features = controller.getFeaturesDirectly(VariantSyncPlugin
-				.getDefault().getSupportProjectList());
-		Set<Feature> featuresOfSelectedProject = features.get(project);
+		Collection<String> cF = controller.getFeatureExpressions().getFeatureExpressions();
 		List<String> features = new ArrayList<String>();
-		if (featuresOfSelectedProject != null
-				&& !featuresOfSelectedProject.isEmpty()) {
-			Iterator<Feature> itFeature = featuresOfSelectedProject.iterator();
+		if (cF != null && !cF.isEmpty()) {
+			Iterator<String> itFeature = cF.iterator();
 			while (itFeature.hasNext()) {
-				features.add(itFeature.next().getName());
+				features.add(itFeature.next());
 			}
 		} else {
 			features.add(NO_FEATURE_DEFINED);

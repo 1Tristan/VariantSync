@@ -16,7 +16,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaElement;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
-import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 
 public class UpdateAlgorithm {
 
@@ -26,25 +26,26 @@ public class UpdateAlgorithm {
 	public UpdateAlgorithm() {
 	}
 
-	public void updateCode(String packageName, String className,
-			List<String> code, String idIgnoreContext) {
+	public void updateCode(String projectName, String packageName,
+			String className, List<String> code, String featureExpression) {
 		List<Diff> diffs = ContextUtils.analyzeDiff(code);
 		Collection<Context> contexts = ContextHandler.getInstance()
 				.getAllContexts();
 		Iterator<Context> itC = contexts.iterator();
 		while (itC.hasNext()) {
 			Context c = itC.next();
-			if (c.getId().equals(idIgnoreContext)) {
+			if (c.getFeatureExpression().equals(featureExpression)) {
 				continue;
 			}
-			JavaProject jp = c.getJavaProject();
+			JavaProject jp = c.getJavaProject(projectName);
 			List<JavaClass> classes = new ArrayList<JavaClass>();
-			iterate(jp.getChildren(), classes, className);
-			for (JavaClass jc : classes) {
-				update(jc, diffs);
-				System.out.println(jc.toString());
+			if (jp != null) {
+				iterate(jp.getChildren(), classes, className);
+				for (JavaClass jc : classes) {
+					update(jc, diffs);
+				}
+				saveContext(c);
 			}
-			saveContext(c);
 		}
 	}
 
@@ -118,10 +119,7 @@ public class UpdateAlgorithm {
 
 	private void saveContext(Context c) {
 		String storageLocation = VariantSyncPlugin.getDefault()
-				.getWorkspaceLocation()
-				+ c.getPathToProject()
-				+ "/"
-				+ VariantSyncConstants.CONTEXT_PATH;
+				.getWorkspaceLocation() + VariantSyncConstants.CONTEXT_PATH;
 		String filename = "/" + c.getFeatureExpression() + ".xml";
 
 		// creates target folder if it does not already exist
@@ -133,5 +131,6 @@ public class UpdateAlgorithm {
 		persistenceOp.saveContext(c, storageLocation);
 		System.out.println("\n================ CONTEXT SAVED ================");
 		System.out.println(c.toString());
+		System.out.println("===============================================\n");
 	}
 }

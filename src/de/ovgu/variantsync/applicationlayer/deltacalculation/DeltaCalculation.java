@@ -16,7 +16,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationExc
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorSet;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ChangeTypes;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
-import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 import difflib.Patch;
 
@@ -111,7 +111,8 @@ class DeltaCalculation {
 						patch, 0);
 
 		ModuleFactory.getContextOperations().recordCodeChange(tmpUnifiedDiff,
-				(IFile) res);
+				res.getProject().getName(),
+				res.getProject().getLocation().toString(), (IFile) res);
 
 		int pointer = 0;
 		if (MonitorSet.getInstance().removeSynchroItem(res)) {

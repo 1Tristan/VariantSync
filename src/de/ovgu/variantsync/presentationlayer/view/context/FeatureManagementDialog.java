@@ -239,7 +239,8 @@ public class FeatureManagementDialog {
 
 		});
 
-		featureTableViewer.setInput(featureController.getFeatureExpressions());
+		featureTableViewer.setInput(featureController.getFeatureExpressions()
+				.getFeatureExpressionsAsSet());
 
 		gridData = new GridData(GridData.FILL_HORIZONTAL);
 		gridData.grabExcessVerticalSpace = true;
@@ -315,6 +316,8 @@ public class FeatureManagementDialog {
 									.getText();
 							featureController
 									.deleteFeatureExpression(selectedFeatureExpression);
+							featureTable.remove(featureTable
+									.getSelectionIndex());
 						} else {
 							Display display = PlatformUI.getWorkbench()
 									.getDisplay();

@@ -6,10 +6,10 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 
-import de.ovgu.featureide.fm.core.Constraint;
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.featureide.fm.core.FeatureModel;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FeatureException;
+import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
 
@@ -47,7 +47,7 @@ public interface IFeatureOperations {
 	 */
 	Map<IProject, Set<Feature>> getFeatures(List<IProject> projects);
 
-	Set<String> getFeatureExpressions();
+	FeatureExpressions getFeatureExpressions();
 
 	void addElement(MappingElement mapping, JavaProject project);
 
@@ -57,7 +57,9 @@ public interface IFeatureOperations {
 
 	FeatureModel getFeatureModel();
 
-	void addConstraint(Constraint constraint);
+	void addFeatureExpression(String featureExpression);
+
+	void addFeatureExpression(Set<String> featureExpressions);
 
 	void deleteFeatureExpression(String expr);
 }

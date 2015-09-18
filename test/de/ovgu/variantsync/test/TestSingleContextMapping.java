@@ -28,17 +28,22 @@ import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
 public class TestSingleContextMapping {
 
 	private final String FEATURE_EXPRESSION = "Test";
+	private final String PROJECT_NAME = "TestProject";
+	private final String PROJECT_PATH = "arbitraryPathToProject";
 	private Context context;
 	private IContextOperations co = ModuleFactory.getContextOperations();
 
 	@Before
 	public void before() {
-		context = new Context("TestProject", "arbitraryPathToProject",
-				FEATURE_EXPRESSION);
+		context = new Context(FEATURE_EXPRESSION);
+		context.initProject(PROJECT_NAME, PROJECT_PATH);
 	}
 
 	@Test
 	public void testAddCodeToEmptyContext() {
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		System.out.println("testAddCodeToEmptyContext()\n");
 		List<String> diff = new ArrayList<String>();
 
 		// add code to empty context
@@ -47,10 +52,10 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		System.out.println("\n" + diff.toString());
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
-		JavaProject jp = context.getJavaProject();
+		JavaProject jp = context.getJavaProject(PROJECT_NAME);
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
 
@@ -91,11 +96,17 @@ public class TestSingleContextMapping {
 		assertEquals(cl.getCode(), "}");
 		assertEquals(cl.getLine(), 17);
 
-		System.out.println("\n" + jp.toString());
+		System.out.println("JavaProject:\n" + jp.toString());
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
 	}
 
 	@Test
 	public void testAddCodeInsideExistingCode() {
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		System.out.println("testAddCodeInsideExistingCode()\n");
+
 		List<String> diff = new ArrayList<String>();
 
 		// add code to empty context
@@ -104,11 +115,11 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		System.out.println("\n" + diff.toString());
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
-		JavaProject jp = context.getJavaProject();
-		System.out.println("\n" + jp.toString() + "\n");
+		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		System.out.println("JavaProject:\n" + jp.toString());
 
 		// add code line inside existing code
 		diffArray = "--- Main.java, +++ Main.java, @@ -6,0 +6,1 @@, +	private int b;, @@ -7,1 +8,1 @@, -	public Main(int g) {, +	public Main(int g, int h) {, @@ -9,0 +10,1 @@, +		b = h;"
@@ -119,7 +130,8 @@ public class TestSingleContextMapping {
 		}
 		diff.set(6, "+	public Main(int g, int h) {");
 		diff.remove(7);
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
@@ -167,11 +179,17 @@ public class TestSingleContextMapping {
 		assertEquals(cl.getCode(), "}");
 		assertEquals(cl.getLine(), 19);
 
-		System.out.println("\n" + jp.toString());
+		System.out.println("JavaProject:\n" + jp.toString());
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
 	}
 
 	@Test
 	public void testAddCodeInsideExistingCode_Simple() {
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		System.out.println("testAddCodeInsideExistingCode_Simple()\n");
+
 		List<String> diff = new ArrayList<String>();
 
 		// add code to empty context
@@ -180,11 +198,11 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		System.out.println("\n" + diff.toString());
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
-		JavaProject jp = context.getJavaProject();
-		System.out.println("\n" + jp.toString() + "\n");
+		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		System.out.println("JavaProject:\n" + jp.toString());
 
 		// add code line inside existing code
 		diffArray = "--- Main.java, +++ Main.java, @@ -6,0 +6,1 @@, +	private int b;, @@ -7,1 +8,1 @@, -	public Main(int g) {, +	public Main(int g, int h) {, @@ -9,0 +10,1 @@, +		b = h;"
@@ -195,7 +213,8 @@ public class TestSingleContextMapping {
 		}
 		diff.set(6, "+	public Main(int g, int h) {");
 		diff.remove(7);
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
@@ -243,11 +262,17 @@ public class TestSingleContextMapping {
 		assertEquals(cl.getCode(), "}");
 		assertEquals(cl.getLine(), 19);
 
-		System.out.println("\n" + jp.toString());
+		System.out.println("JavaProject:\n" + jp.toString());
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
 	}
 
 	@Test
 	public void testAddCodeInsideExistingCode_Comprehensive1() {
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		System.out.println("testAddCodeInsideExistingCode_Comprehensive1()\n");
+
 		List<String> diff = new ArrayList<String>();
 
 		// add code to empty context
@@ -256,11 +281,11 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		System.out.println("\n" + diff.toString());
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
-		JavaProject jp = context.getJavaProject();
-		System.out.println("\n" + jp.toString() + "\n");
+		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		System.out.println("JavaProject:\n" + jp.toString());
 
 		// add code line inside existing code
 		diffArray = "--- Main.java, +++ Main.java, @@ -5,1 +5,5 @@, -	public Main(int g) {, +	private boolean isFalse;, +	private int i = 0;, +, +	public Main(int g, boolean isfalse) {, +		isFalse = true;, @@ -7,0 +11,1 @@, +		this.isFalse = isfalse;, @@ -8,0 +13,5 @@, +	, +	private int helpMe(int i) {, +		i = i * 10;, +		return -1;, +	}, @@ -9,0 +19,9 @@, +	public void setA(int a) {, +		helpMe(4);, +	}, +, +	public void test() {, +		System.out.println(\"This is not a test!\");, +		System.out.println(\"This is not a test, too!\");, +	}, +"
@@ -273,12 +298,11 @@ public class TestSingleContextMapping {
 		diff.remove(8);
 		diff.set(24, "+		System.out.println(\"This is not a test, too!\");");
 		diff.remove(25);
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
-
-		System.out.println("\n" + jp.toString());
 
 		CodeLine cl = codeOfClass.get(0);
 		assertEquals(cl.getCode(), "");
@@ -354,10 +378,18 @@ public class TestSingleContextMapping {
 		cl = codeOfClass.get(23);
 		assertEquals(cl.getCode(), "");
 		assertEquals(cl.getLine(), 27);
+
+		System.out.println("JavaProject:\n" + jp.toString());
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
 	}
 
 	@Test
 	public void testAddCodeInsideExistingCode_Comprehensive2() {
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		System.out.println("testAddCodeInsideExistingCode_Comprehensive2()\n");
+
 		List<String> diff = new ArrayList<String>();
 
 		// add code to empty context
@@ -366,11 +398,11 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		System.out.println("\n" + diff.toString());
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
-		JavaProject jp = context.getJavaProject();
-		System.out.println("\n" + jp.toString() + "\n");
+		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		System.out.println("JavaProject:\n" + jp.toString());
 
 		// add code line inside existing code
 		diffArray = "--- Main.java, +++ Main.java, @@ -5,1 +5,5 @@, -	public Main(int g) {, +	private boolean isFalse;, +	private int i = 0;, +	, +	public Main(int g, boolean isFalse) {, +		isFalse = true;, @@ -7,0 +11,1 @@, +		this.isFalse = isFalse;, @@ -8,0 +13,14 @@, +	, +	private int helpMe(int i) {, +		i = i * 10;, +		return -1;, +	}, +	, +	public void setA(int a) {, +		helpMe(4);, +	}, +	, +	public void test() {, +		System.out.println(\"This is not a test!\");, +		System.out.println(\"This is not a test, too!\");, +	}"
@@ -384,12 +416,11 @@ public class TestSingleContextMapping {
 		diff.remove(8);
 		diff.set(24, "+		System.out.println(\"This is not a test, too!\");");
 		diff.remove(25);
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
-
-		System.out.println("\n" + jp.toString());
 
 		int i = 0;
 		int line = 5;
@@ -461,6 +492,10 @@ public class TestSingleContextMapping {
 		cl = codeOfClass.get(++i);
 		assertEquals(cl.getCode(), "}");
 		assertEquals(cl.getLine(), ++line);
+
+		System.out.println("JavaProject:\n" + jp.toString());
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
 	}
 
 	/**
@@ -468,6 +503,10 @@ public class TestSingleContextMapping {
 	 */
 	@Test
 	public void testAddCodeInsideExistingCode_Comprehensive3() {
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		System.out.println("testAddCodeInsideExistingCode_Comprehensive3()\n");
+
 		List<String> diff = new ArrayList<String>();
 
 		// Step 0
@@ -476,11 +515,11 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		System.out.println("\n" + diff.toString());
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
-		JavaProject jp = context.getJavaProject();
-		System.out.println("\n" + jp.toString() + "\n");
+		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		System.out.println("JavaProject:\n" + jp.toString());
 
 		// Step 1
 		diffArray = "--- Main.java, +++ Main.java, @@ -11,0 +11,1 @@, +		System.out.println();"
@@ -490,12 +529,11 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
-
-		System.out.println("\n" + jp.toString());
 
 		int i = 0;
 		int line = 5;
@@ -521,6 +559,8 @@ public class TestSingleContextMapping {
 		assertEquals(cl.getCode(), "System.out.println();");
 		assertEquals(cl.getLine(), ++line);
 
+		System.out.println("JavaProject:\n" + jp.toString());
+
 		// Step 2
 		diffArray = "--- Main.java, +++ Main.java, @@ -8,1 +8,1 @@, -		this.i = j;, +		"
 				.split(", ");
@@ -529,12 +569,11 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
 		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
 				.getClonedCodeLines();
-
-		System.out.println("\n" + jp.toString());
 
 		i = 0;
 		line = 5;
@@ -559,6 +598,8 @@ public class TestSingleContextMapping {
 		cl = codeOfClass.get(++i);
 		assertEquals(cl.getCode(), "System.out.println();");
 		assertEquals(cl.getLine(), ++line);
+
+		System.out.println("JavaProject:\n" + jp.toString());
 
 		// Step 3
 		diffArray = "--- Main.java, +++ Main.java, @@ -8,1 +8,1 @@, -		, +		this.i = j;"
@@ -568,12 +609,11 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
 		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
 				.getClonedCodeLines();
-
-		System.out.println("\n" + jp.toString());
 
 		i = 0;
 		line = 5;
@@ -598,6 +638,8 @@ public class TestSingleContextMapping {
 		cl = codeOfClass.get(++i);
 		assertEquals(cl.getCode(), "System.out.println();");
 		assertEquals(cl.getLine(), ++line);
+
+		System.out.println("JavaProject:\n" + jp.toString());
 
 		// Step 4
 		diffArray = "--- Main.java, +++ Main.java, @@ -11,1 +11,0 @@, -		System.out.println();"
@@ -607,12 +649,11 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
 		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
 				.getClonedCodeLines();
-
-		System.out.println("\n" + jp.toString());
 
 		i = 0;
 		line = 5;
@@ -634,21 +675,29 @@ public class TestSingleContextMapping {
 		cl = codeOfClass.get(++i);
 		assertEquals(cl.getCode(), "System.out.println();");
 		assertEquals(cl.getLine(), ++line);
+
+		System.out.println("JavaProject:\n" + jp.toString());
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
 	}
 
 	@Test
 	public void testRemoveCode() {
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		System.out.println("testRemoveCode()\n");
+
 		List<String> diff = new ArrayList<String>();
 		String[] diffArray = "--- Main.java, +++ Main.java, @@ -5,0 +5,1 @@, +	private int a;, @@ -6,0 +7,11 @@, +	public Main(int g) {, +		a = g;, +	}, +, +	public int getA() {, +		return a;, +	}, +, +	public void setA(int a) {, +		this.a = a;, +	}"
 				.split(", ");
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		System.out.println("\n" + diff.toString());
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
-		JavaProject jp = context.getJavaProject();
-		System.out.println("\n" + jp.toString() + "\n");
+		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		System.out.println("JavaProject:\n" + jp.toString());
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
 
@@ -659,8 +708,8 @@ public class TestSingleContextMapping {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		System.out.println("\n" + diff.toString());
-		co.addCode("mainpackage", "Main.java", diff, context);
+		System.out.println("\nDiff-String:\n" + diff.toString());
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 
 		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
 				.getClonedCodeLines();
@@ -690,6 +739,8 @@ public class TestSingleContextMapping {
 		assertEquals(cl.getCode(), "}");
 		assertEquals(cl.getLine(), 13);
 
-		System.out.println("\n" + jp.toString());
+		System.out.println("JavaProject:\n" + jp.toString());
+		System.out
+				.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n\n\n");
 	}
 }

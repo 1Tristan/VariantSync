@@ -7,31 +7,22 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.osgi.framework.BundleContext;
@@ -39,23 +30,21 @@ import org.osgi.framework.BundleContext;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.ContextProvider;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeLine;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
+import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 import de.ovgu.variantsync.applicationlayer.deltacalculation.DeltaOperationProvider;
 import de.ovgu.variantsync.applicationlayer.features.FeatureProvider;
+import de.ovgu.variantsync.applicationlayer.features.IFeatureOperations;
 import de.ovgu.variantsync.applicationlayer.monitoring.ChangeListener;
 import de.ovgu.variantsync.applicationlayer.monitoring.MonitorNotifier;
 import de.ovgu.variantsync.applicationlayer.synchronization.SynchronizationProvider;
-import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerTypes;
 import de.ovgu.variantsync.presentationlayer.view.AbstractView;
-import de.ovgu.variantsync.presentationlayer.view.codemapping.BytecodeReferenceView;
 import de.ovgu.variantsync.presentationlayer.view.codemapping.CodeMarkerFactory;
-import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerHandler;
-import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerInformation;
 import de.ovgu.variantsync.presentationlayer.view.console.ChangeOutPutConsole;
+import de.ovgu.variantsync.presentationlayer.view.context.PartAdapter;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
 import de.ovgu.variantsync.utilitylayer.UtilityModel;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
@@ -78,9 +67,10 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	private List<IProject> projectList = new ArrayList<IProject>();
 	private Map<IProject, MonitorItemStorage> synchroInfoMap = new HashMap<IProject, MonitorItemStorage>();
 	private ChangeListener resourceModificationListener;
-	private IPersistanceOperations persistanceOp = ModuleFactory
+	private IPersistanceOperations persistenceOp = ModuleFactory
 			.getPersistanceOperations();
 	private IContextOperations contextOp = ModuleFactory.getContextOperations();
+	private IFeatureOperations featureOp = ModuleFactory.getFeatureOperations();
 	private ControllerHandler controller = ControllerHandler.getInstance();
 
 	@Override
@@ -95,10 +85,11 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		removeAllMarkers();
 		initMVC();
 		initContext();
+		initFeatureExpressions();
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				hookToEditor();
+				listenForActiveClass();
 			}
 		});
 		try {
@@ -109,124 +100,30 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		}
 	}
 
-	public void hookToEditor() {
+	/**
+	 * Listen whether the active file in the java editor changes.
+	 */
+	public void listenForActiveClass() {
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow ww = wb.getActiveWorkbenchWindow();
 		IWorkbenchPage page = ww.getActivePage();
 		if (page == null)
 			return;
-
-		// TODO: calculate and set marker for opened file!
-
-		page.addPartListener(new IPartListener() {
-
-			@Override
-			public void partActivated(IWorkbenchPart part) {
-				if (part instanceof IEditorPart) {
-					if (((IEditorPart) part).getEditorInput() instanceof IFileEditorInput) {
-						IFile file = ((IFileEditorInput) ((EditorPart) part)
-								.getEditorInput()).getFile();
-						System.out
-								.println("LOCATION OF ACTIVE FILE IN EDITOR: "
-										+ file.getLocation());
-						// TODO: search file in contexts and display marker for
-						// code that is tagged
-						String projectName = file.getProject().getName();
-						String fileName = file.getName();
-						Map<String, List<JavaClass>> classes = contextOp
-								.findJavaClass(projectName, fileName);
-
-						MarkerHandler.getInstance().clearAllMarker(file);
-						List<MarkerInformation> markers = new ArrayList<MarkerInformation>();
-						Set<Entry<String, List<JavaClass>>> set = classes
-								.entrySet();
-						Iterator<Entry<String, List<JavaClass>>> it = set
-								.iterator();
-						while (it.hasNext()) {
-							Entry<String, List<JavaClass>> entry = it.next();
-							List<JavaClass> listClasses = entry.getValue();
-							for (JavaClass c : listClasses) {
-								List<CodeLine> cls = c.getCodeLines();
-								int i = 0;
-								List<CodeLine> tmp = new ArrayList<CodeLine>();
-								for (CodeLine cl : cls) {
-									tmp.add(cl);
-									if (cls.size() > i + 1
-											&& cls.get(i + 1).getLine() == cl
-													.getLine() + 1) {
-										tmp.add(cls.get(i + 1));
-									} else {
-										MarkerInformation mi = new MarkerInformation(
-												0, tmp.get(0).getLine(), tmp
-														.get(tmp.size() - 1)
-														.getLine(), 0, 0);
-										mi.setFeature(entry.getKey());
-										markers.add(mi);
-										tmp.clear();
-									}
-									i++;
-								}
-							}
-							try {
-								MarkerHandler.getInstance().setMarker(file,
-										markers);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-			}
-
-			@Override
-			public void partBroughtToTop(IWorkbenchPart part) {
-
-			}
-
-			@Override
-			public void partClosed(IWorkbenchPart arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void partDeactivated(IWorkbenchPart arg0) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void partOpened(IWorkbenchPart arg0) {
-				System.out.println();
-			}
-
-		});
-		page.addPartListener(new BytecodeReferenceView());
-
-		IEditorPart editor = page.getActiveEditor();
-		if (editor == null)
-			return;
-		IResource resource = (IResource) editor.getEditorInput().getAdapter(
-				IResource.class);
-		if (resource == null)
-			return;
-
-		try {
-			resource.accept(new IResourceVisitor() {
-
-				@Override
-				public boolean visit(IResource arg0) throws CoreException {
-					System.out.println(arg0.toString());
-					return false;
-				}
-			});
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
+		page.addPartListener(new PartAdapter(contextOp));
 	}
 
 	@Override
 	public void stop(BundleContext context) {
+		String path = VariantSyncPlugin.getDefault().getWorkspaceLocation()
+				+ VariantSyncConstants.FEATURE_EXPRESSION_PATH;
+
+		// creates target folder if it does not already exist
+		File folder = new File(path.substring(0, path.lastIndexOf("/")));
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
+		persistenceOp.saveFeatureExpressions(featureOp.getFeatureExpressions(),
+				path);
 		plugin = null;
 		try {
 			super.stop(context);
@@ -280,7 +177,7 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 			MonitorItemStorage info = new MonitorItemStorage();
 			if (infoFile.exists()) {
 				try {
-					info = persistanceOp.readSynchroXMLFile(infoFile
+					info = persistenceOp.readSynchroXMLFile(infoFile
 							.getContents());
 				} catch (CoreException e) {
 					UtilityModel.getInstance().handleError(e,
@@ -312,16 +209,39 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	 * Loads all contexts which are saved in a XML-file.
 	 */
 	private void initContext() {
-		List<IProject> projects = getSupportProjectList();
-		for (IProject p : projects) {
-			IPath pathToFolder = p.getLocation().append(
-					VariantSyncConstants.CONTEXT_PATH);
-			File folder = new File(pathToFolder.toString());
-			if (folder.exists() && folder.isDirectory()) {
-				File[] files = folder.listFiles();
-				for (File f : files) {
-					contextOp
-							.addContext(persistanceOp.loadContext(f.getPath()));
+		String storageLocation = VariantSyncPlugin.getDefault()
+				.getWorkspaceLocation() + VariantSyncConstants.CONTEXT_PATH;
+		File folder = new File(storageLocation);
+		if (folder.exists() && folder.isDirectory()) {
+			File[] files = folder.listFiles();
+			for (File f : files) {
+				contextOp.addContext(persistenceOp.loadContext(f.getPath()));
+			}
+		}
+	}
+
+	/**
+	 * Loads all feature expressions which are saved in a XML-file.
+	 */
+	private void initFeatureExpressions() {
+		String storageLocation = VariantSyncPlugin.getDefault()
+				.getWorkspaceLocation()
+				+ VariantSyncConstants.FEATURE_EXPRESSION_PATH;
+		File folder = new File(storageLocation.substring(0,
+				storageLocation.lastIndexOf("/")));
+		if (folder.exists() && folder.isDirectory()) {
+			File[] files = folder.listFiles();
+			for (File f : files) {
+				FeatureExpressions featureExpressions = persistenceOp
+						.loadFeatureExpressions(f.getPath());
+				Iterator<String> it = featureExpressions
+						.getFeatureExpressions().iterator();
+				while (it.hasNext()) {
+					featureOp.addFeatureExpression(it.next());
+				}
+				it = featureOp.getFeatureModel().getFeatureNames().iterator();
+				while (it.hasNext()) {
+					featureOp.addFeatureExpression(it.next());
 				}
 			}
 		}

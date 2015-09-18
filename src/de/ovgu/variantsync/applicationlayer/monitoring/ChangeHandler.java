@@ -21,7 +21,7 @@ import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.deltacalculation.IDeltaOperations;
-import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
 import de.ovgu.variantsync.presentationlayer.view.resourcechanges.ResourceChangesView;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;

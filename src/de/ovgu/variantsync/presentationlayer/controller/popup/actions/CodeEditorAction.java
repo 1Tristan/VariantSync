@@ -54,7 +54,6 @@ public class CodeEditorAction implements IObjectActionDelegate {
 									.getText();
 							// length
 							length = ((ITextSelection) iSelection).getLength();
-							System.out.println("length: " + length);
 							MessageDialog.openInformation(shell,
 									"Do Something Menu", "Length: " + length
 											+ "    Offset: " + offset + "\n"

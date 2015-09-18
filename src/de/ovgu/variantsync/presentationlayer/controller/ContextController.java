@@ -27,8 +27,8 @@ public class ContextController extends AbstractController {
 		return contextOperations.getActiveProject();
 	}
 
-	public void activateContext(String featureExpression, String projectName) {
-		contextOperations.activateContext(featureExpression, projectName);
+	public void activateContext(String featureExpression) {
+		contextOperations.activateContext(featureExpression);
 	}
 
 	public void setContextColor(String featureExpression, RGB color) {

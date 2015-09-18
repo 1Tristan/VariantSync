@@ -5,8 +5,8 @@ import java.util.List;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 
 public class JavaProject extends JavaElement {
-	
-	public JavaProject(){
+
+	public JavaProject() {
 		super();
 	}
 
@@ -61,4 +61,5 @@ public class JavaProject extends JavaElement {
 		// only classes contain code lines
 		return false;
 	}
+
 }

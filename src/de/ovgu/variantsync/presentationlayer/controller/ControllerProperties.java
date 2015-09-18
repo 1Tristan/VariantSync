@@ -15,7 +15,7 @@ public enum ControllerProperties {
 			"refreshTree"), FEATURECHECK("checkFeatureSupport"), FEATUREEXTRACTION(
 			"getFeatures"), PACKAGE_EXPLORER_ELEMENT_PROPERTY("addElement"), CODE_EDITOR_ELEMENT_PROPERTY(
 			"addCodeFragment"), REMOVE_MAPPING_PROPERTY("removeMapping"), CONSTRAINT_PROPERTY(
-			"addConstraint"),DELETE_EXPRESSION_PROPERTY(
+			"addFeatureExpression"),DELETE_EXPRESSION_PROPERTY(
 					"deleteFeatureExpression");
 
 	private String property;

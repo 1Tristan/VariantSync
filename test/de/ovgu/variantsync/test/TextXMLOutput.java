@@ -1,6 +1,7 @@
 package de.ovgu.variantsync.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,11 +14,14 @@ import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeLine;
-import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
+import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 
 public class TextXMLOutput {
 
 	private final String FEATURE_EXPRESSION = "Test";
+	private final String PROJECT_NAME = "TestProject";
+	private final String PROJECT_PATH = "arbitraryPathToProject";
 	private final String PATH_CONTEXT_STORAGE = System.getProperty("user.dir")
 			+ "/test/context/" + "TestFeature.xml";
 	private Context context;
@@ -27,8 +31,9 @@ public class TextXMLOutput {
 
 	@Before
 	public void before() {
-		context = new Context("TestProject", "arbitraryPathToProject",
-				FEATURE_EXPRESSION);
+		context = new Context(FEATURE_EXPRESSION);
+		context.initProject(PROJECT_NAME, PROJECT_PATH);
+
 		List<String> diff = new ArrayList<String>();
 
 		// add code to empty context
@@ -37,7 +42,7 @@ public class TextXMLOutput {
 		for (String s : diffArray) {
 			diff.add(s);
 		}
-		co.addCode("mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
 	}
 
 	@Test
@@ -50,7 +55,8 @@ public class TextXMLOutput {
 	@Test
 	public void testReadXML() {
 		Context c = persistenceOp.loadContext(PATH_CONTEXT_STORAGE);
-		List<CodeLine> codeLines = c.getCodeLines();
+		JavaProject jp = c.getJavaProject(PROJECT_NAME);
+		List<CodeLine> codeLines = jp.getClonedCodeLines();
 		CodeLine cl = codeLines.get(0);
 		assertEquals("private int a;", cl.getCode());
 		assertEquals(5, cl.getLine());
@@ -69,6 +75,6 @@ public class TextXMLOutput {
 		cl = codeLines.get(11);
 		assertEquals("}", cl.getCode());
 		assertEquals(17, cl.getLine());
-		assertTrue(codeLines.size() == 12);
+		assertEquals(12, codeLines.size());
 	}
 }

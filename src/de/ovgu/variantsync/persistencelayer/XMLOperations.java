@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.persistancelayer;
+package de.ovgu.variantsync.persistencelayer;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;

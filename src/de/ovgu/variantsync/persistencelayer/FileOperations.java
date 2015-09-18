@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.persistancelayer;
+package de.ovgu.variantsync.persistencelayer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

@@ -43,7 +43,6 @@ public class FeatureContextActivity extends AbstractHandler implements
 					MessageDialog.QUESTION, new String[] { "Yes, stop it.",
 							"No, continue recording.", }, 0);
 			int result = dialog.open();
-			System.out.println(result);
 			if (result == 0) {
 				staticElement.setIcon(VariantSyncPlugin
 						.imageDescriptorFromPlugin(

@@ -3,10 +3,7 @@ package de.ovgu.variantsync.applicationlayer.context;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
@@ -36,26 +33,28 @@ class ContextAlgorithm {
 		this.context = context;
 	}
 
-	public void addCode(String packageName, String className, List<String> code) {
+	public void addCode(String projectName, String packageName,
+			String className, List<String> code) {
 
 		// Mapping auf FeatureExpressions umstellen/ von FeatureExpressions
 		// extrahieren und immer das Project zurückgeben mit angepasstem Mapping
 		// => Blackbox mit Input (MappingElement, Project) und Output (Project)
 		// Zuordnung Project zu FeatureExpression und Datenhaltung erfolgt im
 		// Context
-		System.out.println(code.toString());
 
 		List<Diff> diffs = ContextUtils.analyzeDiff(code);
-		refreshCodeBase(diffs, packageName, className);
+		refreshCodeBase(diffs, projectName, packageName, className);
 
 		// String file = "/src/" + packageName + "/" + className;
 		// refreshMarker(diffs, file, context.getPathOfJavaProject());
 
-		UtilOperations.getInstance().printProject(context.getJavaProject());
+		UtilOperations.getInstance().printProject(
+				context.getJavaProject(projectName));
+		System.out.println("===============================================");
 	}
 
-	private void refreshCodeBase(List<Diff> diffs, String packageName,
-			String className) {
+	private void refreshCodeBase(List<Diff> diffs, String projectName,
+			String packageName, String className) {
 		int i = 0;
 		for (Diff diff : diffs) {
 			DiffIndices di = diff.getDiffIndices();
@@ -71,13 +70,15 @@ class ContextAlgorithm {
 				}
 				list.add(ds.getCode());
 				if (ds.isAddFlag()) {
-					addCode(packageName, className, startNew, startNew, list);
+					addCode(projectName, packageName, className, startNew,
+							startNew, list);
 					if (!UtilOperations.getInstance().ignoreAddCounter()) {
 						addCounter++;
 					}
 					startNew++;
 				} else {
-					removeCode(packageName, className, startOld, startOld, list);
+					removeCode(projectName, packageName, className, startOld,
+							startOld, list);
 					removeCounter++;
 					if (startNew > startOld) {
 						startNew--;
@@ -96,70 +97,45 @@ class ContextAlgorithm {
 		}
 	}
 
-	private void addCode(String packageName, String className, int start,
-			int end, List<String> extractedCode) {
-		setUpProject();
+	private void addCode(String projectName, String packageName,
+			String className, int start, int end, List<String> extractedCode) {
+		setUpProject(projectName);
 		MappingElement mapping = new MappingElement(
 				context.getFeatureExpression(), className,
-				JavaElements.CODE_FRAGMENT, context.getPathToProject()
-						+ "/src/" + packageName.replace(".", "/") + "/"
-						+ className, extractedCode, start, end, end - start);
-		mapping.setPathToProject(context.getPathToProject());
-		featureOperations.addCodeFragment(mapping, context.getJavaProject());
+				JavaElements.CODE_FRAGMENT,
+				context.getPathToProject(projectName) + "/src/"
+						+ packageName.replace(".", "/") + "/" + className,
+				extractedCode, start, end, end - start);
+		mapping.setPathToProject(context.getPathToProject(projectName));
+		featureOperations.addCodeFragment(mapping,
+				context.getJavaProject(projectName));
 	}
 
-	private void removeCode(String packageName, String className, int start,
-			int end, List<String> extractedCode) {
-		setUpProject();
+	private void removeCode(String projectName, String packageName,
+			String className, int start, int end, List<String> extractedCode) {
+		setUpProject(projectName);
 		MappingElement mapping = new MappingElement(
 				context.getFeatureExpression(), className,
-				JavaElements.CODE_FRAGMENT, context.getPathToProject()
-						+ "/src/" + packageName.replace(".", "/") + "/"
-						+ className, extractedCode, start, end, end - start);
-		mapping.setPathToProject(context.getPathToProject());
-		featureOperations.removeMapping(mapping, context.getJavaProject());
+				JavaElements.CODE_FRAGMENT,
+				context.getPathToProject(projectName) + "/src/"
+						+ packageName.replace(".", "/") + "/" + className,
+				extractedCode, start, end, end - start);
+		mapping.setPathToProject(context.getPathToProject(projectName));
+		featureOperations.removeMapping(mapping,
+				context.getJavaProject(projectName));
 	}
 
-	private void setUpProject() {
-		if (context.getPathToProject() == null) {
+	private void setUpProject(String projectName) {
+		if (context.getPathToProject(projectName) == null) {
 			List<IProject> projects = VariantSyncPlugin.getDefault()
 					.getSupportProjectList();
 			for (IProject p : projects) {
-				if (p.getName().equals(context.getNameOfJavaProject())) {
-					context.setPathToProject(p.getFullPath().toString());
+				if (p.getName().equals(projectName)) {
+					context.setPathToProject(projectName, p.getFullPath()
+							.toString());
 				}
 			}
 		}
 	}
 
-	private void refreshMarker(List<Diff> diffs, String file, String projectName) {
-		System.out.println(file);
-		IPath path = new Path(file);
-		List<IProject> projects = VariantSyncPlugin.getDefault()
-				.getSupportProjectList();
-		IProject iProject = null;
-		projectName = projectName.substring(1);
-		for (IProject p : projects) {
-			if (p.getName().equals(projectName)) {
-				iProject = p;
-				break;
-			}
-		}
-		IFile iFile = iProject.getFile(path);
-		System.out.println(iFile.toString());
-
-		// TODO Marker-Update
-
-		// IMarker marker = null;
-		// try {
-		// marker = CodeMarkerFactory.createMarker(iFile, new Position(offset,
-		// length), featureExpression);
-		// } catch (CoreException e) {
-		// e.printStackTrace();
-		// }
-		// MarkerInformation mi = new MarkerInformation(marker.getId(), start,
-		// end, offset, length);
-		// MarkerHandler.getInstance().addMarker(mi, marker, iFile,
-		// featureExpression);
-	}
 }

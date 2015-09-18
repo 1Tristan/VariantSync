@@ -24,7 +24,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.resources.IChangedFile;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFile;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFilePatch;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ResourceChangesFolder;
-import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 

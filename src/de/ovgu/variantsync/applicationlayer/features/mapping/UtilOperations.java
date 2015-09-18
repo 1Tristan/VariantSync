@@ -16,7 +16,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaElement;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaPackage;
 import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
-import de.ovgu.variantsync.persistancelayer.IPersistanceOperations;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 public class UtilOperations {
@@ -137,7 +137,7 @@ public class UtilOperations {
 		}
 		return c;
 	}
-	
+
 	public boolean ignoreAddCounter() {
 		boolean ignore = ignoreAddCounter;
 		ignoreAddCounter = false;
@@ -173,13 +173,6 @@ public class UtilOperations {
 				e.printStackTrace();
 			}
 		}
-		// try {
-		// Thread.sleep(1000);
-		// System.out.println("\nREMOVE:");
-		// printCode(c);
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
 		return c;
 	}
 
@@ -230,8 +223,8 @@ public class UtilOperations {
 
 	public void printProject(JavaElement element) {
 		if (element instanceof JavaProject) {
-			System.out.println("\n\n=====================\nProject: "
-					+ element.getName());
+			System.out.println("\n=================== Project ===================");
+			System.out.println(element.getName());
 		}
 		if (element.getChildren() != null) {
 			for (JavaElement child : element.getChildren()) {

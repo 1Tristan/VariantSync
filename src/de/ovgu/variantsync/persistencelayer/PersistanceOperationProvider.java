@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.persistancelayer;
+package de.ovgu.variantsync.persistencelayer;
 
 import java.io.File;
 import java.io.InputStream;
@@ -12,6 +12,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FolderOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.XMLException;
+import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 
 /**
@@ -98,6 +99,16 @@ public class PersistanceOperationProvider implements IPersistanceOperations {
 	@Override
 	public void saveContext(Context context, String path) {
 		JaxbOperations.writeContext(context, path);
+	}
+
+	@Override
+	public FeatureExpressions loadFeatureExpressions(String path) {
+		return JaxbOperations.loadFeatureExpression(path);
+	}
+
+	@Override
+	public void saveFeatureExpressions(FeatureExpressions fe, String path) {
+		JaxbOperations.writeFeatureExpression(fe, path);
 	}
 
 }
