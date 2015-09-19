@@ -6,12 +6,13 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.ui.texteditor.IMarkerUpdater;
 
+/*
 public class CodeMarkerUpdater implements IMarkerUpdater {
 	/*
 	*Returns the attributes for which this updater is responsible.
 	*If the result is null, the updater assumes responsibility for any attributes.
 	*/
-	@Override
+/*	@Override
 	public String[] getAttribute() {
 	      return null;
 	}
@@ -19,7 +20,7 @@ public class CodeMarkerUpdater implements IMarkerUpdater {
 	@Override
 	public String getMarkerType() {
 	      //returns the marker type that we are interested in updating
-	      return CodeMarkerFactory.MARKER;
+	      return CodeMarkerFactory.MARKER_GREEN;
 	}
 
 	@Override
@@ -35,3 +36,4 @@ public class CodeMarkerUpdater implements IMarkerUpdater {
 	      }
 	}
 }
+*/

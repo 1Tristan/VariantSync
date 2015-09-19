@@ -1,7 +1,6 @@
 package de.ovgu.variantsync.presentationlayer.view.codemapping;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -19,6 +18,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import de.ovgu.variantsync.VariantSyncPlugin;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 
 /**
@@ -76,7 +76,8 @@ public class CodeEditorMapping extends DynamicMapMenu {
 						// IMarker marker = null;
 						try {
 							CodeMarkerFactory.createMarker(String.valueOf(0),
-									file, offset, offset + length, feature);
+									file, offset, offset + length, feature,
+									CodeHighlighting.YELLOW);
 						} catch (CoreException e) {
 							e.printStackTrace();
 						}

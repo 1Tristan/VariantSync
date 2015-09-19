@@ -48,8 +48,8 @@ public class MarkerHandler {
 		markerMap.put(mi.getMarkerId(), mi);
 	}
 
-	public void removeMarker(IFile file, int start, int end) {
-		List<IMarker> markers = CodeMarkerFactory.findMarkers(file);
+	public void removeMarker(IResource res, int start, int end) {
+		List<IMarker> markers = CodeMarkerFactory.findMarkers(res);
 		for (IMarker marker : markers) {
 			MarkerInformation mi = markerMap.get(marker.getId());
 			if (mi != null && start == mi.getStart() && end == mi.getEnd()) {
@@ -64,8 +64,8 @@ public class MarkerHandler {
 		}
 	}
 
-	public void clearAllMarker(IFile file) {
-		Job job = new RemoveMarkerJob(file);
+	public void clearAllMarker(IResource res) {
+		Job job = new RemoveMarkerJob(res);
 		job.setPriority(Job.SHORT);
 		job.schedule();
 	}
@@ -89,7 +89,7 @@ public class MarkerHandler {
 						end = regionStart.getOffset() + regionEnd.getLength();
 					}
 					CodeMarkerFactory.createMarker(String.valueOf(i), file,
-							start, end, mi.getFeature());
+							start, end, mi.getFeature(), mi.getColor());
 				} catch (CoreException e) {
 					e.printStackTrace();
 				}

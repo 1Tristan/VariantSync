@@ -6,8 +6,9 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.graphics.RGB;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
 
 /**
  * Defines functions to manage contexts.
@@ -42,5 +43,7 @@ public interface IContextOperations {
 
 	Map<String, List<JavaClass>> findJavaClass(String projectName,
 			String className);
+	
+	CodeHighlighting findColor(String featureExpression);
 
 }

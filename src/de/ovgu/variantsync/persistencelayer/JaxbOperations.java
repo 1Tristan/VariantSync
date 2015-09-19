@@ -8,7 +8,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 
 /**
  * 

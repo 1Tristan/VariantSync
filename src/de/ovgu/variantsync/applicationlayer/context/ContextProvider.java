@@ -11,9 +11,10 @@ import org.eclipse.swt.graphics.RGB;
 
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
 import de.ovgu.variantsync.applicationlayer.Util;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.presentationlayer.view.context.FeatureContextSelection;
 
 /**
@@ -108,6 +109,18 @@ public class ContextProvider extends AbstractModel implements
 			result.put(c.getFeatureExpression(), classes);
 		}
 		return result;
+	}
+
+	@Override
+	public CodeHighlighting findColor(String featureExpression) {
+		Collection<Context> contexts = ContextHandler.getInstance()
+				.getAllContexts();
+		for (Context c : contexts) {
+			if (c.getFeatureExpression().equals(featureExpression)) {
+				return c.getColor();
+			}
+		}
+		return null;
 	}
 
 }

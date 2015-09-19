@@ -9,13 +9,13 @@ import java.util.List;
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.Diff;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.DiffIndices;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeLine;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 
 public class UpdateAlgorithm {
@@ -129,8 +129,5 @@ public class UpdateAlgorithm {
 		}
 		storageLocation += filename;
 		persistenceOp.saveContext(c, storageLocation);
-		System.out.println("\n================ CONTEXT SAVED ================");
-		System.out.println(c.toString());
-		System.out.println("===============================================\n");
 	}
 }

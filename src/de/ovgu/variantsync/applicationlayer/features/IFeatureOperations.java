@@ -8,9 +8,9 @@ import org.eclipse.core.resources.IProject;
 
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.featureide.fm.core.FeatureModel;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FeatureException;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
 
 /**

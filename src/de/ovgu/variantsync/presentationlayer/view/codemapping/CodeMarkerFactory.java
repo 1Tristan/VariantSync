@@ -21,18 +21,22 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
 
 import de.ovgu.variantsync.VariantSyncPlugin;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 
 public class CodeMarkerFactory {
 
 	// Marker ID
-	public static final String MARKER = "de.ovgu.pfofe.variantsync.codehighlightmarker";
+	private static final String MARKER_GREEN = "de.ovgu.pfofe.variantsync.codehighlightmarkerGreen";
+	private static final String MARKER_BLUE = "de.ovgu.pfofe.variantsync.codehighlightmarkerBlue";
+	private static final String MARKER_YELLOW = "de.ovgu.pfofe.variantsync.codehighlightmarkerYellow";
 
 	// Annotation ID
-	public static final String ANNOTATION_COLOR1 = "de.ovgu.pfofe.variantsync.codehighlightannotationColor1";
+	private static final String ANNOTATION_COLOR1 = "de.ovgu.pfofe.variantsync.codehighlightannotationColor1";
 	public static final String ANNOTATION_COLOR2 = "de.ovgu.pfofe.variantsync.codehighlightannotationColor2";
 	public static final String ANNOTATION_COLOR3 = "de.ovgu.pfofe.variantsync.codehighlightannotationColor3";
 
 	private static Map<String, String> featureColorMap = new HashMap<String, String>();
+	private static List<String> markers = new ArrayList<String>();
 
 	public static void setFeatureColor(String feature, String color) {
 		featureColorMap.put(feature, color);
@@ -50,10 +54,11 @@ public class CodeMarkerFactory {
 	 * Creates a Marker
 	 */
 	public static void createMarker(String id, IResource res, int start,
-			int end, String feature) throws CoreException {
+			int end, String feature, CodeHighlighting color)
+			throws CoreException {
 		try {
 			Job job = new CreateMarkerJob(feature + "§" + id, res, start, end,
-					feature, MARKER);
+					feature, getMarker(color));
 			job.setPriority(Job.SHORT);
 			job.schedule();
 		} catch (Exception e) {
@@ -65,12 +70,36 @@ public class CodeMarkerFactory {
 	 * returns a list of a resources markers
 	 */
 	public static List<IMarker> findMarkers(IResource resource) {
-		try {
-			return Arrays.asList(resource.findMarkers(MARKER, true,
-					IResource.DEPTH_ZERO));
-		} catch (CoreException e) {
-			return new ArrayList<IMarker>();
+		if (markers.isEmpty()) {
+			markers.add(MARKER_YELLOW);
+			markers.add(MARKER_GREEN);
+			markers.add(MARKER_BLUE);
 		}
+		List<IMarker> returnList = new ArrayList<IMarker>();
+		for (String marker : markers) {
+			try {
+				returnList.addAll(Arrays.asList(resource.findMarkers(
+						marker, true, IResource.DEPTH_INFINITE)));
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
+		return returnList;
+	}
+
+	private static String getMarker(CodeHighlighting color) {
+		if (color == null) {
+			color = CodeHighlighting.YELLOW;
+		}
+		String marker = "";
+		if (color.equals(CodeHighlighting.YELLOW)) {
+			marker = MARKER_YELLOW;
+		} else if (color.equals(CodeHighlighting.BLUE)) {
+			marker = MARKER_BLUE;
+		} else if (color.equals(CodeHighlighting.GREEN)) {
+			marker = MARKER_GREEN;
+		}
+		return marker;
 	}
 
 	/*
@@ -78,12 +107,21 @@ public class CodeMarkerFactory {
 	 * resource of the resource
 	 */
 	public static List<IMarker> findAllMarkers(IResource resource) {
-		try {
-			return Arrays.asList(resource.findMarkers(MARKER, true,
-					IResource.DEPTH_INFINITE));
-		} catch (CoreException e) {
-			return new ArrayList<IMarker>();
+		if (markers.isEmpty()) {
+			markers.add(MARKER_YELLOW);
+			markers.add(MARKER_GREEN);
+			markers.add(MARKER_BLUE);
 		}
+		List<IMarker> returnList = new ArrayList<IMarker>();
+		for (String marker : markers) {
+			try {
+				returnList.addAll(Arrays.asList(resource.findMarkers(marker,
+						true, IResource.DEPTH_INFINITE)));
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
+		return returnList;
 	}
 
 	/*

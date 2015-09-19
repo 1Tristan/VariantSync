@@ -4,8 +4,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -17,11 +21,11 @@ import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.Util;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeLine;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerHandler;
 import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerInformation;
@@ -42,10 +46,12 @@ class ContextHandler {
 			.getPersistanceOperations();
 	private Context activeContext;
 	private static final String DEFAULT_CONTEXT = "Default";
+	private boolean isActive;
 
 	private ContextHandler() {
 		contextMap = new HashMap<String, Context>();
 		colorMap = new HashMap<String, RGB>();
+		isActive = false;
 	}
 
 	public static ContextHandler getInstance() {
@@ -79,9 +85,13 @@ class ContextHandler {
 		storageLocation += filename;
 		persistenceOp.saveContext(activeContext, storageLocation);
 		// activeContext = contextMap.get(DEFAULT_CONTEXT);
+		isActive = false;
 	}
 
 	public void startNewContext(String featureExpression) {
+		if (isActive) {
+			stopRecording();
+		}
 		if (activeContext != null) {
 			contextMap.put(activeContext.getFeatureExpression(), activeContext);
 		}
@@ -90,6 +100,7 @@ class ContextHandler {
 		} else {
 			activeContext = new Context(featureExpression);
 		}
+		isActive = true;
 	}
 
 	public void recordCodeChange(String projectName, String pathToProject,
@@ -137,13 +148,42 @@ class ContextHandler {
 
 	private List<MarkerInformation> initMarker(Context context,
 			String projectName, String className) {
-		List<MarkerInformation> markers = new ArrayList<MarkerInformation>();
-
+		Set<MarkerInformation> markers = new HashSet<MarkerInformation>();
+		Map<String, List<JavaClass>> classes = ModuleFactory
+				.getContextOperations().findJavaClass(projectName, className);
+		Set<Entry<String, List<JavaClass>>> set = classes.entrySet();
+		Iterator<Entry<String, List<JavaClass>>> it = set.iterator();
+		while (it.hasNext()) {
+			Entry<String, List<JavaClass>> entry = it.next();
+			List<JavaClass> listClasses = entry.getValue();
+			for (JavaClass c : listClasses) {
+				List<CodeLine> cls = c.getCodeLines();
+				int i = 0;
+				List<CodeLine> tmp = new ArrayList<CodeLine>();
+				for (CodeLine cl : cls) {
+					tmp.add(cl);
+					if (cls.size() > i + 1
+							&& cls.get(i + 1).getLine() == cl.getLine() + 1) {
+						tmp.add(cls.get(i + 1));
+					} else {
+						MarkerInformation mi = new MarkerInformation(0, tmp
+								.get(0).getLine(), tmp.get(tmp.size() - 1)
+								.getLine(), 0, 0);
+						mi.setFeature(entry.getKey());
+						mi.setColor(ModuleFactory.getContextOperations()
+								.findColor(entry.getKey()));
+						markers.add(mi);
+						tmp.clear();
+					}
+					i++;
+				}
+			}
+		}
 		JavaProject jp = context.getJavaProject(projectName);
 		List<JavaElement> elements = jp.getChildren();
-		List<JavaClass> classes = new ArrayList<JavaClass>();
-		Util.getClassesByClassName(elements, classes, className);
-		for (JavaClass c : classes) {
+		List<JavaClass> cc = new ArrayList<JavaClass>();
+		Util.getClassesByClassName(elements, cc, className);
+		for (JavaClass c : cc) {
 			List<CodeLine> cls = c.getCodeLines();
 			int i = 0;
 			List<CodeLine> tmp = new ArrayList<CodeLine>();
@@ -156,14 +196,14 @@ class ContextHandler {
 					MarkerInformation mi = new MarkerInformation(0, tmp.get(0)
 							.getLine(), tmp.get(tmp.size() - 1).getLine(), 0, 0);
 					mi.setFeature(context.getFeatureExpression());
+					mi.setColor(context.getColor());
 					markers.add(mi);
 					tmp.clear();
 				}
 				i++;
 			}
-
 		}
-		return markers;
+		return new ArrayList<MarkerInformation>(markers);
 	}
 
 	public void addContext(Context c) {

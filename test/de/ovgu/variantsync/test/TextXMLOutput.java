@@ -12,9 +12,9 @@ import org.junit.Test;
 
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeLine;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 
 public class TextXMLOutput {

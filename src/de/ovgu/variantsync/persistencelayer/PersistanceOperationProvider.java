@@ -9,10 +9,10 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FolderOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.XMLException;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 
 /**
@@ -98,6 +98,9 @@ public class PersistanceOperationProvider implements IPersistanceOperations {
 
 	@Override
 	public void saveContext(Context context, String path) {
+		System.out.println("\n================ CONTEXT SAVED ================");
+		System.out.println(context.toString());
+		System.out.println("===============================================\n");
 		JaxbOperations.writeContext(context, path);
 	}
 

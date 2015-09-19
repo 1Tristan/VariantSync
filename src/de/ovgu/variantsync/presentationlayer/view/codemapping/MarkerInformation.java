@@ -1,5 +1,7 @@
 package de.ovgu.variantsync.presentationlayer.view.codemapping;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
+
 public class MarkerInformation {
 
 	private long markerId;
@@ -8,6 +10,7 @@ public class MarkerInformation {
 	private int offset;
 	private int length;
 	private String feature;
+	private CodeHighlighting color;
 
 	public MarkerInformation(long markerId, int start, int end, int offset,
 			int length) {
@@ -73,6 +76,21 @@ public class MarkerInformation {
 	 */
 	public void setFeature(String feature) {
 		this.feature = feature;
+	}
+
+	/**
+	 * @return the color
+	 */
+	public CodeHighlighting getColor() {
+		return color;
+	}
+
+	/**
+	 * @param color
+	 *            the color to set
+	 */
+	public void setColor(CodeHighlighting color) {
+		this.color = color;
 	}
 
 }

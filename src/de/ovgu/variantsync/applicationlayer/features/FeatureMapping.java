@@ -2,9 +2,9 @@ package de.ovgu.variantsync.applicationlayer.features;
 
 import java.util.List;
 
-import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeFragment;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeFragment;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.applicationlayer.features.mapping.ClassMapping;
 import de.ovgu.variantsync.applicationlayer.features.mapping.CodeMapping;
 import de.ovgu.variantsync.applicationlayer.features.mapping.IMappingOperations;

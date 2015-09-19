@@ -2,16 +2,13 @@ package de.ovgu.variantsync;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -30,7 +27,7 @@ import org.osgi.framework.BundleContext;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.ContextProvider;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 import de.ovgu.variantsync.applicationlayer.deltacalculation.DeltaOperationProvider;
 import de.ovgu.variantsync.applicationlayer.features.FeatureProvider;
@@ -42,7 +39,7 @@ import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerTypes;
 import de.ovgu.variantsync.presentationlayer.view.AbstractView;
-import de.ovgu.variantsync.presentationlayer.view.codemapping.CodeMarkerFactory;
+import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerHandler;
 import de.ovgu.variantsync.presentationlayer.view.console.ChangeOutPutConsole;
 import de.ovgu.variantsync.presentationlayer.view.context.PartAdapter;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
@@ -365,20 +362,7 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 	private void removeAllMarkers() {
 		List<IProject> projects = getSupportProjectList();
 		for (IProject p : projects) {
-			try {
-				List<IMarker> markers = Arrays.asList(p.findMarkers(
-						CodeMarkerFactory.MARKER, true,
-						IResource.DEPTH_INFINITE));
-				for (IMarker marker : markers) {
-					try {
-						marker.delete();
-					} catch (CoreException e) {
-						e.printStackTrace();
-					}
-				}
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
+			MarkerHandler.getInstance().clearAllMarker(p);
 		}
 	}
 

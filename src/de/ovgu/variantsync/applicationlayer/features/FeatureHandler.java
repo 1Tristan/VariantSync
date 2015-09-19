@@ -21,8 +21,8 @@ import de.ovgu.featureide.fm.core.configuration.ConfigurationReader;
 import de.ovgu.featureide.fm.core.io.FeatureModelReaderIFileWrapper;
 import de.ovgu.featureide.fm.core.io.UnsupportedModelException;
 import de.ovgu.featureide.fm.core.io.xml.XmlFeatureModelReader;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FeatureException;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
 
 /**
  * Provides functions to read and check features and feature configurations of

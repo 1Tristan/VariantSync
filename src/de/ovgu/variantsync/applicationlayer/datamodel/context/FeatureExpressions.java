@@ -1,4 +1,4 @@
-package de.ovgu.variantsync.applicationlayer.datamodel.features;
+package de.ovgu.variantsync.applicationlayer.datamodel.context;
 
 import java.util.Collection;
 import java.util.HashSet;

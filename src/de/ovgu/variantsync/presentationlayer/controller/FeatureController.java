@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.IPath;
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.featureide.fm.core.FeatureModel;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.FeatureExpressions;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.features.IFeatureOperations;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;

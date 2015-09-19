@@ -15,8 +15,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.EditorPart;
 
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.CodeLine;
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaClass;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
 import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerHandler;
 import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerInformation;
 
@@ -72,6 +72,7 @@ public class PartAdapter implements IPartListener {
 										tmp.get(0).getLine(), tmp.get(
 												tmp.size() - 1).getLine(), 0, 0);
 								mi.setFeature(entry.getKey());
+								mi.setColor(contextOp.findColor(entry.getKey()));
 								markers.add(mi);
 								tmp.clear();
 							}

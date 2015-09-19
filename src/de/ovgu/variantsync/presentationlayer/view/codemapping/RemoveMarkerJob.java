@@ -2,8 +2,8 @@ package de.ovgu.variantsync.presentationlayer.view.codemapping;
 
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -12,20 +12,20 @@ import org.eclipse.core.runtime.jobs.Job;
 
 public class RemoveMarkerJob extends Job {
 
-	private IFile file;
+	private IResource res;
 
 	public RemoveMarkerJob(String name) {
 		super(name);
 	}
 
-	public RemoveMarkerJob(IFile file) {
-		super(file.getName());
-		this.file = file;
+	public RemoveMarkerJob(IResource res) {
+		super(res.getName());
+		this.res = res;
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor arg0) {
-		List<IMarker> markers = CodeMarkerFactory.findMarkers(file);
+		List<IMarker> markers = CodeMarkerFactory.findMarkers(res);
 		for (IMarker marker : markers) {
 			try {
 				marker.delete();

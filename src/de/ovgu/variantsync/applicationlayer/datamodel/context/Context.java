@@ -3,11 +3,8 @@ package de.ovgu.variantsync.applicationlayer.datamodel.context;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.eclipse.swt.graphics.RGB;
-
-import de.ovgu.variantsync.applicationlayer.datamodel.features.JavaProject;
 
 /**
  * 
@@ -21,15 +18,17 @@ public class Context {
 
 	private String featureExpression;
 	private Map<String, JavaProject> javaProjects;
-	private RGB color;
+	private CodeHighlighting color;
 
 	public Context() {
 		this.javaProjects = new HashMap<String, JavaProject>();
+		this.color = CodeHighlighting.YELLOW;
 	}
 
 	public Context(String featureExpression) {
 		this.featureExpression = featureExpression;
 		this.javaProjects = new HashMap<String, JavaProject>();
+		this.color = CodeHighlighting.YELLOW;
 	}
 
 	public void initProject(String projectName, String pathToProject) {
@@ -93,7 +92,7 @@ public class Context {
 	/**
 	 * @return the color
 	 */
-	public RGB getColor() {
+	public CodeHighlighting getColor() {
 		return color;
 	}
 
@@ -101,13 +100,14 @@ public class Context {
 	 * @param color
 	 *            the color to set
 	 */
-	public void setColor(RGB color) {
+	public void setColor(CodeHighlighting color) {
 		this.color = color;
 	}
 
 	/**
 	 * @return the javaProjects
 	 */
+	@XmlElement(name = "color")
 	public Map<String, JavaProject> getJavaProjects() {
 		return javaProjects;
 	}
