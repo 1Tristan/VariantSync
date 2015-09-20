@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.swt.graphics.RGB;
 
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
 import de.ovgu.variantsync.applicationlayer.Util;
@@ -36,11 +35,7 @@ public class ContextProvider extends AbstractModel implements
 
 	@Override
 	public void activateContext(String featureExpression) {
-		if (contextHandler.existsContext(featureExpression)) {
-			contextHandler.continueRecording(featureExpression);
-		} else {
-			contextHandler.startNewContext(featureExpression);
-		}
+		contextHandler.activateContext(featureExpression);
 	}
 
 	@Override
@@ -65,7 +60,7 @@ public class ContextProvider extends AbstractModel implements
 	}
 
 	@Override
-	public void setContextColor(String featureExpression, RGB color) {
+	public void setContextColor(String featureExpression, CodeHighlighting color) {
 		contextHandler.setContextColor(featureExpression, color);
 	}
 
@@ -121,6 +116,11 @@ public class ContextProvider extends AbstractModel implements
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public Context getContext(String featureExpression) {
+		return ContextHandler.getInstance().getContext(featureExpression);
 	}
 
 }

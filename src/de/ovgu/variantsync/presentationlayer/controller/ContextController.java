@@ -1,7 +1,5 @@
 package de.ovgu.variantsync.presentationlayer.controller;
 
-import org.eclipse.swt.graphics.RGB;
-
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 
@@ -31,11 +29,8 @@ public class ContextController extends AbstractController {
 		contextOperations.activateContext(featureExpression);
 	}
 
-	public void setContextColor(String featureExpression, RGB color) {
-		contextOperations.setContextColor(featureExpression, color);
-	}
-
 	public void stopContextRecording() {
 		contextOperations.stopRecording();
 	}
+
 }

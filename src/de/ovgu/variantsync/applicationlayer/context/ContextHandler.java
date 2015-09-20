@@ -1,6 +1,5 @@
 package de.ovgu.variantsync.applicationlayer.context;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,20 +14,20 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.swt.graphics.RGB;
 
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.Util;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
-import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerHandler;
 import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerInformation;
+import de.ovgu.variantsync.presentationlayer.view.context.MarkerHandler;
 
 /**
  * 
@@ -39,19 +38,14 @@ import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerInformation;
  */
 class ContextHandler {
 
-	private Map<String, RGB> colorMap;
 	private Map<String, Context> contextMap;
 	private static ContextHandler instance;
 	private IPersistanceOperations persistenceOp = ModuleFactory
 			.getPersistanceOperations();
 	private Context activeContext;
-	private static final String DEFAULT_CONTEXT = "Default";
-	private boolean isActive;
 
 	private ContextHandler() {
 		contextMap = new HashMap<String, Context>();
-		colorMap = new HashMap<String, RGB>();
-		isActive = false;
 	}
 
 	public static ContextHandler getInstance() {
@@ -61,7 +55,15 @@ class ContextHandler {
 		return instance;
 	}
 
-	public boolean existsContext(String featureExpression) {
+	public void activateContext(String featureExpression) {
+		if (existsContext(featureExpression)) {
+			continueRecording(featureExpression);
+		} else {
+			startContext(featureExpression);
+		}
+	}
+
+	private boolean existsContext(String featureExpression) {
 		return getContext(featureExpression) != null;
 	}
 
@@ -72,78 +74,58 @@ class ContextHandler {
 	public void stopRecording() {
 		if (activeContext != null) {
 			contextMap.put(activeContext.getFeatureExpression(), activeContext);
+			persistenceOp.saveContext(activeContext,
+					Util.parseStorageLocation(activeContext));
 		}
-		String storageLocation = VariantSyncPlugin.getDefault()
-				.getWorkspaceLocation() + VariantSyncConstants.CONTEXT_PATH;
-		String filename = "/" + activeContext.getFeatureExpression() + ".xml";
-
-		// creates target folder if it does not already exist
-		File folder = new File(storageLocation);
-		if (!folder.exists()) {
-			folder.mkdirs();
-		}
-		storageLocation += filename;
-		persistenceOp.saveContext(activeContext, storageLocation);
-		// activeContext = contextMap.get(DEFAULT_CONTEXT);
-		isActive = false;
+		activateContext(VariantSyncConstants.DEFAULT_CONTEXT);
 	}
 
-	public void startNewContext(String featureExpression) {
-		if (isActive) {
-			stopRecording();
-		}
+	private void startContext(String featureExpression) {
 		if (activeContext != null) {
 			contextMap.put(activeContext.getFeatureExpression(), activeContext);
+			persistenceOp.saveContext(activeContext,
+					Util.parseStorageLocation(activeContext));
 		}
 		if (contextMap.containsKey(featureExpression)) {
 			activeContext = getContext(featureExpression);
 		} else {
 			activeContext = new Context(featureExpression);
 		}
-		isActive = true;
 	}
 
 	public void recordCodeChange(String projectName, String pathToProject,
 			List<String> changedCode, String className, String packageName) {
-		if (activeContext != null) {
-			if (!activeContext.containsProject(projectName)) {
-				activeContext.initProject(projectName, pathToProject);
-			}
-			ContextAlgorithm ca = new ContextAlgorithm(activeContext);
-			ca.addCode(projectName, packageName, className, changedCode);
-			UpdateAlgorithm ua = new UpdateAlgorithm();
-			ua.updateCode(projectName, packageName, className, changedCode,
-					activeContext.getFeatureExpression());
-
-			String file = "/src/" + packageName + "/" + className;
-			file = file.replace(".", "/");
-			file = file.replace("/java", ".java");
-			IPath path = new Path(file);
-			List<IProject> projects = VariantSyncPlugin.getDefault()
-					.getSupportProjectList();
-			IProject iProject = null;
-			for (IProject p : projects) {
-				if (p.getName().equals(projectName)) {
-					iProject = p;
-					break;
-				}
-			}
-			IFile iFile = iProject.getFile(path);
-			MarkerHandler.getInstance().clearAllMarker(iFile);
-			List<MarkerInformation> markers = initMarker(
-					activeContext,
-					projectName,
-					iFile.toString().substring(
-							iFile.toString().lastIndexOf("/") + 1));
-
-			MarkerHandler.getInstance().setMarker(iFile, markers);
-		} else {
-
-			// TODO: default context immer dann aktivieren, wenn kein anderer
-			// Context aktiv ist + beim Start von Eclipse aktivieren!
-
-			// activeContext = contextMap.get(DEFAULT_CONTEXT);
+		if (!activeContext.containsProject(projectName)) {
+			activeContext.initProject(projectName, pathToProject);
 		}
+		ContextAlgorithm ca = new ContextAlgorithm(activeContext);
+		ca.addCode(projectName, packageName, className, changedCode);
+		UpdateAlgorithm ua = new UpdateAlgorithm();
+		ua.updateCode(projectName, packageName, className, changedCode,
+				activeContext.getFeatureExpression());
+
+		String file = "/src/" + packageName + "/" + className;
+		file = file.replace(".", "/");
+		file = file.replace("/java", ".java");
+		IPath path = new Path(file);
+		List<IProject> projects = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		IProject iProject = null;
+		for (IProject p : projects) {
+			if (p.getName().equals(projectName)) {
+				iProject = p;
+				break;
+			}
+		}
+		IFile iFile = iProject.getFile(path);
+		MarkerHandler.getInstance().clearAllMarker(iFile);
+		List<MarkerInformation> markers = initMarker(
+				activeContext,
+				projectName,
+				iFile.toString().substring(
+						iFile.toString().lastIndexOf("/") + 1));
+
+		MarkerHandler.getInstance().setMarker(iFile, markers);
 	}
 
 	private List<MarkerInformation> initMarker(Context context,
@@ -218,12 +200,12 @@ class ContextHandler {
 		return contextMap.values();
 	}
 
-	public void setContextColor(String featureExpression, RGB color) {
-		colorMap.put(featureExpression, color);
-	}
-
-	public RGB getColor(String featureExpression) {
-		return colorMap.get(featureExpression);
+	public void setContextColor(String featureExpression, CodeHighlighting color) {
+		Context c = contextMap.get(featureExpression);
+		if (c != null) {
+			c.setColor(color);
+			persistenceOp.saveContext(c, Util.parseStorageLocation(c));
+		}
 	}
 
 	/**

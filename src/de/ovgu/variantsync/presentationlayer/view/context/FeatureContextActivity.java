@@ -54,8 +54,9 @@ public class FeatureContextActivity extends AbstractHandler implements
 				isEnabled = false;
 			}
 		} else {
-			MessageDialog.openInformation(display.getActiveShell(), "Info",
-					"There is no active context.");
+			MessageDialog
+					.openInformation(display.getActiveShell(), "Info",
+							"You have not chosen a context. So, the default context is active.");
 		}
 		return null;
 	}
@@ -83,7 +84,7 @@ public class FeatureContextActivity extends AbstractHandler implements
 			staticElement.setTooltip("Project: " + project);
 		}
 		if (context == null || context.capacity() == 0) {
-			context.append("context not active");
+			context.append("default context active");
 		}
 		staticElement.setIcon(VariantSyncPlugin.imageDescriptorFromPlugin(
 				VariantSyncConstants.PLUGIN_ID, "icons/activeContext.png"));

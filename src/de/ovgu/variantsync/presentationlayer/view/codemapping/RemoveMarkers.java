@@ -22,6 +22,7 @@ import org.eclipse.ui.PlatformUI;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
+import de.ovgu.variantsync.presentationlayer.view.context.MarkerHandler;
 
 public class RemoveMarkers implements IEditorActionDelegate {
 

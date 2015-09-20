@@ -6,6 +6,8 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import de.ovgu.variantsync.VariantSyncConstants;
+
 /**
  * 
  *
@@ -28,7 +30,11 @@ public class Context {
 	public Context(String featureExpression) {
 		this.featureExpression = featureExpression;
 		this.javaProjects = new HashMap<String, JavaProject>();
-		this.color = CodeHighlighting.YELLOW;
+		if (featureExpression.equals(VariantSyncConstants.DEFAULT_CONTEXT)) {
+			this.color = CodeHighlighting.DEFAULTCONTEXT;
+		} else {
+			this.color = CodeHighlighting.YELLOW;
+		}
 	}
 
 	public void initProject(String projectName, String pathToProject) {

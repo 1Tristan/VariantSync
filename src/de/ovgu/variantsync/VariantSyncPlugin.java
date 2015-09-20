@@ -25,6 +25,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.osgi.framework.BundleContext;
 
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.Util;
 import de.ovgu.variantsync.applicationlayer.context.ContextProvider;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
@@ -39,8 +40,8 @@ import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerTypes;
 import de.ovgu.variantsync.presentationlayer.view.AbstractView;
-import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerHandler;
 import de.ovgu.variantsync.presentationlayer.view.console.ChangeOutPutConsole;
+import de.ovgu.variantsync.presentationlayer.view.context.MarkerHandler;
 import de.ovgu.variantsync.presentationlayer.view.context.PartAdapter;
 import de.ovgu.variantsync.presentationlayer.view.eclipseadjustment.VSyncSupportProjectNature;
 import de.ovgu.variantsync.utilitylayer.UtilityModel;
@@ -106,7 +107,7 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		IWorkbenchPage page = ww.getActivePage();
 		if (page == null)
 			return;
-		page.addPartListener(new PartAdapter(contextOp));
+		page.addPartListener(new PartAdapter());
 	}
 
 	@Override
@@ -121,6 +122,13 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		}
 		persistenceOp.saveFeatureExpressions(featureOp.getFeatureExpressions(),
 				path);
+
+		// stop default-context or any other active context
+		contextOp.stopRecording();
+		persistenceOp.saveContext(contextOp
+				.getContext(VariantSyncConstants.DEFAULT_CONTEXT), Util
+				.parseStorageLocation(contextOp
+						.getContext(VariantSyncConstants.DEFAULT_CONTEXT)));
 		plugin = null;
 		try {
 			super.stop(context);
@@ -215,6 +223,7 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 				contextOp.addContext(persistenceOp.loadContext(f.getPath()));
 			}
 		}
+		contextOp.activateContext(VariantSyncConstants.DEFAULT_CONTEXT);
 	}
 
 	/**

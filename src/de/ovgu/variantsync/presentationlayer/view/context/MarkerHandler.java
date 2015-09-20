@@ -1,8 +1,12 @@
-package de.ovgu.variantsync.presentationlayer.view.codemapping;
+package de.ovgu.variantsync.presentationlayer.view.context;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -14,6 +18,13 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 import de.ovgu.variantsync.VariantSyncPlugin;
+import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
+import de.ovgu.variantsync.presentationlayer.view.codemapping.CodeMarkerFactory;
+import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerInformation;
+import de.ovgu.variantsync.presentationlayer.view.codemapping.RemoveMarkerJob;
 
 /**
  * 
@@ -25,6 +36,8 @@ import de.ovgu.variantsync.VariantSyncPlugin;
 public class MarkerHandler {
 
 	private Map<Long, MarkerInformation> markerMap;
+	private IContextOperations contextOp = ModuleFactory.getContextOperations();
+	private IFile activeFile;
 
 	private static MarkerHandler instance;
 
@@ -99,4 +112,56 @@ public class MarkerHandler {
 			i++;
 		}
 	}
+
+	public void refreshMarker(IFile file) {
+
+		// file is null, if marker of active file have to be refreshed
+		if (file == null) {
+			file = activeFile;
+
+			// if a new file is active then the active file will be stored
+		} else {
+			activeFile = file;
+		}
+		String projectName = file.getProject().getName();
+		String fileName = file.getName();
+		Map<String, List<JavaClass>> classes = contextOp.findJavaClass(
+				projectName, fileName);
+
+		MarkerHandler.getInstance().clearAllMarker(file);
+		List<MarkerInformation> markers = new ArrayList<MarkerInformation>();
+		Set<Entry<String, List<JavaClass>>> set = classes.entrySet();
+		Iterator<Entry<String, List<JavaClass>>> it = set.iterator();
+		while (it.hasNext()) {
+			Entry<String, List<JavaClass>> entry = it.next();
+			List<JavaClass> listClasses = entry.getValue();
+			for (JavaClass c : listClasses) {
+				List<CodeLine> cls = c.getCodeLines();
+				int i = 0;
+				List<CodeLine> tmp = new ArrayList<CodeLine>();
+				for (CodeLine cl : cls) {
+					tmp.add(cl);
+					if (cls.size() > i + 1
+							&& cls.get(i + 1).getLine() == cl.getLine() + 1) {
+						tmp.add(cls.get(i + 1));
+					} else {
+						MarkerInformation mi = new MarkerInformation(0, tmp
+								.get(0).getLine(), tmp.get(tmp.size() - 1)
+								.getLine(), 0, 0);
+						mi.setFeature(entry.getKey());
+						mi.setColor(contextOp.findColor(entry.getKey()));
+						markers.add(mi);
+						tmp.clear();
+					}
+					i++;
+				}
+			}
+			try {
+				MarkerHandler.getInstance().setMarker(file, markers);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 }

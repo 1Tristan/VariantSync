@@ -20,7 +20,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -29,7 +28,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -45,7 +43,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.PlatformUI;
 
-import de.ovgu.featureide.fm.core.Operator;
 import de.ovgu.featureide.fm.ui.editors.featuremodel.GUIDefaults;
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
@@ -63,6 +60,7 @@ public class FeatureManagementDialog {
 	private Button okButton;
 	private Button closeButton;
 	private Button deleteButton;
+	private Button colorButton;
 	private StyledText searchFeatureText;
 	private Table featureTable;
 	private String defaultDetailsText = "Create new feature expressions or delete selected feature expressions.";
@@ -200,32 +198,6 @@ public class FeatureManagementDialog {
 
 			}
 		});
-		featureTable.addListener(SWT.MouseDoubleClick, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				TableItem[] selectedItem = featureTable.getSelection();
-				String featureName = selectedItem[0].getText();
-				if (featureName.matches(".*\\s.*")) {
-					featureName = "\"" + featureName + "\"";
-				} else {
-					for (String op : Operator.NAMES) {
-						if (featureName.equals(op.toLowerCase())) {
-							featureName = "\"" + featureName + "\"";
-							break;
-						}
-					}
-				}
-				ColorDialog cd = new ColorDialog(shell);
-				cd.setText("Choose color for selected feature expression");
-				cd.setRGB(new RGB(255, 255, 255));
-				RGB newColor = cd.open();
-				if (newColor == null) {
-					return;
-				}
-				ControllerHandler.getInstance().getContextController()
-						.setContextColor(featureName, newColor);
-			}
-		});
 		searchFeatureText.addListener(SWT.FocusIn, new Listener() {
 
 			@Override
@@ -295,7 +267,15 @@ public class FeatureManagementDialog {
 		formDataOk.bottom = new FormAttachment(100, -5);
 		okButton.setLayoutData(formDataOk);
 
+		colorButton = new Button(lastComposite, SWT.NONE);
+		colorButton.setText("Color");
+		FormData formDataColor = new FormData();
+		formDataColor.width = 70;
+		formDataColor.right = new FormAttachment(okButton, -5);
+		formDataColor.bottom = new FormAttachment(100, -5);
+
 		closeButton.setLayoutData(formDataCancel);
+		colorButton.setLayoutData(formDataColor);
 		deleteButton.setLayoutData(formDataDelete);
 
 		shell.setTabList(new Control[] { featureGroup, lastComposite });
@@ -327,9 +307,22 @@ public class FeatureManagementDialog {
 						}
 					}
 				});
+		colorButton
+				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+					public void widgetSelected(
+							org.eclipse.swt.events.SelectionEvent e) {
+						Display.getDefault().syncExec(new Runnable() {
+							public void run() {
+								new CustomColorDialog(featureController
+										.getFeatureExpressions()
+										.getFeatureExpressions());
+							}
+						});
+					}
+				});
 
-		lastComposite.setTabList(new Control[] { okButton, deleteButton,
-				closeButton });
+		lastComposite.setTabList(new Control[] { colorButton, okButton,
+				deleteButton, closeButton });
 
 		okButton.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {

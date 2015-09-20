@@ -313,7 +313,139 @@
      </specification>
    </extension>
    
-   <!-- Links the annotation spec to the marker -->
+   <extension point="org.eclipse.ui.editors.markerAnnotationSpecification"
+     id="de.ovgu.pfofe.variantsync.codehighlightannotationGrey"
+     name="CodeHighlightGrey">
+     <specification
+          annotationType="codehighlightannotationGrey"
+          label="GreyAnnotation"
+          icon="icons/VariantSyncSupport.png"
+          overviewRulerPreferenceKey="clruler"
+          overviewRulerPreferenceValue="true"
+          colorPreferenceKey="clcolor4"
+          colorPreferenceValue="179,179,179"
+          highlightPreferenceKey="codeHighligthing"
+          highlightPreferenceValue="true"
+          textPreferenceKey="cltext"
+          textPreferenceValue="true"
+          verticalRulerPreferenceKey="clvertical"
+          verticalRulerPreferenceValue="true"
+          textStylePreferenceKey="clstyle"
+          textStylePreferenceValue="BOX">
+     </specification>
+   </extension>
+  
+   <extension point="org.eclipse.ui.editors.markerAnnotationSpecification"
+     id="de.ovgu.pfofe.variantsync.codehighlightannotationSalmon"
+     name="CodeHighlightSalmon">
+     <specification
+          annotationType="codehighlightannotationSalmon"
+          label="GreyAnnotation"
+          icon="icons/VariantSyncSupport.png"
+          overviewRulerPreferenceKey="clruler"
+          overviewRulerPreferenceValue="true"
+          colorPreferenceKey="clcolor5"
+          colorPreferenceValue="255,140,105"
+          highlightPreferenceKey="codeHighligthing"
+          highlightPreferenceValue="true"
+          textPreferenceKey="cltext"
+          textPreferenceValue="true"
+          verticalRulerPreferenceKey="clvertical"
+          verticalRulerPreferenceValue="true"
+          textStylePreferenceKey="clstyle"
+          textStylePreferenceValue="BOX">
+     </specification>
+   </extension>
+   
+   <extension point="org.eclipse.ui.editors.markerAnnotationSpecification"
+     id="de.ovgu.pfofe.variantsync.codehighlightannotationAntiqueWhite"
+     name="CodeHighlightAntiqueWhite">
+     <specification
+          annotationType="codehighlightannotationAntiqueWhite"
+          label="AntiqueWhiteAnnotation"
+          icon="icons/VariantSyncSupport.png"
+          overviewRulerPreferenceKey="clruler"
+          overviewRulerPreferenceValue="true"
+          colorPreferenceKey="clcolor6"
+          colorPreferenceValue="250,235,215"
+          highlightPreferenceKey="codeHighligthing"
+          highlightPreferenceValue="true"
+          textPreferenceKey="cltext"
+          textPreferenceValue="true"
+          verticalRulerPreferenceKey="clvertical"
+          verticalRulerPreferenceValue="true"
+          textStylePreferenceKey="clstyle"
+          textStylePreferenceValue="BOX">
+     </specification>
+   </extension>
+   
+   <extension point="org.eclipse.ui.editors.markerAnnotationSpecification"
+     id="de.ovgu.pfofe.variantsync.codehighlightannotationSpringGreen"
+     name="CodeHighlightSpringGreen">
+     <specification
+          annotationType="codehighlightannotationSpringGreen"
+          label="SpringGreenAnnotation"
+          icon="icons/VariantSyncSupport.png"
+          overviewRulerPreferenceKey="clruler"
+          overviewRulerPreferenceValue="true"
+          colorPreferenceKey="clcolor7"
+          colorPreferenceValue="0,255,127"
+          highlightPreferenceKey="codeHighligthing"
+          highlightPreferenceValue="true"
+          textPreferenceKey="cltext"
+          textPreferenceValue="true"
+          verticalRulerPreferenceKey="clvertical"
+          verticalRulerPreferenceValue="true"
+          textStylePreferenceKey="clstyle"
+          textStylePreferenceValue="BOX">
+     </specification>
+   </extension>
+   
+   <extension point="org.eclipse.ui.editors.markerAnnotationSpecification"
+     id="de.ovgu.pfofe.variantsync.codehighlightannotationDarkSlateGrey"
+     name="CodeHighlightDarkSlateGrey">
+     <specification
+          annotationType="codehighlightannotationDarkSlateGrey"
+          label="DarkSlateGreyAnnotation"
+          icon="icons/VariantSyncSupport.png"
+          overviewRulerPreferenceKey="clruler"
+          overviewRulerPreferenceValue="true"
+          colorPreferenceKey="clcolor8"
+          colorPreferenceValue="151,255,255"
+          highlightPreferenceKey="codeHighligthing"
+          highlightPreferenceValue="true"
+          textPreferenceKey="cltext"
+          textPreferenceValue="true"
+          verticalRulerPreferenceKey="clvertical"
+          verticalRulerPreferenceValue="true"
+          textStylePreferenceKey="clstyle"
+          textStylePreferenceValue="BOX">
+     </specification>
+   </extension>
+   
+   <extension point="org.eclipse.ui.editors.markerAnnotationSpecification"
+     id="de.ovgu.pfofe.variantsync.codehighlightannotationDefaultContext"
+     name="CodeHighlightDefaultContext">
+     <specification
+          annotationType="codehighlightannotationDefaultContext"
+          label="DefaultContextAnnotation"
+          icon="icons/defaultContext.png"
+          overviewRulerPreferenceKey="clruler"
+          overviewRulerPreferenceValue="true"
+          colorPreferenceKey="clcolor9"
+          colorPreferenceValue="255,255,255"
+          highlightPreferenceKey="codeHighligthing"
+          highlightPreferenceValue="true"
+          textPreferenceKey="cltext"
+          textPreferenceValue="true"
+          verticalRulerPreferenceKey="clvertical"
+          verticalRulerPreferenceValue="true"
+          textStylePreferenceKey="clstyle"
+          textStylePreferenceValue="BOX">
+     </specification>
+   </extension>
+      
+   <!-- Links the annotation spec (color) to the marker -->
 	<extension point="org.eclipse.ui.editors.annotationTypes">
       <type
             markerSeverity="0"
@@ -321,23 +453,63 @@
             name="codehighlightannotationYellow"
             markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerYellow"/>
    </extension>
-   
    <extension point="org.eclipse.ui.editors.annotationTypes">
       <type
             markerSeverity="0"
             super="org.eclipse.ui.workbench.texteditor.info"
             name="codehighlightannotationGreen"
             markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerGreen"/>
-   </extension>
-   
+   </extension> 
    <extension point="org.eclipse.ui.editors.annotationTypes">
       <type
             markerSeverity="0"
             super="org.eclipse.ui.workbench.texteditor.info"
             name="codehighlightannotationBlue"
             markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerBlue"/>
+   </extension>   
+   <extension point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerSeverity="0"
+            super="org.eclipse.ui.workbench.texteditor.info"
+            name="codehighlightannotationGrey"
+            markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerGrey"/>
+   </extension> 
+   <extension point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerSeverity="0"
+            super="org.eclipse.ui.workbench.texteditor.info"
+            name="codehighlightannotationSalmon"
+            markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerSalmon"/>
    </extension>
-   
+   <extension point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerSeverity="0"
+            super="org.eclipse.ui.workbench.texteditor.info"
+            name="codehighlightannotationAntiqueWhite"
+            markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerAntiqueWhite"/>
+   </extension>
+   <extension point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerSeverity="0"
+            super="org.eclipse.ui.workbench.texteditor.info"
+            name="codehighlightannotationSpringGreen"
+            markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerSpringGreen"/>
+   </extension>
+   <extension point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerSeverity="0"
+            super="org.eclipse.ui.workbench.texteditor.info"
+            name="codehighlightannotationDarkSlateGrey"
+            markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerDarkSlateGrey"/>
+   </extension>
+   <extension point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerSeverity="0"
+            super="org.eclipse.ui.workbench.texteditor.info"
+            name="codehighlightannotationDefaultContext"
+            markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerDefaultContext"/>
+   </extension>
+      
   <!-- define the marker updater class-->
   <extension point="org.eclipse.ui.editors.markerUpdaters">
       <updater
@@ -412,7 +584,7 @@
                    id="de.ovgu.variantsync.toolbar.ActiveFeatureContextCommand"
                    tooltip="show active feature expression"
                    icon="icons/activeContext.png"
-                   label="active feature context"
+                   label="default context active"
                    mode="FORCE_TEXT"
                    style="push">
              	</command>
