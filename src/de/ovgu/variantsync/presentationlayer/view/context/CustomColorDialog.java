@@ -30,11 +30,11 @@ public class CustomColorDialog {
 	private Color color;
 	private IContextOperations contextOp = ModuleFactory.getContextOperations();
 	private static final CodeHighlighting[] BUTTONS = {
-			CodeHighlighting.YELLOW, CodeHighlighting.BLUE,
-			CodeHighlighting.ANTIQUEWHITE, CodeHighlighting.SALMON,
-			CodeHighlighting.GREEN, CodeHighlighting.GREY,
-			CodeHighlighting.SPRINGGREEN, CodeHighlighting.DARKSLATEGRAY,
-			CodeHighlighting.DEFAULTCONTEXT };
+			CodeHighlighting.YELLOW, CodeHighlighting.GREEN_BRIGHT,
+			CodeHighlighting.ORANGE, CodeHighlighting.RED,
+			CodeHighlighting.GREEN, CodeHighlighting.PURPLE,
+			CodeHighlighting.PINK, CodeHighlighting.BLUE_BRIGHT,
+			CodeHighlighting.BLUE, CodeHighlighting.DEFAULTCONTEXT };
 
 	public CustomColorDialog(Collection<String> featureExpressions) {
 		Shell shell = new Shell(Display.getCurrent(), SWT.APPLICATION_MODAL
@@ -88,48 +88,53 @@ public class CustomColorDialog {
 								getColor(buttons.getText())));
 						contextOp.setContextColor(fe, CodeHighlighting.YELLOW);
 					} else if (buttons.getText().equals(
-							CodeHighlighting.ANTIQUEWHITE.getColorName())) {
+							CodeHighlighting.GREEN_BRIGHT.getColorName())) {
 						colorLabel.setBackground(new Color(shell.getDisplay(),
 								getColor(buttons.getText())));
 						contextOp.setContextColor(fe,
-								CodeHighlighting.ANTIQUEWHITE);
+								CodeHighlighting.GREEN_BRIGHT);
 					} else if (buttons.getText().equals(
-							CodeHighlighting.BLUE.getColorName())) {
+							CodeHighlighting.ORANGE.getColorName())) {
 						colorLabel.setBackground(new Color(shell.getDisplay(),
 								getColor(buttons.getText())));
-						contextOp.setContextColor(fe, CodeHighlighting.BLUE);
+						contextOp.setContextColor(fe, CodeHighlighting.ORANGE);
 					} else if (buttons.getText().equals(
 							CodeHighlighting.GREEN.getColorName())) {
 						colorLabel.setBackground(new Color(shell.getDisplay(),
 								getColor(buttons.getText())));
 						contextOp.setContextColor(fe, CodeHighlighting.GREEN);
 					} else if (buttons.getText().equals(
-							CodeHighlighting.GREY.getColorName())) {
+							CodeHighlighting.RED.getColorName())) {
 						colorLabel.setBackground(new Color(shell.getDisplay(),
 								getColor(buttons.getText())));
-						contextOp.setContextColor(fe, CodeHighlighting.GREY);
+						contextOp.setContextColor(fe, CodeHighlighting.RED);
 					} else if (buttons.getText().equals(
-							CodeHighlighting.SALMON.getColorName())) {
+							CodeHighlighting.PINK.getColorName())) {
 						colorLabel.setBackground(new Color(shell.getDisplay(),
 								getColor(buttons.getText())));
-						contextOp.setContextColor(fe, CodeHighlighting.SALMON);
+						contextOp.setContextColor(fe, CodeHighlighting.PINK);
 					} else if (buttons.getText().equals(
-							CodeHighlighting.SPRINGGREEN.getColorName())) {
+							CodeHighlighting.BLUE_BRIGHT.getColorName())) {
 						colorLabel.setBackground(new Color(shell.getDisplay(),
 								getColor(buttons.getText())));
 						contextOp.setContextColor(fe,
-								CodeHighlighting.SPRINGGREEN);
+								CodeHighlighting.BLUE_BRIGHT);
 					} else if (buttons.getText().equals(
-							CodeHighlighting.DARKSLATEGRAY.getColorName())) {
+							CodeHighlighting.BLUE.getColorName())) {
 						colorLabel.setBackground(new Color(shell.getDisplay(),
 								getColor(buttons.getText())));
-						contextOp.setContextColor(fe,
-								CodeHighlighting.DARKSLATEGRAY);
+						contextOp.setContextColor(fe, CodeHighlighting.BLUE);
+					} else if (buttons.getText().equals(
+							CodeHighlighting.PURPLE.getColorName())) {
+						colorLabel.setBackground(new Color(shell.getDisplay(),
+								getColor(buttons.getText())));
+						contextOp.setContextColor(fe, CodeHighlighting.PURPLE);
 					} else if (buttons.getText().equals(
 							CodeHighlighting.DEFAULTCONTEXT.getColorName())) {
 						colorLabel.setBackground(new Color(shell.getDisplay(),
 								getColor(buttons.getText())));
-						contextOp.setContextColor(fe, CodeHighlighting.DEFAULTCONTEXT);
+						contextOp.setContextColor(fe,
+								CodeHighlighting.DEFAULTCONTEXT);
 					}
 				}
 			});
@@ -165,20 +170,22 @@ public class CustomColorDialog {
 	private RGB getColor(String color) {
 		if (color.equals(CodeHighlighting.YELLOW.getColorName())) {
 			return CodeHighlighting.YELLOW.getColor();
-		} else if (color.equals(CodeHighlighting.ANTIQUEWHITE.getColorName())) {
-			return CodeHighlighting.ANTIQUEWHITE.getColor();
-		} else if (color.equals(CodeHighlighting.BLUE.getColorName())) {
-			return CodeHighlighting.BLUE.getColor();
+		} else if (color.equals(CodeHighlighting.GREEN_BRIGHT.getColorName())) {
+			return CodeHighlighting.GREEN_BRIGHT.getColor();
+		} else if (color.equals(CodeHighlighting.ORANGE.getColorName())) {
+			return CodeHighlighting.ORANGE.getColor();
 		} else if (color.equals(CodeHighlighting.GREEN.getColorName())) {
 			return CodeHighlighting.GREEN.getColor();
-		} else if (color.equals(CodeHighlighting.GREY.getColorName())) {
-			return CodeHighlighting.GREY.getColor();
-		} else if (color.equals(CodeHighlighting.SALMON.getColorName())) {
-			return CodeHighlighting.SALMON.getColor();
-		} else if (color.equals(CodeHighlighting.DARKSLATEGRAY.getColorName())) {
-			return CodeHighlighting.DARKSLATEGRAY.getColor();
-		} else if (color.equals(CodeHighlighting.SPRINGGREEN.getColorName())) {
-			return CodeHighlighting.SPRINGGREEN.getColor();
+		} else if (color.equals(CodeHighlighting.RED.getColorName())) {
+			return CodeHighlighting.RED.getColor();
+		} else if (color.equals(CodeHighlighting.PINK.getColorName())) {
+			return CodeHighlighting.PINK.getColor();
+		} else if (color.equals(CodeHighlighting.BLUE_BRIGHT.getColorName())) {
+			return CodeHighlighting.BLUE_BRIGHT.getColor();
+		} else if (color.equals(CodeHighlighting.BLUE.getColorName())) {
+			return CodeHighlighting.BLUE.getColor();
+		} else if (color.equals(CodeHighlighting.PURPLE.getColorName())) {
+			return CodeHighlighting.PURPLE.getColor();
 		} else if (color.equals(CodeHighlighting.DEFAULTCONTEXT.getColorName())) {
 			return CodeHighlighting.DEFAULTCONTEXT.getColor();
 		} else {

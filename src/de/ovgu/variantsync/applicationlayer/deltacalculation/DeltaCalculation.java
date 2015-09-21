@@ -110,9 +110,14 @@ class DeltaCalculation {
 				.createUnifiedDifference(filename, filename, historyFilelines,
 						patch, 0);
 
+		String packageName = res.getLocation().toString();
+		packageName = packageName.substring(packageName.indexOf("src") + 4,
+				packageName.lastIndexOf("/"));
+		packageName = packageName.replace("/", ".");
 		ModuleFactory.getContextOperations().recordCodeChange(tmpUnifiedDiff,
 				res.getProject().getName(),
-				res.getProject().getLocation().toString(), (IFile) res);
+				res.getProject().getLocation().toString(), packageName,
+				((IFile) res).getName());
 
 		int pointer = 0;
 		if (MonitorSet.getInstance().removeSynchroItem(res)) {

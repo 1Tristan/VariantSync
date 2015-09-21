@@ -3,8 +3,6 @@ package de.ovgu.variantsync.applicationlayer.context;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
-
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
@@ -25,8 +23,8 @@ public interface IContextOperations {
 
 	String getActiveProject();
 
-	void recordCodeChange(List<String> changedCode, String projectName,
-			String pathToProject, IFile res);
+	void recordCodeChange(List<String> tmpUnifiedDiff, String projectName,
+			String pathToProject, String packageName, String className);
 
 	void setContextColor(String featureExpression, CodeHighlighting color);
 
@@ -47,4 +45,5 @@ public interface IContextOperations {
 
 	Context getContext(String featureExpression);
 
+	void deleteAllContexts();
 }

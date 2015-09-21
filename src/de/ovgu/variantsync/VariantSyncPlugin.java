@@ -120,15 +120,21 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		if (!folder.exists()) {
 			folder.mkdirs();
 		}
-		persistenceOp.saveFeatureExpressions(featureOp.getFeatureExpressions(),
-				path);
+		FeatureExpressions fe = featureOp.getFeatureExpressions();
+		if (fe != null && fe.getFeatureExpressions() != null) {
+			persistenceOp.saveFeatureExpressions(fe, path);
+		}
 
 		// stop default-context or any other active context
-		contextOp.stopRecording();
-		persistenceOp.saveContext(contextOp
-				.getContext(VariantSyncConstants.DEFAULT_CONTEXT), Util
-				.parseStorageLocation(contextOp
-						.getContext(VariantSyncConstants.DEFAULT_CONTEXT)));
+		try {
+			contextOp.stopRecording();
+			persistenceOp.saveContext(contextOp
+					.getContext(VariantSyncConstants.DEFAULT_CONTEXT), Util
+					.parseStorageLocation(contextOp
+							.getContext(VariantSyncConstants.DEFAULT_CONTEXT)));
+		} catch (NullPointerException e) {
+			// recordings was already stopped and contexts were cleaned up
+		}
 		plugin = null;
 		try {
 			super.stop(context);

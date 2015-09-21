@@ -36,11 +36,12 @@ public class CodeMarkerFactory {
 	private static final String MARKER_GREEN = "de.ovgu.pfofe.variantsync.codehighlightmarkerGreen";
 	private static final String MARKER_BLUE = "de.ovgu.pfofe.variantsync.codehighlightmarkerBlue";
 	private static final String MARKER_YELLOW = "de.ovgu.pfofe.variantsync.codehighlightmarkerYellow";
-	private static final String MARKER_GREY = "de.ovgu.pfofe.variantsync.codehighlightmarkerGrey";
-	private static final String MARKER_SALMON = "de.ovgu.pfofe.variantsync.codehighlightmarkerSalmon";
-	private static final String MARKER_ANTIQUEWHITE = "de.ovgu.pfofe.variantsync.codehighlightmarkerAntiqueWhite";
-	private static final String MARKER_SPRINGGREEN = "de.ovgu.pfofe.variantsync.codehighlightmarkerSpringGreen";
-	private static final String MARKER_DARKSLATEGRAY = "de.ovgu.pfofe.variantsync.codehighlightmarkerDarkSlateGrey";
+	private static final String MARKER_BLUEBRIGHT = "de.ovgu.pfofe.variantsync.codehighlightmarkerBlueBright";
+	private static final String MARKER_PURPLE = "de.ovgu.pfofe.variantsync.codehighlightmarkerPurple";
+	private static final String MARKER_PINK = "de.ovgu.pfofe.variantsync.codehighlightmarkerPink";
+	private static final String MARKER_RED = "de.ovgu.pfofe.variantsync.codehighlightmarkerRed";
+	private static final String MARKER_ORANGE = "de.ovgu.pfofe.variantsync.codehighlightmarkerOrange";
+	private static final String MARKER_GREENBRIGHT = "de.ovgu.pfofe.variantsync.codehighlightmarkerGreenBright";
 	private static final String MARKER_DEFAULTCONTEXT = "de.ovgu.pfofe.variantsync.codehighlightmarkerDefaultContext";
 
 	// Annotation ID
@@ -60,11 +61,12 @@ public class CodeMarkerFactory {
 			markers.add(MARKER_YELLOW);
 			markers.add(MARKER_GREEN);
 			markers.add(MARKER_BLUE);
-			markers.add(MARKER_GREY);
-			markers.add(MARKER_SALMON);
-			markers.add(MARKER_ANTIQUEWHITE);
-			markers.add(MARKER_SPRINGGREEN);
-			markers.add(MARKER_DARKSLATEGRAY);
+			markers.add(MARKER_PURPLE);
+			markers.add(MARKER_PINK);
+			markers.add(MARKER_RED);
+			markers.add(MARKER_ORANGE);
+			markers.add(MARKER_GREENBRIGHT);
+			markers.add(MARKER_BLUEBRIGHT);
 			markers.add(MARKER_DEFAULTCONTEXT);
 		}
 	}
@@ -117,20 +119,22 @@ public class CodeMarkerFactory {
 		String marker = "";
 		if (color.equals(CodeHighlighting.YELLOW)) {
 			marker = MARKER_YELLOW;
-		} else if (color.equals(CodeHighlighting.BLUE)) {
-			marker = MARKER_BLUE;
+		} else if (color.equals(CodeHighlighting.GREEN_BRIGHT)) {
+			marker = MARKER_GREENBRIGHT;
 		} else if (color.equals(CodeHighlighting.GREEN)) {
 			marker = MARKER_GREEN;
-		} else if (color.equals(CodeHighlighting.GREY)) {
-			marker = MARKER_GREY;
-		} else if (color.equals(CodeHighlighting.SALMON)) {
-			marker = MARKER_SALMON;
-		} else if (color.equals(CodeHighlighting.ANTIQUEWHITE)) {
-			marker = MARKER_ANTIQUEWHITE;
-		} else if (color.equals(CodeHighlighting.SPRINGGREEN)) {
-			marker = MARKER_SPRINGGREEN;
-		} else if (color.equals(CodeHighlighting.DARKSLATEGRAY)) {
-			marker = MARKER_DARKSLATEGRAY;
+		} else if (color.equals(CodeHighlighting.ORANGE)) {
+			marker = MARKER_ORANGE;
+		} else if (color.equals(CodeHighlighting.RED)) {
+			marker = MARKER_RED;
+		} else if (color.equals(CodeHighlighting.PINK)) {
+			marker = MARKER_PINK;
+		} else if (color.equals(CodeHighlighting.BLUE_BRIGHT)) {
+			marker = MARKER_BLUEBRIGHT;
+		} else if (color.equals(CodeHighlighting.BLUE)) {
+			marker = MARKER_BLUE;
+		} else if (color.equals(CodeHighlighting.PURPLE)) {
+			marker = MARKER_PURPLE;
 		} else if (color.equals(CodeHighlighting.DEFAULTCONTEXT)) {
 			marker = MARKER_DEFAULTCONTEXT;
 		}

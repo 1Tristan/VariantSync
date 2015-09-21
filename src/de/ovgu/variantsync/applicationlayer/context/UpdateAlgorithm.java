@@ -52,6 +52,10 @@ public class UpdateAlgorithm {
 	// TODO test with different cases!
 	private void update(JavaClass jc, List<Diff> diffs) {
 		List<CodeLine> cls = jc.getCodeLines();
+
+		// actualize (increase or decrease diff line number (see Context
+		// Algorithm)
+		int diffCounter = 0;
 		for (Diff d : diffs) {
 
 			// case: line numbers must be decreased
@@ -101,6 +105,17 @@ public class UpdateAlgorithm {
 			for (CodeLine cl : addLines) {
 				cls.remove(cl);
 			}
+			if (di.getNumberOfOldCodeLines() > 0) {
+				ContextUtils.decreaseCodeLines(
+						diffs.subList(diffCounter + 1, diffs.size()),
+						di.getNumberOfOldCodeLines());
+			}
+			if (di.getNumberOfNewCodeLines() > 0) {
+				ContextUtils.increaseCodeLines(
+						diffs.subList(diffCounter + 1, diffs.size()),
+						di.getNumberOfNewCodeLines());
+			}
+			diffCounter++;
 		}
 	}
 

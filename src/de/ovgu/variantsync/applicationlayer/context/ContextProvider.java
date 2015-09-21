@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
-
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
 import de.ovgu.variantsync.applicationlayer.Util;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
@@ -50,13 +48,11 @@ public class ContextProvider extends AbstractModel implements
 
 	@Override
 	public void recordCodeChange(List<String> changedCode, String projectName,
-			String pathToProject, IFile res) {
-		String packageName = res.getLocation().toString();
-		packageName = packageName.substring(packageName.indexOf("src") + 4,
-				packageName.lastIndexOf("/"));
-		packageName = packageName.replace("/", ".");
+			String pathToProject, String packageName, String className) {
+		System.out.println("\n=== Changed Code ===");
+		System.out.println(changedCode.toString());
 		contextHandler.recordCodeChange(projectName, pathToProject,
-				changedCode, res.getName(), packageName);
+				changedCode, className, packageName);
 	}
 
 	@Override
@@ -123,4 +119,8 @@ public class ContextProvider extends AbstractModel implements
 		return ContextHandler.getInstance().getContext(featureExpression);
 	}
 
+	@Override
+	public void deleteAllContexts() {
+		contextHandler.clean();
+	}
 }

@@ -8,27 +8,13 @@ public class CodeFragment {
 	private int startLine;
 	private int endLine;
 	private int offset;
-	private String className;
-	private String packageName;
 
-	public CodeFragment(List<String> code, int startLine, int endLine, int offset) {
+	public CodeFragment(List<String> code, int startLine, int endLine,
+			int offset) {
 		this.code = code;
 		this.startLine = startLine;
 		this.endLine = endLine;
 		this.offset = offset;
-	}
-
-	public CodeFragment(List<String> code, String className, String packageName) {
-		this.code = code;
-		this.className = className;
-		this.packageName = packageName;
-	}
-
-	/**
-	 * @return the length
-	 */
-	public int getLength() {
-		return code.size();
 	}
 
 	/**
@@ -102,36 +88,6 @@ public class CodeFragment {
 	 */
 	public int getEndLine() {
 		return endLine;
-	}
-
-	/**
-	 * @return the className
-	 */
-	public String getClassName() {
-		return className;
-	}
-
-	/**
-	 * @param className
-	 *            the className to set
-	 */
-	public void setClassName(String className) {
-		this.className = className;
-	}
-
-	/**
-	 * @return the packageName
-	 */
-	public String getPackageName() {
-		return packageName;
-	}
-
-	/**
-	 * @param packageName
-	 *            the packageName to set
-	 */
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
 	}
 
 }
