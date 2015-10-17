@@ -11,6 +11,7 @@ import de.ovgu.variantsync.applicationlayer.Util;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.presentationlayer.view.context.FeatureContextSelection;
 
@@ -124,5 +125,34 @@ public class ContextProvider extends AbstractModel implements
 	@Override
 	public void deleteAllContexts() {
 		contextHandler.clean();
+	}
+
+	@Override
+	public Collection<String> getProjects(String fe) {
+		Context c = ContextHandler.getInstance().getContext(fe);
+		return c.getJavaProjects().keySet();
+	}
+
+	@Override
+	public Collection<String> getClasses(String fe, String projectName) {
+		Context c = ContextHandler.getInstance().getContext(fe);
+		JavaProject jp = c.getJavaProjects().get(projectName);
+		List<JavaElement> classes = new ArrayList<JavaElement>();
+		iterateElements(jp.getChildren(), classes);
+		List<String> classNames = new ArrayList<String>();
+		for(JavaElement e : classes){
+			classNames.add(e.getName());
+		}
+		return classNames;
+	}
+
+	private void iterateElements(List<JavaElement> elements, List<JavaElement> classes) {
+		for (JavaElement e : elements) {
+			if (e.getChildren() != null) {
+				iterateElements(e.getChildren(), classes);
+			}else{
+				classes.add(e);
+			}
+		}
 	}
 }

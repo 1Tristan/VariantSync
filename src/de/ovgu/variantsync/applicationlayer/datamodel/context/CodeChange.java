@@ -16,7 +16,7 @@ public class CodeChange {
 
 	private List<CodeLine> baseVersion;
 	private List<CodeLine> newVersion;
-	private Timestamp timestamp;
+	private long timestamp;
 
 	public CodeChange() {
 		baseVersion = new ArrayList<CodeLine>();
@@ -26,7 +26,7 @@ public class CodeChange {
 	public CodeChange(List<CodeLine> baseVersion, List<CodeLine> newVersion) {
 		this.baseVersion = baseVersion;
 		this.newVersion = newVersion;
-		this.timestamp = new Timestamp(new Date().getTime());
+		this.timestamp = new Timestamp(new Date().getTime()).getTime();
 	}
 
 	public void addLine() {
@@ -66,7 +66,7 @@ public class CodeChange {
 	/**
 	 * @return the timestamp
 	 */
-	public Timestamp getTimestamp() {
+	public long getTimestamp() {
 		return timestamp;
 	}
 
@@ -74,7 +74,7 @@ public class CodeChange {
 	 * @param timestamp
 	 *            the timestamp to set
 	 */
-	public void setTimestamp(Timestamp timestamp) {
+	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
 

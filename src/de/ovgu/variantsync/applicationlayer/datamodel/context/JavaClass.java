@@ -21,6 +21,10 @@ public class JavaClass extends JavaElement {
 
 	public JavaClass() {
 		super();
+		init();
+	}
+
+	private void init() {
 		codeLines = new ArrayList<CodeLine>();
 		changes = new LinkedList<CodeChange>();
 		wholeClass = new ArrayList<CodeLine>();
@@ -33,33 +37,45 @@ public class JavaClass extends JavaElement {
 	// TODO: use JavaParser to create AST (see CuPrinter example)
 
 	// 1) Änderung an Klasse wird gespeichert im Editor
-	// 2) VSync bemerkt Änderung, berechnet Diff, pflegt Code-Basis im Plugin (aktueller Stand der Klasse im Context)
-	// 3) VSync legt in Klasse einen CodeChange-Eintrag, bestehend aus Timestamp, baseVersion und newVersion,in Queue an
-	// baseVersion sind die Codezeilen, die vor der Änderung dem Feature aus dieser Klasse zugeordnet waren
-	// new Version sind die Codezeilen, die nach der Änderung dem Feature aus dieser Klasse zugeordnet waren
-    // base und newVersion müssen syntaktisch korrete Klassen darstellen für syntaktischen Merge mit JDime
+	// 2) VSync bemerkt Änderung, berechnet Diff, pflegt Code-Basis im Plugin
+	// (aktueller Stand der Klasse im Context)
+	// 3) VSync legt in Klasse einen CodeChange-Eintrag, bestehend aus
+	// Timestamp, baseVersion und newVersion,in Queue an
+	// baseVersion sind die Codezeilen, die vor der Änderung dem Feature aus
+	// dieser Klasse zugeordnet waren
+	// new Version sind die Codezeilen, die nach der Änderung dem Feature aus
+	// dieser Klasse zugeordnet waren
+	// base und newVersion müssen syntaktisch korrete Klassen darstellen für
+	// syntaktischen Merge mit JDime
 	// => Problem: bisher nur Codezeilen ohne Semantic gespeichert
-	// => Lösung: AST erstellen mit javaparser. Dieser enthält den Code mit Zeilennummern zugeordnet zu Methoden
-	// AST ist Schablone, die auf den gespeicherten Code der Versions gelegt wird. Damit wird eine abgespeckte, syntaktisch korrekte Datei erstellt (wenn der Entwickler den Code syntaktisch korrekt mappt mit dem Context)
-    // wenn Code syntaktisch nicht korrekt ist, dann wird kein structured merge (synktatischer merge) sondern unstructured merge (line-based) durchgeführt.
+	// => Lösung: AST erstellen mit javaparser. Dieser enthält den Code mit
+	// Zeilennummern zugeordnet zu Methoden
+	// AST ist Schablone, die auf den gespeicherten Code der Versions gelegt
+	// wird. Damit wird eine abgespeckte, syntaktisch korrekte Datei erstellt
+	// (wenn der Entwickler den Code syntaktisch korrekt mappt mit dem Context)
+	// wenn Code syntaktisch nicht korrekt ist, dann wird kein structured merge
+	// (synktatischer merge) sondern unstructured merge (line-based)
+	// durchgeführt.
 	/*
 	 * 
-======================================
-=== Synchronisieren von Änderungen ===
-======================================
+	 * ====================================== === Synchronisieren von Änderungen
+	 * === ======================================
+	 * 
+	 * Beim Speichern Vorgang: - Sichern der bisherigen Code-Lines der Klasse,
+	 * die sich im Context befinden - Einfügen der Änderungen und Sichern der
+	 * aktuellen Code-Lines der Klasse, die sich im Context befinden -
+	 * Sicherungen erfolgen im Typ CodeChange, der für jede Klasse im Context
+	 * als Queue gespeichert wird - CodeChange bekommt Timestamp, damit beim
+	 * Synchronisieren die Reihenfolge der Änderungen an gleichen Klassen
+	 * desselben Features rekonstruiert werden kann
+	 * 
+	 * Beim Synchronisieren: - Änderungen an Features (Context) Klassenweise
+	 * aufführen - Änderungen an gleichen Klassen in unterschiedlichen Projekten
+	 * des gleiches Features nach zeitlicher Reihenfolge synchronisieren mit
+	 * jdime - Automatisierung der Änderungen durchführen, außer es tritt ein
+	 * Konflikt auf: Git-Vergleichsdialog für User öffnen
+	 */
 
-Beim Speichern Vorgang: 
-- Sichern der bisherigen Code-Lines der Klasse, die sich im Context befinden
-- Einfügen der Änderungen und Sichern der aktuellen Code-Lines der Klasse, die sich im Context befinden
-- Sicherungen erfolgen im Typ CodeChange, der für jede Klasse im Context als Queue gespeichert wird
-- CodeChange bekommt Timestamp, damit beim Synchronisieren die Reihenfolge der Änderungen an gleichen Klassen desselben Features rekonstruiert werden kann
-
-Beim Synchronisieren:
-- Änderungen an Features (Context) Klassenweise aufführen
-- Änderungen an gleichen Klassen in unterschiedlichen Projekten des gleiches Features nach zeitlicher Reihenfolge synchronisieren mit jdime
-- Automatisierung der Änderungen durchführen, außer es tritt ein Konflikt auf: Git-Vergleichsdialog für User öffnen
-*/
-	
 	private void addChange(List<CodeLine> newLines)
 			throws CloneNotSupportedException {
 		List<CodeLine> baseVersion = new ArrayList<CodeLine>();
@@ -70,32 +86,38 @@ Beim Synchronisieren:
 		for (CodeLine cl : newLines) {
 			newVersion.add(cl.clone());
 		}
-		changes.add(new CodeChange(previousClass, newVersion));
+		changes.add(new CodeChange(baseVersion, newVersion));
+		System.out.println(changes.toString());
 	}
 
 	public JavaClass(String name, String path, JavaElement member) {
 		super(name, path, JavaElements.CLASS);
 		addChild(member);
+		init();
 	}
 
 	public JavaClass(String name, String path, List<JavaElement> members) {
 		super(name, path, JavaElements.CLASS);
 		setChildren(members);
+		init();
 	}
 
 	public JavaClass(String name, String path, List<String> code,
 			int numberOfCodeLines) {
 		super(name, path, JavaElements.CLASS);
 		addCode(new CodeFragment(code, 0, numberOfCodeLines, 0));
+		init();
 	}
 
 	public JavaClass(String name, String path, CodeFragment code) {
 		super(name, path, JavaElements.CLASS);
 		addCode(code);
+		init();
 	}
 
 	public JavaClass(String name, String path) {
 		super(name, path, JavaElements.CLASS);
+		init();
 	}
 
 	/*
@@ -185,6 +207,11 @@ Beim Synchronisieren:
 	 *            the codeFragments to set
 	 */
 	public boolean setCodeLines(List<CodeLine> codeLines) {
+		try {
+			addChange(codeLines);
+		} catch (CloneNotSupportedException e1) {
+			e1.printStackTrace();
+		}
 		this.codeLines.clear();
 		for (CodeLine cl : codeLines) {
 			try {
@@ -207,5 +234,11 @@ Beim Synchronisieren:
 	 */
 	public List<CodeLine> getWholeClass() {
 		return wholeClass;
+	}
+
+	@XmlElementWrapper(name = "changes")
+	@XmlElement(name = "change")
+	public Queue<CodeChange> getChanges() {
+		return changes;
 	}
 }

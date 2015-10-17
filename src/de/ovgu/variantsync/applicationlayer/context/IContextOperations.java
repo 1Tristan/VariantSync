@@ -1,5 +1,6 @@
 package de.ovgu.variantsync.applicationlayer.context;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -47,4 +48,8 @@ public interface IContextOperations {
 	Context getContext(String featureExpression);
 
 	void deleteAllContexts();
+
+	Collection<String> getProjects(String fe);
+
+	Collection<String> getClasses(String fe, String projectName);
 }

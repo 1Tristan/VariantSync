@@ -1,5 +1,7 @@
 package de.ovgu.variantsync.presentationlayer.controller;
 
+import java.util.Collection;
+
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 
@@ -33,4 +35,15 @@ public class ContextController extends AbstractController {
 		contextOperations.stopRecording();
 	}
 
+	public Collection<String> getProjects(String fe) {
+		return contextOperations.getProjects(fe);
+	}
+
+	public Collection<String> getChanges(String fe, String projectName) {
+		return contextOperations.getClasses(fe, projectName);
+	}
+
+	public Collection<String> getClasses(String fe, String projectName) {
+		return contextOperations.getClasses(fe, projectName);
+	}
 }

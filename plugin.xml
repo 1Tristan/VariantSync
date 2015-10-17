@@ -592,6 +592,12 @@
 			id="de.ovgu.variantsync.FeatureExpressionHandler"
 			name="Feature Expressions">
 		</command>
+		<command
+			categoryId="org.eclipse.ui.category.edit"
+			defaultHandler="de.ovgu.variantsync.presentationlayer.view.mergeprocess.FeatureViewHandler"
+			id="de.ovgu.variantsync.FeatureViewHandler"
+			name="Feature Views">
+		</command>
 	</extension>
 	<extension point="org.eclipse.ui.commandImages">
 		<image commandId="de.ovgu.variantsync.FeatureDropDownCommand" icon="icons/VariantSyncSupport.png">
@@ -600,6 +606,11 @@
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
         	<toolbar id="de.ovgu.variantsync.toolbar">
+        		<command
+					commandId="de.ovgu.variantsync.FeatureViewHandler"
+					icon="icons/defaultContext.png"
+					style="push">
+				</command>
         	    <command
 					commandId="de.ovgu.variantsync.FeatureExpressionHandler"
 					icon="icons/featureExpression.png"
