@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.Path;
 
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorSet;
 import de.ovgu.variantsync.applicationlayer.datamodel.resources.ChangeTypes;
@@ -37,6 +38,8 @@ class DeltaCalculation {
 
 	private String unifiedDiff;
 	private ExternalDeltaCalculation externalDeltaOperations;
+	private IContextOperations contextOperations = ModuleFactory
+			.getContextOperations();
 	private IPersistanceOperations persistanceOperations = ModuleFactory
 			.getPersistanceOperations();
 
@@ -114,10 +117,9 @@ class DeltaCalculation {
 		packageName = packageName.substring(packageName.indexOf("src") + 4,
 				packageName.lastIndexOf("/"));
 		packageName = packageName.replace("/", ".");
-		ModuleFactory.getContextOperations().recordCodeChange(tmpUnifiedDiff,
-				res.getProject().getName(),
-				res.getProject().getLocation().toString(), packageName,
-				((IFile) res).getName());
+		contextOperations.recordCodeChange(tmpUnifiedDiff, res.getProject()
+				.getName(), res.getProject().getLocation().toString(),
+				packageName, ((IFile) res).getName(), currentFilelines);
 
 		int pointer = 0;
 		if (MonitorSet.getInstance().removeSynchroItem(res)) {

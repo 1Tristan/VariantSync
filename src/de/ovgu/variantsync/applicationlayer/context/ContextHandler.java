@@ -78,12 +78,13 @@ class ContextHandler {
 	}
 
 	public void recordCodeChange(String projectName, String pathToProject,
-			List<String> changedCode, String className, String packageName) {
+			List<String> changedCode, String className, String packageName,
+			List<String> wholeClass) {
 		if (!activeContext.containsProject(projectName)) {
 			activeContext.initProject(projectName, pathToProject);
 		}
 		ContextAlgorithm ca = new ContextAlgorithm(activeContext);
-		ca.addCode(projectName, packageName, className, changedCode);
+		ca.addCode(projectName, packageName, className, changedCode, wholeClass);
 		UpdateAlgorithm ua = new UpdateAlgorithm();
 		ua.updateCode(projectName, packageName, className, changedCode,
 				activeContext.getFeatureExpression());

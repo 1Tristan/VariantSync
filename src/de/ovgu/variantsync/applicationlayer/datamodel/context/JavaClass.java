@@ -1,7 +1,9 @@
 package de.ovgu.variantsync.applicationlayer.datamodel.context;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -12,12 +14,64 @@ import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 
 public class JavaClass extends JavaElement {
 
+	private List<CodeLine> codeLines;
+	private List<CodeLine> previousClass;
+	private List<CodeLine> wholeClass;
+	private Queue<CodeChange> changes;
+
 	public JavaClass() {
 		super();
 		codeLines = new ArrayList<CodeLine>();
+		changes = new LinkedList<CodeChange>();
+		wholeClass = new ArrayList<CodeLine>();
+		previousClass = new ArrayList<CodeLine>();
 	}
 
-	private List<CodeLine> codeLines;
+	// TODO: für syntaktischen Merge müssen korrekte JavaKlassen gebildet werden
+	// aus den Codezeilen, die per Diff ermittelt wurden als Code, der zum
+	// Context/Feature gehört
+	// TODO: use JavaParser to create AST (see CuPrinter example)
+
+	// 1) Änderung an Klasse wird gespeichert im Editor
+	// 2) VSync bemerkt Änderung, berechnet Diff, pflegt Code-Basis im Plugin (aktueller Stand der Klasse im Context)
+	// 3) VSync legt in Klasse einen CodeChange-Eintrag, bestehend aus Timestamp, baseVersion und newVersion,in Queue an
+	// baseVersion sind die Codezeilen, die vor der Änderung dem Feature aus dieser Klasse zugeordnet waren
+	// new Version sind die Codezeilen, die nach der Änderung dem Feature aus dieser Klasse zugeordnet waren
+    // base und newVersion müssen syntaktisch korrete Klassen darstellen für syntaktischen Merge mit JDime
+	// => Problem: bisher nur Codezeilen ohne Semantic gespeichert
+	// => Lösung: AST erstellen mit javaparser. Dieser enthält den Code mit Zeilennummern zugeordnet zu Methoden
+	// AST ist Schablone, die auf den gespeicherten Code der Versions gelegt wird. Damit wird eine abgespeckte, syntaktisch korrekte Datei erstellt (wenn der Entwickler den Code syntaktisch korrekt mappt mit dem Context)
+    // wenn Code syntaktisch nicht korrekt ist, dann wird kein structured merge (synktatischer merge) sondern unstructured merge (line-based) durchgeführt.
+	/*
+	 * 
+======================================
+=== Synchronisieren von Änderungen ===
+======================================
+
+Beim Speichern Vorgang: 
+- Sichern der bisherigen Code-Lines der Klasse, die sich im Context befinden
+- Einfügen der Änderungen und Sichern der aktuellen Code-Lines der Klasse, die sich im Context befinden
+- Sicherungen erfolgen im Typ CodeChange, der für jede Klasse im Context als Queue gespeichert wird
+- CodeChange bekommt Timestamp, damit beim Synchronisieren die Reihenfolge der Änderungen an gleichen Klassen desselben Features rekonstruiert werden kann
+
+Beim Synchronisieren:
+- Änderungen an Features (Context) Klassenweise aufführen
+- Änderungen an gleichen Klassen in unterschiedlichen Projekten des gleiches Features nach zeitlicher Reihenfolge synchronisieren mit jdime
+- Automatisierung der Änderungen durchführen, außer es tritt ein Konflikt auf: Git-Vergleichsdialog für User öffnen
+*/
+	
+	private void addChange(List<CodeLine> newLines)
+			throws CloneNotSupportedException {
+		List<CodeLine> baseVersion = new ArrayList<CodeLine>();
+		for (CodeLine cl : this.codeLines) {
+			baseVersion.add(cl.clone());
+		}
+		List<CodeLine> newVersion = new ArrayList<CodeLine>();
+		for (CodeLine cl : newLines) {
+			newVersion.add(cl.clone());
+		}
+		changes.add(new CodeChange(previousClass, newVersion));
+	}
 
 	public JavaClass(String name, String path, JavaElement member) {
 		super(name, path, JavaElements.CLASS);
@@ -142,4 +196,16 @@ public class JavaClass extends JavaElement {
 		return true;
 	}
 
+	public void setWholeClass(List<String> lines) {
+
+		// TODO
+		// this.previousClass = lines;
+	}
+
+	/**
+	 * @return the wholeClass
+	 */
+	public List<CodeLine> getWholeClass() {
+		return wholeClass;
+	}
 }

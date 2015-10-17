@@ -14,6 +14,7 @@ public class MappingElement {
 	private int endLineOfSelection;
 	private int offset;
 	private String pathToProject;
+	private List<String> wholeClass;
 
 	public MappingElement(String feature, String title, JavaElements type,
 			String pathToSelectedElement, String pathToProject) {
@@ -26,7 +27,8 @@ public class MappingElement {
 
 	public MappingElement(String feature, String title, JavaElements type,
 			String pathToSelectedElement, List<String> code,
-			int startLineOfSelection, int endLineOfSelection, int offset) {
+			int startLineOfSelection, int endLineOfSelection, int offset,
+			List<String> wholeClass) {
 		this.feature = feature;
 		this.title = title;
 		this.type = type;
@@ -35,6 +37,7 @@ public class MappingElement {
 		this.startLineOfSelection = startLineOfSelection;
 		this.endLineOfSelection = endLineOfSelection;
 		this.offset = offset;
+		this.wholeClass = wholeClass;
 	}
 
 	public MappingElement(String feature, String title, JavaElements type,
@@ -138,6 +141,13 @@ public class MappingElement {
 	 */
 	public void setPathToProject(String pathToProject) {
 		this.pathToProject = pathToProject;
+	}
+
+	/**
+	 * @return the wholeClass
+	 */
+	public List<String> getWholeClass() {
+		return wholeClass;
 	}
 
 }

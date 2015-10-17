@@ -24,7 +24,8 @@ public interface IContextOperations {
 	String getActiveProject();
 
 	void recordCodeChange(List<String> tmpUnifiedDiff, String projectName,
-			String pathToProject, String packageName, String className);
+			String pathToProject, String packageName, String className,
+			List<String> wholeClass);
 
 	void setContextColor(String featureExpression, CodeHighlighting color);
 
@@ -33,10 +34,10 @@ public interface IContextOperations {
 	void addContext(Context c);
 
 	void addCode(String projectName, String packageName, String className,
-			List<String> code);
+			List<String> code, List<String> wholeClass);
 
 	void addCode(String projectName, String packageName, String className,
-			List<String> code, Context c);
+			List<String> code, Context c, List<String> wholeClass);
 
 	Map<String, List<JavaClass>> findJavaClass(String projectName,
 			String className);

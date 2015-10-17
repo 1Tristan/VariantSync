@@ -60,7 +60,7 @@ public class TestDefaultContext {
 		System.out.println("\nDiff-String:\n" + diff.toString());
 
 		co.recordCodeChange(diff, PROJECT_NAME, PROJECT_PATH, PACKAGE_NAME,
-				CLASS_NAME);
+				CLASS_NAME, new ArrayList<String>());
 		co.stopRecording();
 		Context defaultContext = co.getContext(DEFAULT_CONTEXT);
 		JavaProject jp = defaultContext.getJavaProject(PROJECT_NAME);
@@ -128,7 +128,7 @@ public class TestDefaultContext {
 		System.out.println("\nDiff-String:\n" + diff.toString());
 
 		co.recordCodeChange(diff, PROJECT_NAME, PROJECT_PATH, PACKAGE_NAME,
-				CLASS_NAME);
+				CLASS_NAME, new ArrayList<String>());
 
 		// add code line inside existing code
 		diffArray = "--- Main.java, +++ Main.java, @@ -6,0 +6,1 @@, +	private int b;, @@ -7,1 +8,1 @@, -	public Main(int g) {, +	public Main(int g, int h) {, @@ -9,0 +10,1 @@, +		b = h;"
@@ -142,7 +142,7 @@ public class TestDefaultContext {
 		System.out.println("\nDiff-String:\n" + diff.toString());
 
 		co.recordCodeChange(diff, PROJECT_NAME, PROJECT_PATH, PACKAGE_NAME,
-				CLASS_NAME);
+				CLASS_NAME, new ArrayList<String>());
 		co.stopRecording();
 		Context defaultContext = co
 				.getContext(VariantSyncConstants.DEFAULT_CONTEXT);

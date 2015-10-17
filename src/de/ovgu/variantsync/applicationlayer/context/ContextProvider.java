@@ -48,11 +48,12 @@ public class ContextProvider extends AbstractModel implements
 
 	@Override
 	public void recordCodeChange(List<String> changedCode, String projectName,
-			String pathToProject, String packageName, String className) {
+			String pathToProject, String packageName, String className,
+			List<String> wholeClass) {
 		System.out.println("\n=== Changed Code ===");
 		System.out.println(changedCode.toString());
 		contextHandler.recordCodeChange(projectName, pathToProject,
-				changedCode, className, packageName);
+				changedCode, className, packageName, wholeClass);
 	}
 
 	@Override
@@ -72,17 +73,18 @@ public class ContextProvider extends AbstractModel implements
 
 	@Override
 	public void addCode(String projectName, String packageName,
-			String className, List<String> code) {
+			String className, List<String> code, List<String> wholeClass) {
 		ContextAlgorithm ca = new ContextAlgorithm(ContextHandler.getInstance()
 				.getActiveContext());
-		ca.addCode(projectName, packageName, className, code);
+		ca.addCode(projectName, packageName, className, code, wholeClass);
 	}
 
 	@Override
 	public void addCode(String projectName, String packageName,
-			String className, List<String> code, Context c) {
+			String className, List<String> code, Context c,
+			List<String> wholeClass) {
 		ContextAlgorithm ca = new ContextAlgorithm(c);
-		ca.addCode(projectName, packageName, className, code);
+		ca.addCode(projectName, packageName, className, code, wholeClass);
 	}
 
 	@Override

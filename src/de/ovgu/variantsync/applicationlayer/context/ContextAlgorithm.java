@@ -34,7 +34,7 @@ class ContextAlgorithm {
 	}
 
 	public void addCode(String projectName, String packageName,
-			String className, List<String> code) {
+			String className, List<String> code, List<String> wholeClass) {
 
 		// Mapping auf FeatureExpressions umstellen/ von FeatureExpressions
 		// extrahieren und immer das Project zurückgeben mit angepasstem Mapping
@@ -43,7 +43,7 @@ class ContextAlgorithm {
 		// Context
 
 		List<Diff> diffs = ContextUtils.analyzeDiff(code);
-		refreshCodeBase(diffs, projectName, packageName, className);
+		refreshCodeBase(diffs, projectName, packageName, className, wholeClass);
 
 		// String file = "/src/" + packageName + "/" + className;
 		// refreshMarker(diffs, file, context.getPathOfJavaProject());
@@ -54,7 +54,7 @@ class ContextAlgorithm {
 	}
 
 	private void refreshCodeBase(List<Diff> diffs, String projectName,
-			String packageName, String className) {
+			String packageName, String className, List<String> wholeClass) {
 		int i = 0;
 		for (Diff diff : diffs) {
 			DiffIndices di = diff.getDiffIndices();
@@ -71,7 +71,7 @@ class ContextAlgorithm {
 				list.add(ds.getCode());
 				if (ds.isAddFlag()) {
 					addCode(projectName, packageName, className, startNew,
-							startNew, list);
+							startNew, list, wholeClass);
 					if (!UtilOperations.getInstance().ignoreAddCounter()) {
 						addCounter++;
 					}
@@ -98,15 +98,17 @@ class ContextAlgorithm {
 	}
 
 	private void addCode(String projectName, String packageName,
-			String className, int start, int end, List<String> extractedCode) {
+			String className, int start, int end, List<String> extractedCode,
+			List<String> wholeClass) {
 		setUpProject(projectName);
 		MappingElement mapping = new MappingElement(
 				context.getFeatureExpression(), className,
 				JavaElements.CODE_FRAGMENT,
 				context.getPathToProject(projectName) + "/src/"
 						+ packageName.replace(".", "/") + "/" + className,
-				extractedCode, start, end, end - start);
+				extractedCode, start, end, end - start, wholeClass);
 		mapping.setPathToProject(context.getPathToProject(projectName));
+
 		featureOperations.addCodeFragment(mapping,
 				context.getJavaProject(projectName));
 	}
@@ -119,7 +121,7 @@ class ContextAlgorithm {
 				JavaElements.CODE_FRAGMENT,
 				context.getPathToProject(projectName) + "/src/"
 						+ packageName.replace(".", "/") + "/" + className,
-				extractedCode, start, end, end - start);
+				extractedCode, start, end, end - start, null);
 		mapping.setPathToProject(context.getPathToProject(projectName));
 		featureOperations.removeMapping(mapping,
 				context.getJavaProject(projectName));

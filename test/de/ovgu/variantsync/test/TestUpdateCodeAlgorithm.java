@@ -57,7 +57,7 @@ public class TestUpdateCodeAlgorithm {
 
 		co.activateContext(TESTFEATURE_CONTEXT);
 		co.recordCodeChange(diff, PROJECT_NAME, PROJECT_PATH, PACKAGE_NAME,
-				CLASS_NAME);
+				CLASS_NAME, new ArrayList<String>());
 		co.stopRecording();
 
 		Context testFeatureContext = co.getContext(TESTFEATURE_CONTEXT);
@@ -76,7 +76,7 @@ public class TestUpdateCodeAlgorithm {
 		System.out.println("\nDiff-String:\n" + diff.toString());
 
 		co.recordCodeChange(diff, PROJECT_NAME, PROJECT_PATH, PACKAGE_NAME,
-				CLASS_NAME);
+				CLASS_NAME, new ArrayList<String>());
 
 		testFeatureContext = co.getContext(TESTFEATURE_CONTEXT);
 		jp = testFeatureContext.getJavaProject(PROJECT_NAME);
@@ -159,7 +159,7 @@ public class TestUpdateCodeAlgorithm {
 
 		co.activateContext(TESTFEATURE_CONTEXT);
 		co.recordCodeChange(diff, PROJECT_NAME, PROJECT_PATH, PACKAGE_NAME,
-				CLASS_NAME);
+				CLASS_NAME, new ArrayList<String>());
 		co.stopRecording();
 
 		Context testFeatureContext = co.getContext(TESTFEATURE_CONTEXT);
@@ -176,7 +176,7 @@ public class TestUpdateCodeAlgorithm {
 		System.out.println("\nDiff-String:\n" + diff.toString());
 
 		co.recordCodeChange(diff, PROJECT_NAME, PROJECT_PATH, PACKAGE_NAME,
-				CLASS_NAME);
+				CLASS_NAME, new ArrayList<String>());
 
 		testFeatureContext = co.getContext(TESTFEATURE_CONTEXT);
 		jp = testFeatureContext.getJavaProject(PROJECT_NAME);

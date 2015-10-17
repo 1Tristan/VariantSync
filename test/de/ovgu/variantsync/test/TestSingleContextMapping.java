@@ -53,7 +53,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		JavaProject jp = context.getJavaProject(PROJECT_NAME);
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
@@ -116,7 +117,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		JavaProject jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
@@ -131,7 +133,8 @@ public class TestSingleContextMapping {
 		diff.set(6, "+	public Main(int g, int h) {");
 		diff.remove(7);
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
@@ -199,7 +202,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		JavaProject jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
@@ -214,7 +218,8 @@ public class TestSingleContextMapping {
 		diff.set(6, "+	public Main(int g, int h) {");
 		diff.remove(7);
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
@@ -282,7 +287,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		JavaProject jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
@@ -299,7 +305,8 @@ public class TestSingleContextMapping {
 		diff.set(24, "+		System.out.println(\"This is not a test, too!\");");
 		diff.remove(25);
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
@@ -399,7 +406,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		JavaProject jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
@@ -417,7 +425,8 @@ public class TestSingleContextMapping {
 		diff.set(24, "+		System.out.println(\"This is not a test, too!\");");
 		diff.remove(25);
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
@@ -516,7 +525,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		JavaProject jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
@@ -530,7 +540,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
@@ -570,7 +581,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
 				.getClonedCodeLines();
@@ -610,7 +622,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
 				.getClonedCodeLines();
@@ -650,7 +663,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
 				.getClonedCodeLines();
@@ -694,7 +708,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		JavaProject jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
@@ -709,7 +724,8 @@ public class TestSingleContextMapping {
 			diff.add(s);
 		}
 		System.out.println("\nDiff-String:\n" + diff.toString());
-		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context);
+		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
+				new ArrayList<String>());
 
 		codeOfClass = jp.getChildren().get(0).getChildren().get(0)
 				.getClonedCodeLines();

@@ -54,7 +54,7 @@ public class UpdateAlgorithm {
 		List<CodeLine> cls = jc.getCodeLines();
 
 		// actualize (increase or decrease diff line number (see Context
-		// Algorithm)
+		// Algorithm))
 		int diffCounter = 0;
 		for (Diff d : diffs) {
 

@@ -6,6 +6,7 @@ public class CodeLine {
 
 	private String code;
 	private int line;
+	private boolean isMapped;
 
 	public CodeLine() {
 	}
@@ -13,6 +14,12 @@ public class CodeLine {
 	public CodeLine(String code, int line) {
 		this.code = code;
 		this.line = line;
+	}
+
+	public CodeLine(String code, int line, boolean isMapped) {
+		this.code = code;
+		this.line = line;
+		this.isMapped = isMapped;
 	}
 
 	/**
@@ -56,7 +63,8 @@ public class CodeLine {
 	 */
 	@Override
 	public String toString() {
-		return "CodeLine [line=" + line + ", code=" + code + "]";
+		return "CodeLine [code=" + code + ", line=" + line + ", isMapped="
+				+ isMapped + "]";
 	}
 
 	/*
@@ -67,6 +75,21 @@ public class CodeLine {
 	@Override
 	public CodeLine clone() throws CloneNotSupportedException {
 		return new CodeLine(code, line);
+	}
+
+	/**
+	 * @return the isMapped
+	 */
+	public boolean isMapped() {
+		return isMapped;
+	}
+
+	/**
+	 * @param isMapped
+	 *            the isMapped to set
+	 */
+	public void setMapped(boolean isMapped) {
+		this.isMapped = isMapped;
 	}
 
 }
