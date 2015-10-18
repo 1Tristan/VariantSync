@@ -19,7 +19,8 @@ Require-Bundle: org.eclipse.ui,
  de.ovgu.featureide.fm.core;bundle-version="2.7.4",
  de.ovgu.featureide.fm.ui;bundle-version="2.7.4",
  de.ovgu.featureide.ui;bundle-version="2.7.4",
- org.junit
+ org.junit,
+ org.eclipse.e4.ui.di;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: libraries/diffutils-1.2.1.jar,

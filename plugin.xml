@@ -13,6 +13,13 @@
             icon="icons/VariantSyncSupport.png"
             id="de.ovgu.variantsync.presentationlayer.view.resourcechanges.ResourceChanges"
             name="Resource Changes">
+      </view> 
+      <view
+            category="de.ovgu.variantsync"
+            class="de.ovgu.variantsync.presentationlayer.view.mergeprocess.FeatureView"
+            icon="icons/VariantSyncSupport.png"
+            id="de.ovgu.variantsync.presentationlayer.view.mergeprocess.featureview"
+            name="Feature View">
       </view>
    </extension>
    <extension
@@ -611,7 +618,7 @@
 					icon="icons/defaultContext.png"
 					style="push">
 				</command>
-        	    <command
+        		<command
 					commandId="de.ovgu.variantsync.FeatureExpressionHandler"
 					icon="icons/featureExpression.png"
 					style="push">

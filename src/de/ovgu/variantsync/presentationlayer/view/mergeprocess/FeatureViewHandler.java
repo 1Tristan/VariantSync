@@ -17,9 +17,10 @@ public class FeatureViewHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		String featureExpressions[] = fc.getFeatureExpressions().getFeatureExpressions().toArray(new String[]{});
+		String featureExpressions[] = fc.getFeatureExpressions()
+				.getFeatureExpressions().toArray(new String[] {});
 
-		FeatureView fv = new FeatureView(new Shell(Display.getCurrent(),
+		FW1 fv = new FW1(new Shell(Display.getCurrent(),
 				SWT.APPLICATION_MODAL | SWT.SHEET), 0, featureExpressions);
 		fv.open();
 		return null;
