@@ -21,7 +21,7 @@ public abstract class Mapping implements IMappingOperations {
 
 	protected abstract boolean removeElement(JavaElement element,
 			List<JavaElement> elements, String elementName, String elementPath,
-			CodeFragment code);
+			CodeFragment code, boolean isFirstStep, boolean isLastStep);
 
 	protected abstract boolean checkElement(JavaElement element,
 			String elementName, String pathToElement);
@@ -70,14 +70,17 @@ public abstract class Mapping implements IMappingOperations {
 
 	@Override
 	public void removeMapping(String elementName, String pathToElement,
-			CodeFragment code, JavaElement element) {
+			CodeFragment code, JavaElement element, boolean isFirstStep,
+			boolean isLastStep) {
 		List<JavaElement> packages = element.getChildren();
 		if (packages != null) {
 			for (JavaElement javaPackage : packages) {
-				removeMapping(elementName, pathToElement, code, javaPackage);
+				removeMapping(elementName, pathToElement, code, javaPackage,
+						isFirstStep, isLastStep);
 			}
 		} else {
-			removeElement(element, packages, elementName, pathToElement, code);
+			removeElement(element, packages, elementName, pathToElement, code,
+					isFirstStep, isLastStep);
 		}
 	}
 

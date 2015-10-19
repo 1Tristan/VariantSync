@@ -15,6 +15,8 @@ public class MappingElement {
 	private int offset;
 	private String pathToProject;
 	private List<String> wholeClass;
+	private boolean isFirstStep;
+	private boolean isLastStep;
 
 	public MappingElement(String feature, String title, JavaElements type,
 			String pathToSelectedElement, String pathToProject) {
@@ -28,7 +30,7 @@ public class MappingElement {
 	public MappingElement(String feature, String title, JavaElements type,
 			String pathToSelectedElement, List<String> code,
 			int startLineOfSelection, int endLineOfSelection, int offset,
-			List<String> wholeClass) {
+			List<String> wholeClass, boolean isFirstStep, boolean isLastStep) {
 		this.feature = feature;
 		this.title = title;
 		this.type = type;
@@ -38,6 +40,8 @@ public class MappingElement {
 		this.endLineOfSelection = endLineOfSelection;
 		this.offset = offset;
 		this.wholeClass = wholeClass;
+		this.isFirstStep = isFirstStep;
+		this.isLastStep = isLastStep;
 	}
 
 	public MappingElement(String feature, String title, JavaElements type,
@@ -148,6 +152,35 @@ public class MappingElement {
 	 */
 	public List<String> getWholeClass() {
 		return wholeClass;
+	}
+
+	/**
+	 * @return the isLastStep
+	 */
+	public boolean isLastStep() {
+		return isLastStep;
+	}
+
+	/**
+	 * @param isLastStep
+	 *            the isLastStep to set
+	 */
+	public void setLastStep(boolean isLastStep) {
+		this.isLastStep = isLastStep;
+	}
+
+	/**
+	 * @return the isFirstStep
+	 */
+	public boolean isFirstStep() {
+		return isFirstStep;
+	}
+
+	/**
+	 * @param isFirstStep the isFirstStep to set
+	 */
+	public void setFirstStep(boolean isFirstStep) {
+		this.isFirstStep = isFirstStep;
 	}
 
 }

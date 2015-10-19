@@ -63,6 +63,9 @@ class ContextAlgorithm {
 			int startOld = di.getStartIndixOldCode();
 			int removeCounter = 0;
 			int addCounter = 0;
+			boolean isFirstStep = true;
+			boolean isLastStep = false;
+			int j = 0;
 			for (DiffStep ds : diffSteps) {
 				List<String> list = new LinkedList<String>();
 				if (ds == null) {
@@ -71,19 +74,24 @@ class ContextAlgorithm {
 				list.add(ds.getCode());
 				if (ds.isAddFlag()) {
 					addCode(projectName, packageName, className, startNew,
-							startNew, list, wholeClass);
+							startNew, list, wholeClass, isFirstStep, isLastStep);
 					if (!UtilOperations.getInstance().ignoreAddCounter()) {
 						addCounter++;
 					}
 					startNew++;
 				} else {
 					removeCode(projectName, packageName, className, startOld,
-							startOld, list);
+							startOld, list, isFirstStep, isLastStep);
 					removeCounter++;
 					if (startNew > startOld) {
 						startNew--;
 					}
 				}
+				isFirstStep = false;
+				if (j == diffSteps.size() - 2) {
+					isLastStep = true;
+				}
+				j++;
 			}
 			if (removeCounter > 0) {
 				ContextUtils.decreaseCodeLines(
@@ -99,14 +107,15 @@ class ContextAlgorithm {
 
 	private void addCode(String projectName, String packageName,
 			String className, int start, int end, List<String> extractedCode,
-			List<String> wholeClass) {
+			List<String> wholeClass, boolean isFirstStep, boolean isLastStep) {
 		setUpProject(projectName);
 		MappingElement mapping = new MappingElement(
 				context.getFeatureExpression(), className,
 				JavaElements.CODE_FRAGMENT,
 				context.getPathToProject(projectName) + "/src/"
 						+ packageName.replace(".", "/") + "/" + className,
-				extractedCode, start, end, end - start, wholeClass);
+				extractedCode, start, end, end - start, wholeClass,
+				isFirstStep, isLastStep);
 		mapping.setPathToProject(context.getPathToProject(projectName));
 
 		featureOperations.addCodeFragment(mapping,
@@ -114,14 +123,16 @@ class ContextAlgorithm {
 	}
 
 	private void removeCode(String projectName, String packageName,
-			String className, int start, int end, List<String> extractedCode) {
+			String className, int start, int end, List<String> extractedCode,
+			boolean isFirstStep, boolean isLastStep) {
 		setUpProject(projectName);
 		MappingElement mapping = new MappingElement(
 				context.getFeatureExpression(), className,
 				JavaElements.CODE_FRAGMENT,
 				context.getPathToProject(projectName) + "/src/"
 						+ packageName.replace(".", "/") + "/" + className,
-				extractedCode, start, end, end - start, null);
+				extractedCode, start, end, end - start, null, isFirstStep,
+				isLastStep);
 		mapping.setPathToProject(context.getPathToProject(projectName));
 		featureOperations.removeMapping(mapping,
 				context.getJavaProject(projectName));

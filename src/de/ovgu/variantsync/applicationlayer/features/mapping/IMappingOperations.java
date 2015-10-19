@@ -12,7 +12,7 @@ public interface IMappingOperations {
 	JavaElement getElement(List<JavaElement> javaPackages, String className,
 			String classPath);
 
-	JavaProject addMapping(JavaProject project, MappingElement mapping);
+	JavaProject addMapping(JavaProject project, MappingElement mappingp);
 
 	JavaElement createElement(String pathToProject, String elementName,
 			String pathToElement);
@@ -21,5 +21,6 @@ public interface IMappingOperations {
 			String pathToElement, String contentOfElement);
 
 	void removeMapping(String elementName, String pathToElement,
-			CodeFragment code, JavaElement project);
+			CodeFragment code, JavaElement project, boolean isFirstStep,
+			boolean isLastStep);
 }

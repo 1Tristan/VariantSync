@@ -171,13 +171,15 @@ class FeatureMapping {
 
 		// check
 		case PACKAGE: {
-			packageMapping.removeMapping(filename, pathToFile, null, project);
+			packageMapping.removeMapping(filename, pathToFile, null, project,
+					mapping.isFirstStep(), mapping.isLastStep());
 			break;
 		}
 
 		// check
 		case CLASS: {
-			classMapping.removeMapping(filename, pathToFile, null, project);
+			classMapping.removeMapping(filename, pathToFile, null, project,
+					mapping.isFirstStep(), mapping.isLastStep());
 			break;
 		}
 
@@ -186,7 +188,7 @@ class FeatureMapping {
 			codeMapping.removeMapping(filename, pathToFile, new CodeFragment(
 					mapping.getCode(), mapping.getStartLineOfSelection(),
 					mapping.getEndLineOfSelection(), mapping.getOffset()),
-					project);
+					project, mapping.isFirstStep(), mapping.isLastStep());
 			break;
 		}
 		default:

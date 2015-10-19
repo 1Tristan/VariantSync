@@ -60,7 +60,13 @@ public class CodeMapping extends Mapping {
 					new CodeFragment(code, mapping.getStartLineOfSelection(),
 							mapping.getEndLineOfSelection(),
 							mapping.getOffset()), actualCode);
+			if (mapping.isFirstStep()) {
+				((JavaClass) javaElement).setBaseVersion();
+			}
 			javaElement.setCodeLines(newLines);
+			if (mapping.isLastStep()) {
+				((JavaClass) javaElement).addChange(newLines);
+			}
 		} else {
 			JavaElement packageOfClass = packageMapping.getElement(
 					element.getChildren(), name, relativeClassPath);
@@ -93,26 +99,26 @@ public class CodeMapping extends Mapping {
 	@Override
 	protected boolean removeElement(JavaElement javaElement,
 			List<JavaElement> elements, String elementName, String elementPath,
-			CodeFragment code) {
-			String nameOfClass = javaElement.getName();
-			String pathOfClass = UtilOperations.getInstance().removeSrcInPath(
-					javaElement.getPath());
-			if (nameOfClass.equals(elementName)
-					&& pathOfClass.equals(UtilOperations.getInstance()
-							.removeSrcInPath(elementPath))) {
-				List<CodeLine> tmpCode = new ArrayList<CodeLine>();
-				List<CodeLine> actualCode = javaElement.getClonedCodeLines();
-				for (CodeLine cl : actualCode) {
-					try {
-						tmpCode.add(cl.clone());
-					} catch (CloneNotSupportedException e) {
-						e.printStackTrace();
-					}
+			CodeFragment code, boolean isFirstStep, boolean isLastStep) {
+		String nameOfClass = javaElement.getName();
+		String pathOfClass = UtilOperations.getInstance().removeSrcInPath(
+				javaElement.getPath());
+		if (nameOfClass.equals(elementName)
+				&& pathOfClass.equals(UtilOperations.getInstance()
+						.removeSrcInPath(elementPath))) {
+			List<CodeLine> tmpCode = new ArrayList<CodeLine>();
+			List<CodeLine> actualCode = javaElement.getClonedCodeLines();
+			for (CodeLine cl : actualCode) {
+				try {
+					tmpCode.add(cl.clone());
+				} catch (CloneNotSupportedException e) {
+					e.printStackTrace();
 				}
-				return javaElement.setCodeLines(UtilOperations.getInstance()
-						.removeCode(code.getStartLine(), code.getEndLine(),
-								tmpCode));
 			}
+			return javaElement
+					.setCodeLines(UtilOperations.getInstance().removeCode(
+							code.getStartLine(), code.getEndLine(), tmpCode));
+		}
 		return false;
 	}
 

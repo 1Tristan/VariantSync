@@ -29,8 +29,8 @@ public class CodeChange {
 		this.timestamp = new Timestamp(new Date().getTime()).getTime();
 	}
 
-	public void addLine() {
-
+	public void createTimeStamp() {
+		this.timestamp = new Timestamp(new Date().getTime()).getTime();
 	}
 
 	/**
@@ -87,6 +87,28 @@ public class CodeChange {
 	public String toString() {
 		return "CodeChange [baseVersion=" + baseVersion + ", newVersion="
 				+ newVersion + ", timestamp=" + timestamp + "]";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	protected CodeChange clone() throws CloneNotSupportedException {
+		CodeChange copy = new CodeChange();
+		copy.setTimestamp(this.timestamp);
+		List<CodeLine> baseVersion = new ArrayList<CodeLine>();
+		for (CodeLine line : this.baseVersion) {
+			baseVersion.add(line.clone());
+		}
+		copy.setBaseVersion(baseVersion);
+		List<CodeLine> newVersion = new ArrayList<CodeLine>();
+		for (CodeLine line : this.newVersion) {
+			baseVersion.add(line.clone());
+		}
+		copy.setNewVersion(newVersion);
+		return copy;
 	}
 
 }

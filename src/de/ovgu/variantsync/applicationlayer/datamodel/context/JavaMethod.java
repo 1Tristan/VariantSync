@@ -5,8 +5,8 @@ import java.util.List;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 
 public class JavaMethod extends JavaElement {
-	
-	public JavaMethod(){
+
+	public JavaMethod() {
 		super();
 	}
 

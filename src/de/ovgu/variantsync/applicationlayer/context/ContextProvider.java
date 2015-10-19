@@ -3,16 +3,32 @@ package de.ovgu.variantsync.applicationlayer.context;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
+import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
+import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.Util;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.view.context.FeatureContextSelection;
 
 /**
@@ -27,6 +43,8 @@ public class ContextProvider extends AbstractModel implements
 		IContextOperations {
 
 	private ContextHandler contextHandler;
+	private IPersistanceOperations persistanceOperations = ModuleFactory
+			.getPersistanceOperations();
 
 	public ContextProvider() {
 		contextHandler = ContextHandler.getInstance();
@@ -140,19 +158,150 @@ public class ContextProvider extends AbstractModel implements
 		List<JavaElement> classes = new ArrayList<JavaElement>();
 		iterateElements(jp.getChildren(), classes);
 		List<String> classNames = new ArrayList<String>();
-		for(JavaElement e : classes){
+		for (JavaElement e : classes) {
 			classNames.add(e.getName());
 		}
 		return classNames;
 	}
 
-	private void iterateElements(List<JavaElement> elements, List<JavaElement> classes) {
+	private void iterateElements(List<JavaElement> elements,
+			List<JavaElement> classes) {
 		for (JavaElement e : elements) {
 			if (e.getChildren() != null) {
 				iterateElements(e.getChildren(), classes);
-			}else{
+			} else {
 				classes.add(e);
 			}
 		}
+	}
+
+	@Override
+	public Collection<CodeChange> getChanges(String fe, String projectName,
+			String className) {
+		Context c = ContextHandler.getInstance().getContext(fe);
+		JavaProject jp = c.getJavaProjects().get(projectName);
+		List<JavaElement> classes = new ArrayList<JavaElement>();
+		iterateElements(jp.getChildren(), classes);
+		for (JavaElement e : classes) {
+			if (e.getName().equals(className)) {
+				return ((JavaClass) e).getChanges();
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public List<String> getSyncTargets(String fe, String projectName,
+			String className) {
+		List<String> syncTargets = new ArrayList<String>();
+		Context c = ContextHandler.getInstance().getContext(fe);
+		Map<String, JavaProject> mapJp = c.getJavaProjects();
+		Set<Entry<String, JavaProject>> entries = mapJp.entrySet();
+		Iterator<Entry<String, JavaProject>> it = entries.iterator();
+		Set<String> usedProjects = new HashSet<String>();
+		while (it.hasNext()) {
+			Entry<String, JavaProject> e = it.next();
+			if (!e.getKey().equals(projectName)) {
+				List<JavaElement> classes = new ArrayList<JavaElement>();
+				JavaProject jp = e.getValue();
+				iterateElements(jp.getChildren(), classes);
+				for (JavaElement element : classes) {
+					if (element.getName().equals(className)) {
+						syncTargets
+								.add(jp.getName() + ": " + element.getName());
+						usedProjects.add(element.getName());
+					}
+				}
+			}
+		}
+		List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		for (IProject p : supportedProjects) {
+			String name = p.getName();
+			if (!usedProjects.contains(name) && !name.equals(projectName)) {
+				IResource javaClass = null;
+				try {
+					javaClass = findFileRecursively(p, className);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+				if (javaClass != null) {
+					syncTargets.add(name + ": " + javaClass.getName());
+					usedProjects.add(name);
+				}
+			}
+		}
+		return syncTargets;
+	}
+
+	private IFile findFileRecursively(IContainer container, String name)
+			throws CoreException {
+		for (IResource r : container.members()) {
+			if (r instanceof IContainer) {
+				IFile file = findFileRecursively((IContainer) r, name);
+				if (file != null) {
+					return file;
+				}
+			} else if (r instanceof IFile && r.getName().equals(name)) {
+				return (IFile) r;
+			}
+		}
+
+		return null;
+	}
+
+	// TODO: use package-name to get full-qualified path to class
+	@Override
+	public List<CodeLine> getTargetCode(String fe, String projectName,
+			String className) {
+		List<CodeLine> targetCode = new ArrayList<CodeLine>();
+		Context c = ContextHandler.getInstance().getContext(fe);
+		Map<String, JavaProject> mapJp = c.getJavaProjects();
+		Set<Entry<String, JavaProject>> entries = mapJp.entrySet();
+		Iterator<Entry<String, JavaProject>> it = entries.iterator();
+		while (it.hasNext()) {
+			Entry<String, JavaProject> e = it.next();
+			if (e.getKey().equals(projectName)) {
+				List<JavaElement> classes = new ArrayList<JavaElement>();
+				JavaProject jp = e.getValue();
+				iterateElements(jp.getChildren(), classes);
+				for (JavaElement element : classes) {
+					if (element.getName().equals(className)) {
+						targetCode.addAll(element.getClonedCodeLines());
+					}
+				}
+			}
+		}
+		if (targetCode.isEmpty()) {
+			List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
+					.getSupportProjectList();
+			for (IProject p : supportedProjects) {
+				String name = p.getName();
+				if (name.equals(projectName)) {
+					IResource javaClass = null;
+					try {
+						javaClass = findFileRecursively(p, className);
+					} catch (CoreException e) {
+						e.printStackTrace();
+					}
+					if (javaClass != null) {
+						IFile file = (IFile) javaClass;
+						List<String> linesOfFile = null;
+						try {
+							linesOfFile = persistanceOperations.readFile(
+									file.getContents(), file.getCharset());
+						} catch (FileOperationException | CoreException e) {
+							e.printStackTrace();
+						}
+						int i = 0;
+						for (String line : linesOfFile) {
+							targetCode.add(new CodeLine(line, i));
+							i++;
+						}
+					}
+				}
+			}
+		}
+		return targetCode;
 	}
 }

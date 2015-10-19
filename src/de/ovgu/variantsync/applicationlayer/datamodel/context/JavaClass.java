@@ -18,6 +18,7 @@ public class JavaClass extends JavaElement {
 	private List<CodeLine> previousClass;
 	private List<CodeLine> wholeClass;
 	private Queue<CodeChange> changes;
+	private CodeChange actualChange;
 
 	public JavaClass() {
 		super();
@@ -76,17 +77,31 @@ public class JavaClass extends JavaElement {
 	 * Konflikt auf: Git-Vergleichsdialog für User öffnen
 	 */
 
-	private void addChange(List<CodeLine> newLines)
-			throws CloneNotSupportedException {
+	public void setBaseVersion() {
+		actualChange = new CodeChange();
 		List<CodeLine> baseVersion = new ArrayList<CodeLine>();
 		for (CodeLine cl : this.codeLines) {
-			baseVersion.add(cl.clone());
+			try {
+				baseVersion.add(cl.clone());
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
 		}
+		actualChange.setBaseVersion(baseVersion);
+	}
+
+	public void addChange(List<CodeLine> newLines) {
 		List<CodeLine> newVersion = new ArrayList<CodeLine>();
 		for (CodeLine cl : newLines) {
-			newVersion.add(cl.clone());
+			try {
+				newVersion.add(cl.clone());
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
 		}
-		changes.add(new CodeChange(baseVersion, newVersion));
+		actualChange.setNewVersion(newVersion);
+		actualChange.createTimeStamp();
+		changes.add(actualChange);
 		System.out.println(changes.toString());
 	}
 
@@ -199,6 +214,14 @@ public class JavaClass extends JavaElement {
 			}
 			((JavaClass) copy).setCodeLines(clonedCodeFragments);
 		}
+		Queue<CodeChange> changes = this.changes;
+		Queue<CodeChange> clonedChanges = new LinkedList<CodeChange>();
+		if (changes != null) {
+			for (CodeChange change : changes) {
+				clonedChanges.add(change.clone());
+			}
+			((JavaClass) copy).setChanges(clonedChanges);
+		}
 		return copy;
 	}
 
@@ -207,11 +230,6 @@ public class JavaClass extends JavaElement {
 	 *            the codeFragments to set
 	 */
 	public boolean setCodeLines(List<CodeLine> codeLines) {
-		try {
-			addChange(codeLines);
-		} catch (CloneNotSupportedException e1) {
-			e1.printStackTrace();
-		}
 		this.codeLines.clear();
 		for (CodeLine cl : codeLines) {
 			try {
@@ -240,5 +258,13 @@ public class JavaClass extends JavaElement {
 	@XmlElement(name = "change")
 	public Queue<CodeChange> getChanges() {
 		return changes;
+	}
+
+	/**
+	 * @param changes
+	 *            the changes to set
+	 */
+	public void setChanges(Queue<CodeChange> changes) {
+		this.changes = changes;
 	}
 }

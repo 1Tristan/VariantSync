@@ -4,7 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
 
@@ -52,4 +54,12 @@ public interface IContextOperations {
 	Collection<String> getProjects(String fe);
 
 	Collection<String> getClasses(String fe, String projectName);
+
+	List<String> getSyncTargets(String fe, String projectName,
+			String className);
+
+	Collection<CodeChange> getChanges(String fe, String projectName,
+			String className);
+
+	List<CodeLine> getTargetCode(String fe, String projectName, String className);
 }
