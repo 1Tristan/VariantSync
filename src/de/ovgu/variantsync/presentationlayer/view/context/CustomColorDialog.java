@@ -67,7 +67,7 @@ public class CustomColorDialog {
 
 			// final variable to use it in selection adapter
 			final CodeHighlighting highlightColor = ch;
-			color = new Color(shell.getDisplay(), highlightColor.getColor());
+			color = new Color(shell.getDisplay(), highlightColor.getRGB());
 
 			// Use a label full of spaces to show the color
 			final Label colorLabel = new Label(shell, SWT.NONE);
@@ -169,25 +169,25 @@ public class CustomColorDialog {
 
 	private RGB getColor(String color) {
 		if (color.equals(CodeHighlighting.YELLOW.getColorName())) {
-			return CodeHighlighting.YELLOW.getColor();
+			return CodeHighlighting.YELLOW.getRGB();
 		} else if (color.equals(CodeHighlighting.GREEN_BRIGHT.getColorName())) {
-			return CodeHighlighting.GREEN_BRIGHT.getColor();
+			return CodeHighlighting.GREEN_BRIGHT.getRGB();
 		} else if (color.equals(CodeHighlighting.ORANGE.getColorName())) {
-			return CodeHighlighting.ORANGE.getColor();
+			return CodeHighlighting.ORANGE.getRGB();
 		} else if (color.equals(CodeHighlighting.GREEN.getColorName())) {
-			return CodeHighlighting.GREEN.getColor();
+			return CodeHighlighting.GREEN.getRGB();
 		} else if (color.equals(CodeHighlighting.RED.getColorName())) {
-			return CodeHighlighting.RED.getColor();
+			return CodeHighlighting.RED.getRGB();
 		} else if (color.equals(CodeHighlighting.PINK.getColorName())) {
-			return CodeHighlighting.PINK.getColor();
+			return CodeHighlighting.PINK.getRGB();
 		} else if (color.equals(CodeHighlighting.BLUE_BRIGHT.getColorName())) {
-			return CodeHighlighting.BLUE_BRIGHT.getColor();
+			return CodeHighlighting.BLUE_BRIGHT.getRGB();
 		} else if (color.equals(CodeHighlighting.BLUE.getColorName())) {
-			return CodeHighlighting.BLUE.getColor();
+			return CodeHighlighting.BLUE.getRGB();
 		} else if (color.equals(CodeHighlighting.PURPLE.getColorName())) {
-			return CodeHighlighting.PURPLE.getColor();
+			return CodeHighlighting.PURPLE.getRGB();
 		} else if (color.equals(CodeHighlighting.DEFAULTCONTEXT.getColorName())) {
-			return CodeHighlighting.DEFAULTCONTEXT.getColor();
+			return CodeHighlighting.DEFAULTCONTEXT.getRGB();
 		} else {
 			return new RGB(0, 0, 0);
 		}

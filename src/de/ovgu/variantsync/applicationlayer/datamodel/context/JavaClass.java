@@ -81,11 +81,7 @@ public class JavaClass extends JavaElement {
 		actualChange = new CodeChange();
 		List<CodeLine> baseVersion = new ArrayList<CodeLine>();
 		for (CodeLine cl : this.codeLines) {
-			try {
-				baseVersion.add(cl.clone());
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
+			baseVersion.add(cl.clone());
 		}
 		actualChange.setBaseVersion(baseVersion);
 	}
@@ -93,11 +89,7 @@ public class JavaClass extends JavaElement {
 	public void addChange(List<CodeLine> newLines) {
 		List<CodeLine> newVersion = new ArrayList<CodeLine>();
 		for (CodeLine cl : newLines) {
-			try {
-				newVersion.add(cl.clone());
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
+			newVersion.add(cl.clone());
 		}
 		actualChange.setNewVersion(newVersion);
 		actualChange.createTimeStamp();
@@ -167,11 +159,7 @@ public class JavaClass extends JavaElement {
 	public List<CodeLine> getClonedCodeLines() {
 		List<CodeLine> tmpList = new ArrayList<CodeLine>();
 		for (CodeLine cl : codeLines) {
-			try {
-				tmpList.add(cl.clone());
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
+			tmpList.add(cl.clone());
 		}
 		return tmpList;
 	}
@@ -232,11 +220,7 @@ public class JavaClass extends JavaElement {
 	public boolean setCodeLines(List<CodeLine> codeLines) {
 		this.codeLines.clear();
 		for (CodeLine cl : codeLines) {
-			try {
-				this.codeLines.add(cl.clone());
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
+			this.codeLines.add(cl.clone());
 		}
 		return true;
 	}

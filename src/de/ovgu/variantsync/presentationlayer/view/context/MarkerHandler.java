@@ -219,43 +219,45 @@ public class MarkerHandler {
 		} else {
 			activeFile = file;
 		}
-		String projectName = file.getProject().getName();
-		String fileName = file.getName();
-		Map<String, List<JavaClass>> classes = contextOp.findJavaClass(
-				projectName, fileName);
+		if (file != null && file.getProject() != null) {
+			String projectName = file.getProject().getName();
+			String fileName = file.getName();
+			Map<String, List<JavaClass>> classes = contextOp.findJavaClass(
+					projectName, fileName);
 
-		MarkerHandler.getInstance().clearAllMarker(file);
-		List<MarkerInformation> markers = new ArrayList<MarkerInformation>();
-		Set<Entry<String, List<JavaClass>>> set = classes.entrySet();
-		Iterator<Entry<String, List<JavaClass>>> it = set.iterator();
-		while (it.hasNext()) {
-			Entry<String, List<JavaClass>> entry = it.next();
-			List<JavaClass> listClasses = entry.getValue();
-			for (JavaClass c : listClasses) {
-				List<CodeLine> cls = c.getCodeLines();
-				int i = 0;
-				List<CodeLine> tmp = new ArrayList<CodeLine>();
-				for (CodeLine cl : cls) {
-					tmp.add(cl);
-					if (cls.size() > i + 1
-							&& cls.get(i + 1).getLine() == cl.getLine() + 1) {
-						tmp.add(cls.get(i + 1));
-					} else {
-						MarkerInformation mi = new MarkerInformation(0, tmp
-								.get(0).getLine(), tmp.get(tmp.size() - 1)
-								.getLine(), 0, 0);
-						mi.setFeature(entry.getKey());
-						mi.setColor(contextOp.findColor(entry.getKey()));
-						markers.add(mi);
-						tmp.clear();
+			MarkerHandler.getInstance().clearAllMarker(file);
+			List<MarkerInformation> markers = new ArrayList<MarkerInformation>();
+			Set<Entry<String, List<JavaClass>>> set = classes.entrySet();
+			Iterator<Entry<String, List<JavaClass>>> it = set.iterator();
+			while (it.hasNext()) {
+				Entry<String, List<JavaClass>> entry = it.next();
+				List<JavaClass> listClasses = entry.getValue();
+				for (JavaClass c : listClasses) {
+					List<CodeLine> cls = c.getCodeLines();
+					int i = 0;
+					List<CodeLine> tmp = new ArrayList<CodeLine>();
+					for (CodeLine cl : cls) {
+						tmp.add(cl);
+						if (cls.size() > i + 1
+								&& cls.get(i + 1).getLine() == cl.getLine() + 1) {
+							tmp.add(cls.get(i + 1));
+						} else {
+							MarkerInformation mi = new MarkerInformation(0, tmp
+									.get(0).getLine(), tmp.get(tmp.size() - 1)
+									.getLine(), 0, 0);
+							mi.setFeature(entry.getKey());
+							mi.setColor(contextOp.findColor(entry.getKey()));
+							markers.add(mi);
+							tmp.clear();
+						}
+						i++;
 					}
-					i++;
 				}
-			}
-			try {
-				MarkerHandler.getInstance().setMarker(file, markers);
-			} catch (Exception e) {
-				e.printStackTrace();
+				try {
+					MarkerHandler.getInstance().setMarker(file, markers);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

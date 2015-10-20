@@ -7,6 +7,7 @@ public class CodeLine {
 	private String code;
 	private int line;
 	private boolean isMapped;
+	private boolean isNew;
 
 	public CodeLine() {
 	}
@@ -14,12 +15,14 @@ public class CodeLine {
 	public CodeLine(String code, int line) {
 		this.code = code;
 		this.line = line;
+		isMapped = true;
 	}
 
-	public CodeLine(String code, int line, boolean isMapped) {
+	public CodeLine(String code, int line, boolean isMapped, boolean isNew) {
 		this.code = code;
 		this.line = line;
 		this.isMapped = isMapped;
+		this.isNew = isNew;
 	}
 
 	/**
@@ -64,7 +67,7 @@ public class CodeLine {
 	@Override
 	public String toString() {
 		return "CodeLine [code=" + code + ", line=" + line + ", isMapped="
-				+ isMapped + "]";
+				+ isMapped + ", isNew=" + isNew + "]";
 	}
 
 	/*
@@ -73,8 +76,8 @@ public class CodeLine {
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
-	public CodeLine clone() throws CloneNotSupportedException {
-		return new CodeLine(code, line);
+	public CodeLine clone() {
+		return new CodeLine(code, line, isMapped, isNew);
 	}
 
 	/**
@@ -90,6 +93,21 @@ public class CodeLine {
 	 */
 	public void setMapped(boolean isMapped) {
 		this.isMapped = isMapped;
+	}
+
+	/**
+	 * @return the isNew
+	 */
+	public boolean isNew() {
+		return isNew;
+	}
+
+	/**
+	 * @param isNew
+	 *            the isNew to set
+	 */
+	public void setNew(boolean isNew) {
+		this.isNew = isNew;
 	}
 
 }

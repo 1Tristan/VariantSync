@@ -78,7 +78,7 @@ public class UtilOperations {
 			List<String> codeLines = codeFragment.getCode();
 			int i = codeFragment.getStartLine();
 			for (String line : codeLines) {
-				code.add(new CodeLine(line, i));
+				code.add(new CodeLine(line, i, true, true));
 				i++;
 			}
 		} else {
@@ -99,7 +99,8 @@ public class UtilOperations {
 				for (String newCodeLine : newCodeLines) {
 					int lineNumber = tmpNumber;
 					if (lineNumber < oldStart) {
-						beginning.add(new CodeLine(newCodeLine, lineNumber));
+						beginning.add(new CodeLine(newCodeLine, lineNumber,
+								true, true));
 					} else {
 						insertCode(code, tmpNumber, newCodeLine);
 					}
@@ -109,7 +110,7 @@ public class UtilOperations {
 				int tmpNumber = newStart;
 				for (String newCodeLine : newCodeLines) {
 					if (tmpNumber > oldEnd) {
-						end.add(new CodeLine(newCodeLine, tmpNumber));
+						end.add(new CodeLine(newCodeLine, tmpNumber, true, true));
 					} else {
 						insertCode(code, tmpNumber, newCodeLine);
 					}
@@ -129,11 +130,7 @@ public class UtilOperations {
 		}
 		List<CodeLine> c = new ArrayList<CodeLine>();
 		for (CodeLine cl : code) {
-			try {
-				c.add(cl.clone());
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
+			c.add(cl.clone());
 		}
 		return c;
 	}
@@ -167,11 +164,7 @@ public class UtilOperations {
 		}
 		List<CodeLine> c = new ArrayList<CodeLine>();
 		for (CodeLine cl : code) {
-			try {
-				c.add(cl.clone());
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
+			c.add(cl.clone());
 		}
 		return c;
 	}
@@ -180,7 +173,7 @@ public class UtilOperations {
 			List<String> newCodeLines, List<CodeLine> list) {
 		int j = newStart;
 		for (String newCodeLine : newCodeLines) {
-			list.add(new CodeLine(newCodeLine, j));
+			list.add(new CodeLine(newCodeLine, j, true, true));
 			j++;
 		}
 		return list;
@@ -197,13 +190,9 @@ public class UtilOperations {
 			listIndex++;
 		}
 		for (int x = listIndex; x < code.size(); x++) {
-			try {
-				tmp.add(code.get(x).clone());
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
+			tmp.add(code.get(x).clone());
 		}
-		code.add(listIndex, new CodeLine(newCodeLine, tmpNumber));
+		code.add(listIndex, new CodeLine(newCodeLine, tmpNumber, true, true));
 		for (int k = 0; k < tmp.size(); k++) {
 			try {
 				CodeLine cl = tmp.get(k);
@@ -223,7 +212,8 @@ public class UtilOperations {
 
 	public void printProject(JavaElement element) {
 		if (element instanceof JavaProject) {
-			System.out.println("\n=================== Project ===================");
+			System.out
+					.println("\n=================== Project ===================");
 			System.out.println(element.getName());
 		}
 		if (element.getChildren() != null) {

@@ -50,17 +50,13 @@ public class CodeMapping extends Mapping {
 			List<CodeLine> tmpCode = new ArrayList<CodeLine>();
 			List<CodeLine> actualCode = javaElement.getClonedCodeLines();
 			for (CodeLine cl : actualCode) {
-				try {
-					tmpCode.add(cl.clone());
-				} catch (CloneNotSupportedException e) {
-					e.printStackTrace();
-				}
+				tmpCode.add(cl.clone());
 			}
 			List<CodeLine> newLines = UtilOperations.getInstance().addCode(
 					new CodeFragment(code, mapping.getStartLineOfSelection(),
 							mapping.getEndLineOfSelection(),
 							mapping.getOffset()), actualCode);
-			if (mapping.isFirstStep()) {
+			if (mapping.isFirstStep() || actualCode.isEmpty()) {
 				((JavaClass) javaElement).setBaseVersion();
 			}
 			javaElement.setCodeLines(newLines);
@@ -109,11 +105,7 @@ public class CodeMapping extends Mapping {
 			List<CodeLine> tmpCode = new ArrayList<CodeLine>();
 			List<CodeLine> actualCode = javaElement.getClonedCodeLines();
 			for (CodeLine cl : actualCode) {
-				try {
-					tmpCode.add(cl.clone());
-				} catch (CloneNotSupportedException e) {
-					e.printStackTrace();
-				}
+				tmpCode.add(cl.clone());
 			}
 			return javaElement
 					.setCodeLines(UtilOperations.getInstance().removeCode(

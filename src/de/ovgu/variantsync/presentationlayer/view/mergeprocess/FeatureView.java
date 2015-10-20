@@ -10,6 +10,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -17,15 +19,25 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.part.ViewPart;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.presentationlayer.controller.ContextController;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
 import de.ovgu.variantsync.presentationlayer.controller.FeatureController;
+import de.ovgu.variantsync.presentationlayer.controller.SynchronizationController;
 
+/**
+ * 
+ *
+ * @author Tristan Pfofe (tristan.pfofe@st.ovgu.de)
+ * @version 1.0
+ * @since 20.10.2015
+ */
 public class FeatureView extends ViewPart {
 
 	private List projects;
@@ -40,11 +52,14 @@ public class FeatureView extends ViewPart {
 	private String featureExpressions[];
 	private ContextController cc = ControllerHandler.getInstance()
 			.getContextController();
+	private SynchronizationController sc = ControllerHandler.getInstance()
+			.getSynchronizationController();
 	private FeatureController fc = ControllerHandler.getInstance()
 			.getFeatureController();
-	private Text oldCode;
-	private Text newCode;
-	private Text codeOfTarget;
+	private Table oldCode;
+	private Table newCode;
+	private Table codeOfTarget;
+	private Table syncPreview;
 
 	public FeatureView() {
 	}
@@ -57,7 +72,7 @@ public class FeatureView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite arg0) {
-		arg0.setLayout(new GridLayout(13, false));
+		arg0.setLayout(new GridLayout(9, false));
 
 		Label lblSelectFeatureExpression = new Label(arg0, SWT.NONE);
 		lblSelectFeatureExpression.setText("Select Feature Expression");
@@ -73,20 +88,25 @@ public class FeatureView extends ViewPart {
 		combo.setItems(featureExpressions);
 		combo.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				System.out.println("You selected: " + combo.getText());
+				if (syncTargets != null)
+					syncTargets.setItems(new String[] {});
+				if (changes != null)
+					changes.setItems(new String[] {});
+				if (classes != null)
+					classes.setItems(new String[] {});
+				if (codeOfTarget != null)
+					codeOfTarget.removeAll();
+				if (collChanges != null)
+					collChanges.clear();
+				if (oldCode != null)
+					oldCode.removeAll();
+				if (newCode != null)
+					newCode.removeAll();
 				selectedFeatureExpression = combo.getText();
 				projects.setItems(cc.getProjects(combo.getText()).toArray(
 						new String[] {}));
 			}
 		});
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
@@ -119,53 +139,55 @@ public class FeatureView extends ViewPart {
 
 		Label lblNewCode = new Label(arg0, SWT.NONE);
 		lblNewCode.setText("New Code");
-		new Label(arg0, SWT.NONE);
 
-		Label lblSyncTargets = new Label(arg0, SWT.NONE);
-		lblSyncTargets.setText("Sync Targets");
-		new Label(arg0, SWT.NONE);
-
-		Label lblCodeOfTarget = new Label(arg0, SWT.NONE);
-		lblCodeOfTarget.setText("Code of Target");
-
-		projects = new List(arg0, SWT.BORDER);
-		GridData gd_list = new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1);
-		gd_list.heightHint = 94;
-		gd_list.widthHint = 130;
+		projects = new List(arg0, SWT.BORDER | SWT.H_SCROLL);
+		GridData gd_list = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
+		gd_list.heightHint = 255;
+		gd_list.widthHint = 119;
 		projects.setLayoutData(gd_list);
 		projects.addSelectionListener(new SelectionListener() {
 
 			public void widgetSelected(SelectionEvent event) {
-				int[] selections = projects.getSelectionIndices();
-				String outText = "";
-				for (int loopIndex = 0; loopIndex < selections.length; loopIndex++)
-					outText += selections[loopIndex] + " ";
-				System.out.println("You selected: " + outText);
+				if (syncTargets != null)
+					syncTargets.setItems(new String[] {});
+				if (changes != null)
+					changes.setItems(new String[] {});
+				if (classes != null)
+					classes.setItems(new String[] {});
+				if (codeOfTarget != null)
+					codeOfTarget.removeAll();
+				if (oldCode != null)
+					oldCode.removeAll();
+				if (newCode != null)
+					newCode.removeAll();
 				selectedProject = projects.getSelection()[0];
 				classes.setItems(cc.getClasses(selectedFeatureExpression,
 						selectedProject).toArray(new String[] {}));
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
-				int[] selections = projects.getSelectionIndices();
-				String outText = "";
-				for (int loopIndex = 0; loopIndex < selections.length; loopIndex++)
-					outText += selections[loopIndex] + " ";
-				System.out.println("You selected: " + outText);
 			}
 		});
 
 		new Label(arg0, SWT.NONE);
 
-		classes = new List(arg0, SWT.BORDER);
-		GridData gd_list_1 = new GridData(SWT.LEFT, SWT.CENTER, false, false,
-				1, 1);
-		gd_list_1.heightHint = 174;
+		classes = new List(arg0, SWT.BORDER | SWT.H_SCROLL);
+		GridData gd_list_1 = new GridData(SWT.FILL, SWT.FILL, false, false, 1,
+				1);
+		gd_list_1.heightHint = 259;
 		gd_list_1.widthHint = 83;
 		classes.setLayoutData(gd_list_1);
 		classes.addSelectionListener(new SelectionListener() {
 
 			public void widgetSelected(SelectionEvent event) {
+				if (syncTargets != null)
+					syncTargets.setItems(new String[] {});
+				if (codeOfTarget != null)
+					codeOfTarget.removeAll();
+				if (oldCode != null)
+					oldCode.removeAll();
+				if (newCode != null)
+					newCode.removeAll();
 				selectedClass = classes.getSelection()[0];
 				collChanges = cc.getChanges(selectedFeatureExpression,
 						selectedProject, selectedClass);
@@ -188,33 +210,55 @@ public class FeatureView extends ViewPart {
 		new Label(arg0, SWT.NONE);
 
 		changes = new List(arg0, SWT.H_SCROLL | SWT.BORDER);
-		GridData gd_changes = new GridData(SWT.LEFT, SWT.CENTER, false, false,
-				1, 1);
-		gd_changes.heightHint = 160;
+		GridData gd_changes = new GridData(SWT.FILL, SWT.FILL, false, false, 1,
+				1);
+		gd_changes.heightHint = 256;
 		gd_changes.widthHint = 93;
 		changes.setLayoutData(gd_changes);
 		changes.addSelectionListener(new SelectionListener() {
 
 			public void widgetSelected(SelectionEvent event) {
+				if (oldCode != null)
+					oldCode.removeAll();
+				if (newCode != null)
+					newCode.removeAll();
 				selectedChange = changes.getSelectionIndex();
 				Iterator<CodeChange> it = collChanges.iterator();
 				int i = 0;
-				oldCode.setText("");
-				newCode.setText("");
+				oldCode.removeAll();
+				newCode.removeAll();
+				CodeHighlighting ccolor = cc
+						.getContextColor(selectedFeatureExpression);
 				while (it.hasNext()) {
 					CodeChange ch = it.next();
 					if (i == selectedChange) {
 						java.util.List<CodeLine> code = ch.getBaseVersion();
-						oldCode.setText("");
+						oldCode.removeAll();
 						for (CodeLine cl : code) {
-							oldCode.append(cl.getLine() + ": " + cl.getCode());
-							oldCode.append(System.getProperty("line.separator"));
+							TableItem item = new TableItem(oldCode, SWT.NONE);
+							item.setText(cl.getLine() + ": " + cl.getCode());
+							Color color = new Color(getSite().getShell()
+									.getDisplay(), ccolor.getRGB());
+							item.setBackground(color);
+							// setBackground(ccolor, item);
 						}
 						code = ch.getNewVersion();
-						newCode.setText("");
+						newCode.removeAll();
 						for (CodeLine cl : code) {
-							newCode.append(cl.getLine() + ": " + cl.getCode());
-							newCode.append(System.getProperty("line.separator"));
+							TableItem item = new TableItem(newCode, SWT.NONE);
+							item.setText(cl.getLine() + ": " + cl.getCode());
+							Color color = new Color(getSite().getShell()
+									.getDisplay(), ccolor.getRGB());
+							item.setBackground(color);
+							// setBackground(ccolor, item);
+							if (cl.isNew()) {
+								item.setForeground(getSite().getShell()
+										.getDisplay()
+										.getSystemColor(SWT.COLOR_WHITE));
+								item.setBackground(getSite().getShell()
+										.getDisplay()
+										.getSystemColor(SWT.COLOR_BLACK));
+							}
 						}
 						break;
 					}
@@ -223,68 +267,22 @@ public class FeatureView extends ViewPart {
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
-				int[] selections = changes.getSelectionIndices();
-				String outText = "";
-				for (int loopIndex = 0; loopIndex < selections.length; loopIndex++)
-					outText += selections[loopIndex] + " ";
-				System.out.println("You selected: " + outText);
 			}
 		});
 		new Label(arg0, SWT.NONE);
 
-		oldCode = new Text(arg0, SWT.BORDER | SWT.V_SCROLL);
-		GridData gd_text = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_text.heightHint = 171;
+		oldCode = new Table(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
+				| SWT.CANCEL);
+		GridData gd_text = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
+		gd_text.heightHint = 241;
 		oldCode.setLayoutData(gd_text);
 		new Label(arg0, SWT.NONE);
 
-		newCode = new Text(arg0, SWT.BORDER | SWT.V_SCROLL);
-		GridData gd_text_1 = new GridData(SWT.FILL, SWT.CENTER, true, false, 1,
-				1);
-		gd_text_1.heightHint = 167;
+		newCode = new Table(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
+				| SWT.CANCEL);
+		GridData gd_text_1 = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
+		gd_text_1.heightHint = 251;
 		newCode.setLayoutData(gd_text_1);
-		new Label(arg0, SWT.NONE);
-
-		syncTargets = new List(arg0, SWT.BORDER | SWT.H_SCROLL);
-		GridData gd_syncTargets = new GridData(SWT.LEFT, SWT.CENTER, false,
-				false, 1, 1);
-		gd_syncTargets.heightHint = 174;
-		gd_syncTargets.widthHint = 100;
-		syncTargets.setLayoutData(gd_syncTargets);
-		syncTargets.addSelectionListener(new SelectionListener() {
-
-			public void widgetSelected(SelectionEvent event) {
-				String selection = syncTargets.getSelection()[0];
-				String[] tmp = selection.split(":");
-				String projectName = tmp[0].trim();
-				String className = tmp[1].trim();
-				java.util.List<CodeLine> code = cc.getTargetCode(
-						selectedFeatureExpression, projectName, className);
-				codeOfTarget.setText("");
-				for (CodeLine cl : code) {
-					codeOfTarget.append(cl.getLine() + ": " + cl.getCode());
-					codeOfTarget.append(System.getProperty("line.separator"));
-				}
-			}
-
-			public void widgetDefaultSelected(SelectionEvent event) {
-			}
-		});
-		new Label(arg0, SWT.NONE);
-
-		codeOfTarget = new Text(arg0, SWT.BORDER | SWT.V_SCROLL);
-		gd_text = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_text.heightHint = 173;
-		codeOfTarget.setLayoutData(gd_text);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
@@ -298,30 +296,137 @@ public class FeatureView extends ViewPart {
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
+
+		Label lblSyncTargets = new Label(arg0, SWT.NONE);
+		lblSyncTargets.setText("Sync Targets");
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 
+		Label lblCodeOfTarget = new Label(arg0, SWT.NONE);
+		lblCodeOfTarget.setText("Code of Target");
+		new Label(arg0, SWT.NONE);
+
+		Label lblSyncPreview = new Label(arg0, SWT.NONE);
+		lblSyncPreview.setText("Sync Preview");
+
+		syncTargets = new List(arg0, SWT.BORDER | SWT.H_SCROLL);
+		GridData gd_syncTargets = new GridData(SWT.FILL, SWT.FILL, false,
+				false, 1, 1);
+		gd_syncTargets.heightHint = 79;
+		gd_syncTargets.widthHint = 100;
+		syncTargets.setLayoutData(gd_syncTargets);
+		syncTargets.addSelectionListener(new SelectionListener() {
+
+			public void widgetSelected(SelectionEvent event) {
+				if (codeOfTarget != null)
+					codeOfTarget.removeAll();
+				String selection = syncTargets.getSelection()[0];
+				String[] tmp = selection.split(":");
+				String projectName = tmp[0].trim();
+				String className = tmp[1].trim();
+				java.util.List<CodeLine> code = cc.getTargetCode(
+						selectedFeatureExpression, projectName, className);
+				CodeHighlighting ccolor = cc
+						.getContextColor(selectedFeatureExpression);
+				codeOfTarget.removeAll();
+				for (CodeLine cl : code) {
+					TableItem item = new TableItem(codeOfTarget, SWT.NONE);
+					item.setText(cl.getLine() + ": " + cl.getCode());
+					Color color = new Color(getSite().getShell().getDisplay(),
+							ccolor.getRGB());
+					item.setBackground(color);
+					// setBackground(ccolor, item);
+				}
+				Iterator<CodeChange> it = collChanges.iterator();
+				java.util.List<CodeLine> newCode = null;
+				int i = 0;
+				while (it.hasNext()) {
+					CodeChange cc = it.next();
+					if (i == selectedChange) {
+						newCode = cc.getNewVersion();
+					}
+					i++;
+				}
+				java.util.List<CodeLine> syncCode = sc
+						.doAutoSync(newCode, code);
+				for (CodeLine cl : syncCode) {
+					TableItem item = new TableItem(syncPreview, SWT.NONE);
+					item.setText(cl.getLine() + ": " + cl.getCode());
+					Color color = new Color(getSite().getShell().getDisplay(),
+							ccolor.getRGB());
+					item.setBackground(color);
+				}
+			}
+
+			public void widgetDefaultSelected(SelectionEvent event) {
+			}
+		});
+		new Label(arg0, SWT.NONE);
+
 		Button btnSynchronize = new Button(arg0, SWT.NONE);
-		btnSynchronize.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
+		btnSynchronize.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
+				false, false, 1, 1));
+		btnSynchronize.setText("Auto Sync");
+		new Label(arg0, SWT.NONE);
+
+		Button btnManualSync = new Button(arg0, SWT.NONE);
+		btnManualSync.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false,
 				false, 1, 1));
-		btnSynchronize.setText("Synchronize");
+		btnManualSync.setText("Manual Sync");
 		new Label(arg0, SWT.NONE);
+
+		codeOfTarget = new Table(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
+				| SWT.CANCEL);
+		gd_text = new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1);
+		gd_text.heightHint = 247;
+		codeOfTarget.setLayoutData(gd_text);
 		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
+
+		syncPreview = new Table(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
+				| SWT.CANCEL);
+		gd_text = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
+		gd_text.heightHint = 111;
+		syncPreview.setLayoutData(gd_text);
+	}
+
+	private void setBackground(CodeHighlighting foreground, TableItem item) {
+		Color color = null;
+		final RGB BLACK = new RGB(0, 0, 0);
+		final RGB WHITE = new RGB(255, 255, 255);
+		if (foreground.getColorName().equals(
+				CodeHighlighting.YELLOW.getColorName())) {
+			color = new Color(getSite().getShell().getDisplay(), BLACK);
+		} else if (foreground.getColorName().equals(
+				CodeHighlighting.GREEN_BRIGHT.getColorName())) {
+			color = new Color(getSite().getShell().getDisplay(), BLACK);
+		} else if (foreground.getColorName().equals(
+				CodeHighlighting.ORANGE.getColorName())) {
+			color = new Color(getSite().getShell().getDisplay(), BLACK);
+		} else if (foreground.getColorName().equals(
+				CodeHighlighting.GREEN.getColorName())) {
+			color = new Color(getSite().getShell().getDisplay(), WHITE);
+		} else if (foreground.getColorName().equals(
+				CodeHighlighting.RED.getColorName())) {
+			color = new Color(getSite().getShell().getDisplay(), WHITE);
+		} else if (foreground.getColorName().equals(
+				CodeHighlighting.PINK.getColorName())) {
+			color = new Color(getSite().getShell().getDisplay(), WHITE);
+		} else if (foreground.getColorName().equals(
+				CodeHighlighting.BLUE_BRIGHT.getColorName())) {
+			color = new Color(getSite().getShell().getDisplay(), BLACK);
+		} else if (foreground.getColorName().equals(
+				CodeHighlighting.BLUE.getColorName())) {
+			color = new Color(getSite().getShell().getDisplay(), WHITE);
+		} else if (foreground.getColorName().equals(
+				CodeHighlighting.PURPLE.getColorName())) {
+			color = new Color(getSite().getShell().getDisplay(), WHITE);
+		} else if (foreground.getColorName().equals(
+				CodeHighlighting.DEFAULTCONTEXT.getColorName())) {
+			color = new Color(getSite().getShell().getDisplay(), BLACK);
+		}
+		item.setBackground(color);
 	}
 }

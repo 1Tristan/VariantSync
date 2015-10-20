@@ -30,7 +30,7 @@ public enum CodeHighlighting {
 		this.color = color;
 	}
 
-	public RGB getColor() {
+	public RGB getRGB() {
 		return this.color;
 	}
 

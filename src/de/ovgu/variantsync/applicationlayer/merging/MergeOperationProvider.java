@@ -1,8 +1,10 @@
 package de.ovgu.variantsync.applicationlayer.merging;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import difflib.Delta;
 
 /**
@@ -33,4 +35,21 @@ public class MergeOperationProvider extends AbstractModel implements
 		return mergeCalculation.performThreeWayMerge(fList1, fList2, fList3);
 	}
 
+	@Override
+	public List<CodeLine> doAutoSync(List<CodeLine> newCode,
+			List<CodeLine> target) {
+		List<String> quell = new ArrayList<String>();
+		for (CodeLine cl : newCode) {
+			if (cl.isNew())
+				quell.add(cl.getCode());
+		}
+		List<String> targetCode = new ArrayList<String>();
+		for (CodeLine cl : target) {
+			if (cl.isNew())
+				targetCode.add(cl.getCode());
+		}
+		JDimeWrapper.merge(quell, targetCode);
+		List<CodeLine> syncResult = new ArrayList<CodeLine>();
+		return syncResult;
+	}
 }

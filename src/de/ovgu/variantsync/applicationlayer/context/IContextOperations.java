@@ -55,11 +55,13 @@ public interface IContextOperations {
 
 	Collection<String> getClasses(String fe, String projectName);
 
-	List<String> getSyncTargets(String fe, String projectName,
-			String className);
+	List<String> getSyncTargets(String fe, String projectName, String className);
 
 	Collection<CodeChange> getChanges(String fe, String projectName,
 			String className);
 
 	List<CodeLine> getTargetCode(String fe, String projectName, String className);
+
+	CodeHighlighting getContextColor(String featureExpression);
+
 }

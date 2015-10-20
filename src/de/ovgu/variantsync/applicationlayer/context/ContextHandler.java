@@ -111,6 +111,19 @@ class ContextHandler {
 		Context c = contextMap.get(featureExpression);
 		if (c != null) {
 			c.setColor(color);
+			// Map<String, JavaProject> jps = c.getJavaProjects();
+			// Set<Entry<String, JavaProject>> entries = jps.entrySet();
+			// Iterator<Entry<String, JavaProject>> it = entries.iterator();
+			// while (it.hasNext()) {
+			// Entry<String, JavaProject> e = it.next();
+			// List<JavaClass> classes = ContextUtils.getClasses(e.getValue());
+			// for (JavaClass jc : classes) {
+			// List<CodeLine> codelines = jc.getCodeLines();
+			// for (CodeLine cl : codelines) {
+			// cl.setColor(c.getColor());
+			// }
+			// }
+			// }
 			persistenceOp.saveContext(c, Util.parseStorageLocation(c));
 		}
 	}

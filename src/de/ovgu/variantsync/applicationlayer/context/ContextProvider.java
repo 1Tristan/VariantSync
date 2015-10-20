@@ -148,31 +148,23 @@ public class ContextProvider extends AbstractModel implements
 	@Override
 	public Collection<String> getProjects(String fe) {
 		Context c = ContextHandler.getInstance().getContext(fe);
-		return c.getJavaProjects().keySet();
+		if (c != null && c.getJavaProjects() != null)
+			return c.getJavaProjects().keySet();
+		else
+			return new ArrayList<String>() {
+			};
 	}
 
 	@Override
 	public Collection<String> getClasses(String fe, String projectName) {
 		Context c = ContextHandler.getInstance().getContext(fe);
 		JavaProject jp = c.getJavaProjects().get(projectName);
-		List<JavaElement> classes = new ArrayList<JavaElement>();
-		iterateElements(jp.getChildren(), classes);
+		List<JavaClass> classes = ContextUtils.getClasses(jp);
 		List<String> classNames = new ArrayList<String>();
 		for (JavaElement e : classes) {
 			classNames.add(e.getName());
 		}
 		return classNames;
-	}
-
-	private void iterateElements(List<JavaElement> elements,
-			List<JavaElement> classes) {
-		for (JavaElement e : elements) {
-			if (e.getChildren() != null) {
-				iterateElements(e.getChildren(), classes);
-			} else {
-				classes.add(e);
-			}
-		}
 	}
 
 	@Override
@@ -181,7 +173,7 @@ public class ContextProvider extends AbstractModel implements
 		Context c = ContextHandler.getInstance().getContext(fe);
 		JavaProject jp = c.getJavaProjects().get(projectName);
 		List<JavaElement> classes = new ArrayList<JavaElement>();
-		iterateElements(jp.getChildren(), classes);
+		ContextUtils.iterateElements(jp.getChildren(), classes);
 		for (JavaElement e : classes) {
 			if (e.getName().equals(className)) {
 				return ((JavaClass) e).getChanges();
@@ -204,7 +196,7 @@ public class ContextProvider extends AbstractModel implements
 			if (!e.getKey().equals(projectName)) {
 				List<JavaElement> classes = new ArrayList<JavaElement>();
 				JavaProject jp = e.getValue();
-				iterateElements(jp.getChildren(), classes);
+				ContextUtils.iterateElements(jp.getChildren(), classes);
 				for (JavaElement element : classes) {
 					if (element.getName().equals(className)) {
 						syncTargets
@@ -264,7 +256,7 @@ public class ContextProvider extends AbstractModel implements
 			if (e.getKey().equals(projectName)) {
 				List<JavaElement> classes = new ArrayList<JavaElement>();
 				JavaProject jp = e.getValue();
-				iterateElements(jp.getChildren(), classes);
+				ContextUtils.iterateElements(jp.getChildren(), classes);
 				for (JavaElement element : classes) {
 					if (element.getName().equals(className)) {
 						targetCode.addAll(element.getClonedCodeLines());
@@ -295,7 +287,7 @@ public class ContextProvider extends AbstractModel implements
 						}
 						int i = 0;
 						for (String line : linesOfFile) {
-							targetCode.add(new CodeLine(line, i));
+							targetCode.add(new CodeLine(line, i, false, false));
 							i++;
 						}
 					}
@@ -304,4 +296,10 @@ public class ContextProvider extends AbstractModel implements
 		}
 		return targetCode;
 	}
+
+	@Override
+	public CodeHighlighting getContextColor(String featureExpression) {
+		return contextHandler.getContext(featureExpression).getColor();
+	}
+
 }

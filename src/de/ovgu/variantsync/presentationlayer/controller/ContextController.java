@@ -6,6 +6,7 @@ import java.util.List;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 
 /**
@@ -56,7 +57,13 @@ public class ContextController extends AbstractController {
 		return contextOperations.getClasses(fe, projectName);
 	}
 
-	public List<CodeLine> getTargetCode(String fe, String projectName, String className) {
+	public List<CodeLine> getTargetCode(String fe, String projectName,
+			String className) {
 		return contextOperations.getTargetCode(fe, projectName, className);
 	}
+
+	public CodeHighlighting getContextColor(String featureExpression) {
+		return contextOperations.getContextColor(featureExpression);
+	}
+
 }

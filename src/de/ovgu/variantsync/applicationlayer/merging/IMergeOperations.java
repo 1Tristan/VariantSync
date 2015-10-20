@@ -2,6 +2,7 @@ package de.ovgu.variantsync.applicationlayer.merging;
 
 import java.util.List;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import difflib.Delta;
 
 /**
@@ -37,4 +38,6 @@ public interface IMergeOperations {
 	 */
 	List<String> performThreeWayMerge(List<String> fList1, List<String> fList2,
 			List<String> fList3);
+
+	List<CodeLine> doAutoSync(List<CodeLine> newCode, List<CodeLine> target);
 }

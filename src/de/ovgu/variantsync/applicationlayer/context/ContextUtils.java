@@ -3,6 +3,9 @@ package de.ovgu.variantsync.applicationlayer.context;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.Diff;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.DiffIndices;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.DiffStep;
@@ -53,6 +56,27 @@ class ContextUtils {
 			}
 		}
 		return diffs;
+	}
+
+	public static List<JavaClass> getClasses(JavaProject jp) {
+		List<JavaElement> javaElements = new ArrayList<JavaElement>();
+		ContextUtils.iterateElements(jp.getChildren(), javaElements);
+		List<JavaClass> classes = new ArrayList<JavaClass>();
+		for (JavaElement e : javaElements) {
+			classes.add((JavaClass) e);
+		}
+		return classes;
+	}
+
+	public static void iterateElements(List<JavaElement> elements,
+			List<JavaElement> classes) {
+		for (JavaElement e : elements) {
+			if (e.getChildren() != null) {
+				iterateElements(e.getChildren(), classes);
+			} else {
+				classes.add(e);
+			}
+		}
 	}
 
 	private static DiffIndices parseLineChanges(String codeChange) {
