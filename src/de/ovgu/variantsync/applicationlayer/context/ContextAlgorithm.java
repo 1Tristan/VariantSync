@@ -81,7 +81,7 @@ class ContextAlgorithm {
 					startNew++;
 				} else {
 					removeCode(projectName, packageName, className, startOld,
-							startOld, list, isFirstStep, isLastStep);
+							startOld, list, isFirstStep, isLastStep, wholeClass);
 					removeCounter++;
 					if (startNew > startOld) {
 						startNew--;
@@ -124,14 +124,14 @@ class ContextAlgorithm {
 
 	private void removeCode(String projectName, String packageName,
 			String className, int start, int end, List<String> extractedCode,
-			boolean isFirstStep, boolean isLastStep) {
+			boolean isFirstStep, boolean isLastStep, List<String> wholeClass) {
 		setUpProject(projectName);
 		MappingElement mapping = new MappingElement(
 				context.getFeatureExpression(), className,
 				JavaElements.CODE_FRAGMENT,
 				context.getPathToProject(projectName) + "/src/"
 						+ packageName.replace(".", "/") + "/" + className,
-				extractedCode, start, end, end - start, null, isFirstStep,
+				extractedCode, start, end, end - start, wholeClass, isFirstStep,
 				isLastStep);
 		mapping.setPathToProject(context.getPathToProject(projectName));
 		featureOperations.removeMapping(mapping,

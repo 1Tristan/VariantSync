@@ -30,9 +30,9 @@ class MergeCalculation {
 	 * @param fOrigin
 	 *            origin development history
 	 * @param fList1
-	 *            development history two
+	 *            development history one
 	 * @param fList2
-	 *            development history three
+	 *            development history two
 	 * @return merged development branch
 	 */
 	public List<String> performThreeWayMerge(List<String> fOrigin,

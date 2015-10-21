@@ -41,7 +41,8 @@ public class MemberMapping extends Mapping {
 	@Override
 	protected boolean removeElement(JavaElement element,
 			List<JavaElement> elements, String elementName, String elementPath,
-			CodeFragment code, boolean isFirstStep, boolean isLastStep) {
+			CodeFragment code, boolean isFirstStep, boolean isLastStep,
+			List<String> wholeClass) {
 		return false;
 	}
 

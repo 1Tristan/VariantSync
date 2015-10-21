@@ -34,9 +34,9 @@ public class SynchronizationController extends AbstractController {
 				patch);
 	}
 
-	public List<CodeLine> doAutoSync(List<CodeLine> newCode,
-			List<CodeLine> targetCode) {
-		return mergeOperations.doAutoSync(newCode, targetCode);
+	public List<CodeLine> doAutoSync(List<CodeLine> left, List<CodeLine> base,
+			List<CodeLine> right) {
+		return mergeOperations.doAutoSync(left, base, right);
 	}
 
 }

@@ -66,4 +66,11 @@ public class ContextController extends AbstractController {
 		return contextOperations.getContextColor(featureExpression);
 	}
 
+	public java.util.List<CodeLine> getTargetCodeWholeClass(
+			String selectedFeatureExpression, String projectName,
+			String className) {
+		return contextOperations.getTargetCodeWholeClass(
+				selectedFeatureExpression, projectName, className);
+	}
+
 }

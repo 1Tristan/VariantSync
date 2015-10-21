@@ -39,5 +39,6 @@ public interface IMergeOperations {
 	List<String> performThreeWayMerge(List<String> fList1, List<String> fList2,
 			List<String> fList3);
 
-	List<CodeLine> doAutoSync(List<CodeLine> newCode, List<CodeLine> target);
+	List<CodeLine> doAutoSync(List<CodeLine> left, List<CodeLine> base,
+			List<CodeLine> right);
 }

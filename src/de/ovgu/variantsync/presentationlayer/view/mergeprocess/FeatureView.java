@@ -60,6 +60,7 @@ public class FeatureView extends ViewPart {
 	private Table newCode;
 	private Table codeOfTarget;
 	private Table syncPreview;
+	private java.util.List<CodeLine> baseCode;
 
 	public FeatureView() {
 	}
@@ -232,32 +233,53 @@ public class FeatureView extends ViewPart {
 				while (it.hasNext()) {
 					CodeChange ch = it.next();
 					if (i == selectedChange) {
-						java.util.List<CodeLine> code = ch.getBaseVersion();
+						baseCode = ch.getBaseVersionWholeClass();
+						java.util.List<CodeLine> mappedCode = ch
+								.getBaseVersion();
+						for (CodeLine clWC : baseCode) {
+							for (CodeLine cl : mappedCode) {
+								if (cl.getLine() == clWC.getLine()) {
+									clWC.setMapped(true);
+								}
+							}
+						}
 						oldCode.removeAll();
-						for (CodeLine cl : code) {
+						for (CodeLine cl : baseCode) {
 							TableItem item = new TableItem(oldCode, SWT.NONE);
 							item.setText(cl.getLine() + ": " + cl.getCode());
-							Color color = new Color(getSite().getShell()
-									.getDisplay(), ccolor.getRGB());
-							item.setBackground(color);
-							// setBackground(ccolor, item);
+							if (cl.isMapped()) {
+								Color color = new Color(getSite().getShell()
+										.getDisplay(), ccolor.getRGB());
+								item.setBackground(color);
+								// setBackground(ccolor, item);
+							}
 						}
-						code = ch.getNewVersion();
+						java.util.List<CodeLine> code = ch.getNewVersionWholeClass();
+						mappedCode = ch.getNewVersion();
+						for (CodeLine clWC : code) {
+							for (CodeLine cl : mappedCode) {
+								if (cl.getLine() == clWC.getLine()) {
+									clWC.setMapped(true);
+								}
+							}
+						}
 						newCode.removeAll();
 						for (CodeLine cl : code) {
 							TableItem item = new TableItem(newCode, SWT.NONE);
 							item.setText(cl.getLine() + ": " + cl.getCode());
-							Color color = new Color(getSite().getShell()
-									.getDisplay(), ccolor.getRGB());
-							item.setBackground(color);
-							// setBackground(ccolor, item);
+							if (cl.isMapped()) {
+								Color color = new Color(getSite().getShell()
+										.getDisplay(), ccolor.getRGB());
+								item.setBackground(color);
+								// setBackground(ccolor, item);
+							}
 							if (cl.isNew()) {
 								item.setForeground(getSite().getShell()
 										.getDisplay()
-										.getSystemColor(SWT.COLOR_WHITE));
-								item.setBackground(getSite().getShell()
-										.getDisplay()
-										.getSystemColor(SWT.COLOR_BLACK));
+										.getSystemColor(SWT.COLOR_DARK_RED));
+								// item.setBackground(getSite().getShell()
+								// .getDisplay()
+								// .getSystemColor(SWT.COLOR_BLACK));
 							}
 						}
 						break;
@@ -329,16 +351,27 @@ public class FeatureView extends ViewPart {
 				String className = tmp[1].trim();
 				java.util.List<CodeLine> code = cc.getTargetCode(
 						selectedFeatureExpression, projectName, className);
+				java.util.List<CodeLine> codeWC = cc.getTargetCodeWholeClass(
+						selectedFeatureExpression, projectName, className);
+				for (CodeLine clWC : codeWC) {
+					for (CodeLine cl : code) {
+						if (cl.getLine() == clWC.getLine()) {
+							clWC.setMapped(true);
+						}
+					}
+				}
 				CodeHighlighting ccolor = cc
 						.getContextColor(selectedFeatureExpression);
 				codeOfTarget.removeAll();
-				for (CodeLine cl : code) {
+				for (CodeLine cl : codeWC) {
 					TableItem item = new TableItem(codeOfTarget, SWT.NONE);
 					item.setText(cl.getLine() + ": " + cl.getCode());
-					Color color = new Color(getSite().getShell().getDisplay(),
-							ccolor.getRGB());
-					item.setBackground(color);
-					// setBackground(ccolor, item);
+					if (cl.isMapped()) {
+						Color color = new Color(getSite().getShell()
+								.getDisplay(), ccolor.getRGB());
+						item.setBackground(color);
+						// setBackground(ccolor, item);
+					}
 				}
 				Iterator<CodeChange> it = collChanges.iterator();
 				java.util.List<CodeLine> newCode = null;
@@ -346,18 +379,20 @@ public class FeatureView extends ViewPart {
 				while (it.hasNext()) {
 					CodeChange cc = it.next();
 					if (i == selectedChange) {
-						newCode = cc.getNewVersion();
+						newCode = cc.getNewVersionWholeClass();
 					}
 					i++;
 				}
-				java.util.List<CodeLine> syncCode = sc
-						.doAutoSync(newCode, code);
+				java.util.List<CodeLine> syncCode = sc.doAutoSync(newCode,
+						baseCode, codeWC);
 				for (CodeLine cl : syncCode) {
 					TableItem item = new TableItem(syncPreview, SWT.NONE);
 					item.setText(cl.getLine() + ": " + cl.getCode());
-					Color color = new Color(getSite().getShell().getDisplay(),
-							ccolor.getRGB());
-					item.setBackground(color);
+					if (cl.isMapped()) {
+						Color color = new Color(getSite().getShell()
+								.getDisplay(), ccolor.getRGB());
+						item.setBackground(color);
+					}
 				}
 			}
 

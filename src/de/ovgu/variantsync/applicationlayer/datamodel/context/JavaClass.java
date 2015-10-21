@@ -9,13 +9,19 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
+import de.ovgu.variantsync.VariantSyncPlugin;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.features.mapping.UtilOperations;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 
 public class JavaClass extends JavaElement {
 
 	private List<CodeLine> codeLines;
-	private List<CodeLine> previousClass;
 	private List<CodeLine> wholeClass;
 	private Queue<CodeChange> changes;
 	private CodeChange actualChange;
@@ -29,7 +35,6 @@ public class JavaClass extends JavaElement {
 		codeLines = new ArrayList<CodeLine>();
 		changes = new LinkedList<CodeChange>();
 		wholeClass = new ArrayList<CodeLine>();
-		previousClass = new ArrayList<CodeLine>();
 	}
 
 	// TODO: für syntaktischen Merge müssen korrekte JavaKlassen gebildet werden
@@ -83,7 +88,15 @@ public class JavaClass extends JavaElement {
 		for (CodeLine cl : this.codeLines) {
 			baseVersion.add(cl.clone());
 		}
+		List<CodeLine> baseVersionWholeClass = new ArrayList<CodeLine>();
+		for (CodeLine cl : this.wholeClass) {
+			CodeLine baseLine = cl.clone();
+			baseLine.setMapped(false);
+			baseVersionWholeClass.add(baseLine);
+		}
+		// new ClassGenerator(getPath(), baseVersion);
 		actualChange.setBaseVersion(baseVersion);
+		actualChange.setBaseVersionWholeClass(baseVersionWholeClass);
 	}
 
 	public void addChange(List<CodeLine> newLines) {
@@ -91,7 +104,15 @@ public class JavaClass extends JavaElement {
 		for (CodeLine cl : newLines) {
 			newVersion.add(cl.clone());
 		}
+		List<CodeLine> newVersionWholeClass = new ArrayList<CodeLine>();
+		for (CodeLine cl : this.wholeClass) {
+			CodeLine newLine = cl.clone();
+			newLine.setMapped(false);
+			newVersionWholeClass.add(newLine);
+		}
+		// new ClassGenerator(getPath(), newVersion);
 		actualChange.setNewVersion(newVersion);
+		actualChange.setNewVersionWholeClass(newVersionWholeClass);
 		actualChange.createTimeStamp();
 		changes.add(actualChange);
 		System.out.println(changes.toString());
@@ -164,6 +185,14 @@ public class JavaClass extends JavaElement {
 		return tmpList;
 	}
 
+	public List<CodeLine> getClonedCodeLinesWholeClass() {
+		List<CodeLine> tmpList = new ArrayList<CodeLine>();
+		for (CodeLine cl : wholeClass) {
+			tmpList.add(cl.clone());
+		}
+		return tmpList;
+	}
+
 	public void addCode(CodeFragment code) {
 		codeLines = UtilOperations.getInstance().addCode(code, codeLines);
 	}
@@ -226,9 +255,12 @@ public class JavaClass extends JavaElement {
 	}
 
 	public void setWholeClass(List<String> lines) {
-
-		// TODO
-		// this.previousClass = lines;
+		wholeClass = new ArrayList<CodeLine>();
+		int i = 0;
+		for (String line : lines) {
+			wholeClass.add(new CodeLine(line, i));
+			i++;
+		}
 	}
 
 	/**

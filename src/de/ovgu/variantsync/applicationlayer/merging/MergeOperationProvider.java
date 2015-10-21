@@ -30,26 +30,32 @@ public class MergeOperationProvider extends AbstractModel implements
 	}
 
 	@Override
-	public List<String> performThreeWayMerge(List<String> fList1,
-			List<String> fList2, List<String> fList3) {
-		return mergeCalculation.performThreeWayMerge(fList1, fList2, fList3);
+	public List<String> performThreeWayMerge(List<String> fOrigin,
+			List<String> fList1, List<String> fList2) {
+		return mergeCalculation.performThreeWayMerge(fOrigin, fList1, fList2);
 	}
 
 	@Override
-	public List<CodeLine> doAutoSync(List<CodeLine> newCode,
-			List<CodeLine> target) {
+	public List<CodeLine> doAutoSync(List<CodeLine> left, List<CodeLine> base,
+			List<CodeLine> right) {
 		List<String> quell = new ArrayList<String>();
-		for (CodeLine cl : newCode) {
-			if (cl.isNew())
-				quell.add(cl.getCode());
+		for (CodeLine cl : left) {
+			quell.add(cl.getCode());
+		}
+		List<String> baseCode = new ArrayList<String>();
+		for (CodeLine cl : base) {
+			baseCode.add(cl.getCode());
 		}
 		List<String> targetCode = new ArrayList<String>();
-		for (CodeLine cl : target) {
-			if (cl.isNew())
-				targetCode.add(cl.getCode());
+		for (CodeLine cl : right) {
+			targetCode.add(cl.getCode());
+		}		List<CodeLine> syncResult = new ArrayList<CodeLine>();
+		List<String> result = JDimeWrapper.merge(quell, baseCode, targetCode);
+		int i = 0;
+		for(String s : result){
+			syncResult.add(new CodeLine(s, i));
+			i++;
 		}
-		JDimeWrapper.merge(quell, targetCode);
-		List<CodeLine> syncResult = new ArrayList<CodeLine>();
 		return syncResult;
 	}
 }

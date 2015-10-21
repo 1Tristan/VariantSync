@@ -3,17 +3,29 @@ package de.ovgu.variantsync.applicationlayer.features.mapping;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
+import de.ovgu.variantsync.VariantSyncPlugin;
+import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeFragment;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaPackage;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
 
 public class CodeMapping extends Mapping {
 
 	private IMappingOperations classMapping;
 	private IMappingOperations packageMapping;
+	private IPersistanceOperations persistanceOperations = ModuleFactory
+			.getPersistanceOperations();
 
 	public CodeMapping() {
 		classMapping = new ClassMapping();
@@ -56,10 +68,19 @@ public class CodeMapping extends Mapping {
 					new CodeFragment(code, mapping.getStartLineOfSelection(),
 							mapping.getEndLineOfSelection(),
 							mapping.getOffset()), actualCode);
+			
+			// TODO: read base version before save!!!
+			// TODO: String to List<CodeLine> after JDime merge
 			if (mapping.isFirstStep() || actualCode.isEmpty()) {
+				if (((JavaClass) javaElement).getCodeLines().isEmpty()) {
+					((JavaClass) javaElement)
+							.setWholeClass(getCodeLinesFromFile(
+									element.getName(), name));
+				}
 				((JavaClass) javaElement).setBaseVersion();
 			}
 			javaElement.setCodeLines(newLines);
+			((JavaClass) javaElement).setWholeClass(mapping.getWholeClass());
 			if (mapping.isLastStep()) {
 				((JavaClass) javaElement).addChange(newLines);
 			}
@@ -80,6 +101,51 @@ public class CodeMapping extends Mapping {
 		}
 	}
 
+	private List<String> getCodeLinesFromFile(String projectName,
+			String className) {
+		List<String> linesOfFile = null;
+		List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		for (IProject p : supportedProjects) {
+			String name = p.getName();
+			if (name.equals(projectName)) {
+				IResource javaClass = null;
+				try {
+					javaClass = findFileRecursively(p, className);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+				if (javaClass != null) {
+					IFile file = (IFile) javaClass;
+					try {
+						linesOfFile = persistanceOperations.readFile(
+								file.getContents(), file.getCharset());
+						break;
+					} catch (FileOperationException | CoreException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return linesOfFile;
+	}
+
+	private IFile findFileRecursively(IContainer container, String name)
+			throws CoreException {
+		for (IResource r : container.members()) {
+			if (r instanceof IContainer) {
+				IFile file = findFileRecursively((IContainer) r, name);
+				if (file != null) {
+					return file;
+				}
+			} else if (r instanceof IFile && r.getName().equals(name)) {
+				return (IFile) r;
+			}
+		}
+
+		return null;
+	}
+
 	@Override
 	protected JavaElement createProject(String pathToProject,
 			String elementName, String elementPath, MappingElement mapping) {
@@ -95,7 +161,8 @@ public class CodeMapping extends Mapping {
 	@Override
 	protected boolean removeElement(JavaElement javaElement,
 			List<JavaElement> elements, String elementName, String elementPath,
-			CodeFragment code, boolean isFirstStep, boolean isLastStep) {
+			CodeFragment code, boolean isFirstStep, boolean isLastStep,
+			List<String> wholeClass) {
 		String nameOfClass = javaElement.getName();
 		String pathOfClass = UtilOperations.getInstance().removeSrcInPath(
 				javaElement.getPath());
@@ -107,6 +174,7 @@ public class CodeMapping extends Mapping {
 			for (CodeLine cl : actualCode) {
 				tmpCode.add(cl.clone());
 			}
+			((JavaClass) javaElement).setWholeClass(wholeClass);
 			return javaElement
 					.setCodeLines(UtilOperations.getInstance().removeCode(
 							code.getStartLine(), code.getEndLine(), tmpCode));

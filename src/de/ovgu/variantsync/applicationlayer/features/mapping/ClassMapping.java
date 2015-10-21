@@ -71,7 +71,7 @@ public class ClassMapping extends Mapping {
 	@Override
 	protected boolean removeElement(JavaElement element,
 			List<JavaElement> elements, String elementName, String elementPath,
-			CodeFragment code, boolean isFirstStep, boolean isLastStep) {
+			CodeFragment code, boolean isFirstStep, boolean isLastStep, List<String> wholeClass) {
 		List<JavaElement> classes = element.getChildren();
 		for (JavaElement javaClass : classes) {
 			String nameOfClass = javaClass.getName();

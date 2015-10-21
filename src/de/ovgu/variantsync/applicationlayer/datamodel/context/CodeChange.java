@@ -15,12 +15,16 @@ import java.util.List;
 public class CodeChange {
 
 	private List<CodeLine> baseVersion;
+	private List<CodeLine> baseVersionWholeClass;
 	private List<CodeLine> newVersion;
+	private List<CodeLine> newVersionWholeClass;
 	private long timestamp;
 
 	public CodeChange() {
 		baseVersion = new ArrayList<CodeLine>();
 		newVersion = new ArrayList<CodeLine>();
+		baseVersionWholeClass = new ArrayList<CodeLine>();
+		newVersionWholeClass = new ArrayList<CodeLine>();
 	}
 
 	public CodeChange(List<CodeLine> baseVersion, List<CodeLine> newVersion) {
@@ -85,8 +89,10 @@ public class CodeChange {
 	 */
 	@Override
 	public String toString() {
-		return "CodeChange [baseVersion=" + baseVersion + ", newVersion="
-				+ newVersion + ", timestamp=" + timestamp + "]";
+		return "CodeChange [baseVersion=" + baseVersion
+				+ ", baseVersionWholeClass=" + baseVersionWholeClass
+				+ ", newVersion=" + newVersion + ", newVersionWholeClass="
+				+ newVersionWholeClass + ", timestamp=" + timestamp + "]";
 	}
 
 	/*
@@ -108,7 +114,47 @@ public class CodeChange {
 			baseVersion.add(line.clone());
 		}
 		copy.setNewVersion(newVersion);
+		List<CodeLine> baseVersionWholeClass = new ArrayList<CodeLine>();
+		for (CodeLine line : this.baseVersionWholeClass) {
+			baseVersionWholeClass.add(line.clone());
+		}
+		copy.setBaseVersionWholeClass(baseVersionWholeClass);
+		List<CodeLine> newVersionWholeClass = new ArrayList<CodeLine>();
+		for (CodeLine line : this.newVersionWholeClass) {
+			newVersionWholeClass.add(line.clone());
+		}
+		copy.setNewVersionWholeClass(newVersionWholeClass);
 		return copy;
+	}
+
+	/**
+	 * @return the baseVersionWholeClass
+	 */
+	public List<CodeLine> getBaseVersionWholeClass() {
+		return baseVersionWholeClass;
+	}
+
+	/**
+	 * @param baseVersionWholeClass
+	 *            the baseVersionWholeClass to set
+	 */
+	public void setBaseVersionWholeClass(List<CodeLine> baseVersionWholeClass) {
+		this.baseVersionWholeClass = baseVersionWholeClass;
+	}
+
+	/**
+	 * @return the newVersionWholeClass
+	 */
+	public List<CodeLine> getNewVersionWholeClass() {
+		return newVersionWholeClass;
+	}
+
+	/**
+	 * @param newVersionWholeClass
+	 *            the newVersionWholeClass to set
+	 */
+	public void setNewVersionWholeClass(List<CodeLine> newVersionWholeClass) {
+		this.newVersionWholeClass = newVersionWholeClass;
 	}
 
 }

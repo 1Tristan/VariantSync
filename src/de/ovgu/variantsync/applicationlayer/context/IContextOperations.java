@@ -64,4 +64,7 @@ public interface IContextOperations {
 
 	CodeHighlighting getContextColor(String featureExpression);
 
+	List<CodeLine> getTargetCodeWholeClass(String fe, String projectName,
+			String className);
+
 }

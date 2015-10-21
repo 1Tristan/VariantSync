@@ -264,6 +264,31 @@ public class ContextProvider extends AbstractModel implements
 				}
 			}
 		}
+		return targetCode;
+	}
+
+	@Override
+	public List<CodeLine> getTargetCodeWholeClass(String fe,
+			String projectName, String className) {
+		List<CodeLine> targetCode = new ArrayList<CodeLine>();
+		Context c = ContextHandler.getInstance().getContext(fe);
+		Map<String, JavaProject> mapJp = c.getJavaProjects();
+		Set<Entry<String, JavaProject>> entries = mapJp.entrySet();
+		Iterator<Entry<String, JavaProject>> it = entries.iterator();
+		while (it.hasNext()) {
+			Entry<String, JavaProject> e = it.next();
+			if (e.getKey().equals(projectName)) {
+				List<JavaElement> classes = new ArrayList<JavaElement>();
+				JavaProject jp = e.getValue();
+				ContextUtils.iterateElements(jp.getChildren(), classes);
+				for (JavaElement element : classes) {
+					if (element.getName().equals(className)) {
+						targetCode.addAll(((JavaClass) element)
+								.getClonedCodeLinesWholeClass());
+					}
+				}
+			}
+		}
 		if (targetCode.isEmpty()) {
 			List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
 					.getSupportProjectList();
