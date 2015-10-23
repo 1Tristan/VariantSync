@@ -91,7 +91,7 @@ public class MarkerHandler {
 		job.schedule();
 	}
 
-	public void setMarker(IFile file, List<MarkerInformation> markers) {
+	private void setMarker(IFile file, List<MarkerInformation> markers) {
 		IDocument document = (IDocument) VariantSyncPlugin.getEditor()
 				.getDocumentProvider()
 				.getDocument(VariantSyncPlugin.getEditor().getEditorInput());
@@ -145,7 +145,7 @@ public class MarkerHandler {
 					iFile.toString().substring(
 							iFile.toString().lastIndexOf("/") + 1));
 
-			MarkerHandler.getInstance().setMarker(iFile, markers);
+			setMarker(iFile, markers);
 		}
 	}
 
@@ -254,7 +254,7 @@ public class MarkerHandler {
 					}
 				}
 				try {
-					MarkerHandler.getInstance().setMarker(file, markers);
+					setMarker(file, markers);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

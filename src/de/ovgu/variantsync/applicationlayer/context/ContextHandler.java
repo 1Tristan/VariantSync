@@ -9,6 +9,7 @@ import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.Util;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.view.context.MarkerHandler;
@@ -27,9 +28,11 @@ class ContextHandler {
 	private IPersistanceOperations persistenceOp = ModuleFactory
 			.getPersistanceOperations();
 	private Context activeContext;
+	private Map<String, List<CodeLine>> mapBaseVersion;
 
 	private ContextHandler() {
 		contextMap = new HashMap<String, Context>();
+		mapBaseVersion = new HashMap<String, List<CodeLine>>();
 	}
 
 	public static ContextHandler getInstance() {
@@ -139,6 +142,18 @@ class ContextHandler {
 		contextMap.clear();
 		activeContext = null;
 		activateContext(VariantSyncConstants.DEFAULT_CONTEXT);
+	}
+
+	public void setLinesOfActualClass(String filename,
+			List<CodeLine> linesOfFile) {
+		this.mapBaseVersion.put(filename, linesOfFile);
+	}
+
+	/**
+	 * @return the linesOfFile
+	 */
+	public List<CodeLine> getLinesOfActualClass(String filename) {
+		return this.mapBaseVersion.get(filename);
 	}
 
 }

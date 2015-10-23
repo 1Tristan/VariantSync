@@ -1,11 +1,14 @@
 package de.ovgu.variantsync.presentationlayer.view.mergeprocess;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -17,15 +20,22 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.part.ViewPart;
 
+import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
+import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.ContextController;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
 import de.ovgu.variantsync.presentationlayer.controller.FeatureController;
@@ -61,6 +71,19 @@ public class FeatureView extends ViewPart {
 	private Table codeOfTarget;
 	private Table syncPreview;
 	private java.util.List<CodeLine> baseCode;
+	private java.util.List<CodeLine> syncCode;
+	private String projectNameTarget;
+	private String classNameTarget;
+	private IPersistanceOperations persistanceOperations = ModuleFactory
+			.getPersistanceOperations();
+	private IContextOperations contextOperations = ModuleFactory
+			.getContextOperations();
+	private Button btnSynchronize;
+	private Button btnManualSync;
+	private java.util.List<CodeLine> left;
+	private String leftClass;
+	private java.util.List<CodeLine> right;
+	private String rightClass;
 
 	public FeatureView() {
 	}
@@ -72,7 +95,7 @@ public class FeatureView extends ViewPart {
 	}
 
 	@Override
-	public void createPartControl(Composite arg0) {
+	public void createPartControl(final Composite arg0) {
 		arg0.setLayout(new GridLayout(9, false));
 
 		Label lblSelectFeatureExpression = new Label(arg0, SWT.NONE);
@@ -161,6 +184,8 @@ public class FeatureView extends ViewPart {
 					oldCode.removeAll();
 				if (newCode != null)
 					newCode.removeAll();
+				if (syncPreview != null)
+					syncPreview.removeAll();
 				selectedProject = projects.getSelection()[0];
 				classes.setItems(cc.getClasses(selectedFeatureExpression,
 						selectedProject).toArray(new String[] {}));
@@ -190,19 +215,8 @@ public class FeatureView extends ViewPart {
 				if (newCode != null)
 					newCode.removeAll();
 				selectedClass = classes.getSelection()[0];
-				collChanges = cc.getChanges(selectedFeatureExpression,
-						selectedProject, selectedClass);
-				java.util.List<String> timestamps = new ArrayList<String>();
-				SimpleDateFormat formatter = new SimpleDateFormat(
-						"hh:mm:ss 'at' dd.MM.yyyy");
-				for (CodeChange ch : collChanges) {
-					timestamps.add(formatter.format(new Date(ch.getTimestamp())));
-				}
-				changes.setItems(timestamps.toArray(new String[] {}));
-
-				syncTargets.setItems(cc.getSyncTargets(
-						selectedFeatureExpression, selectedProject,
-						selectedClass).toArray(new String[] {}));
+				leftClass = selectedProject + " - " + selectedClass;
+				setChanges();
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
@@ -254,7 +268,8 @@ public class FeatureView extends ViewPart {
 								// setBackground(ccolor, item);
 							}
 						}
-						java.util.List<CodeLine> code = ch.getNewVersionWholeClass();
+						java.util.List<CodeLine> code = ch
+								.getNewVersionWholeClass();
 						mappedCode = ch.getNewVersion();
 						for (CodeLine clWC : code) {
 							for (CodeLine cl : mappedCode) {
@@ -347,12 +362,15 @@ public class FeatureView extends ViewPart {
 					codeOfTarget.removeAll();
 				String selection = syncTargets.getSelection()[0];
 				String[] tmp = selection.split(":");
-				String projectName = tmp[0].trim();
-				String className = tmp[1].trim();
+				projectNameTarget = tmp[0].trim();
+				classNameTarget = tmp[1].trim();
+				rightClass = projectNameTarget + " - " + classNameTarget;
 				java.util.List<CodeLine> code = cc.getTargetCode(
-						selectedFeatureExpression, projectName, className);
+						selectedFeatureExpression, projectNameTarget,
+						classNameTarget);
 				java.util.List<CodeLine> codeWC = cc.getTargetCodeWholeClass(
-						selectedFeatureExpression, projectName, className);
+						selectedFeatureExpression, projectNameTarget,
+						classNameTarget);
 				for (CodeLine clWC : codeWC) {
 					for (CodeLine cl : code) {
 						if (cl.getLine() == clWC.getLine()) {
@@ -383,16 +401,44 @@ public class FeatureView extends ViewPart {
 					}
 					i++;
 				}
-				java.util.List<CodeLine> syncCode = sc.doAutoSync(newCode,
-						baseCode, codeWC);
-				for (CodeLine cl : syncCode) {
-					TableItem item = new TableItem(syncPreview, SWT.NONE);
-					item.setText(cl.getLine() + ": " + cl.getCode());
-					if (cl.isMapped()) {
-						Color color = new Color(getSite().getShell()
-								.getDisplay(), ccolor.getRGB());
-						item.setBackground(color);
+				syncCode = sc.doAutoSync(newCode, baseCode, codeWC);
+				left = new ArrayList<CodeLine>();
+				right = new ArrayList<CodeLine>();
+				if (syncCode != null && !syncCode.isEmpty()) {
+					btnSynchronize.setEnabled(true);
+					boolean addLeft = false;
+					boolean addRight = false;
+					for (CodeLine cl : syncCode) {
+						TableItem item = new TableItem(syncPreview, SWT.NONE);
+						item.setText(cl.getLine() + ": " + cl.getCode());
+						if (cl.getCode().contains("<<<<<<<")) {
+							btnSynchronize.setEnabled(false);
+							btnManualSync.setEnabled(true);
+							addLeft = true;
+						}
+						if (cl.getCode().contains("=======")) {
+							addLeft = false;
+							addRight = true;
+							continue;
+						}
+						if (addRight) {
+							item.setBackground(new Color(getSite().getShell()
+									.getDisplay(), CodeHighlighting.RED
+									.getRGB()));
+							right.add(cl);
+						}
+						if (cl.getCode().contains(">>>>>>>")) {
+							addRight = false;
+						}
+						if (addLeft) {
+							item.setBackground(new Color(getSite().getShell()
+									.getDisplay(), CodeHighlighting.RED
+									.getRGB()));
+							left.add(cl);
+						}
 					}
+				} else {
+					btnManualSync.setEnabled(true);
 				}
 			}
 
@@ -401,16 +447,79 @@ public class FeatureView extends ViewPart {
 		});
 		new Label(arg0, SWT.NONE);
 
-		Button btnSynchronize = new Button(arg0, SWT.NONE);
+		btnSynchronize = new Button(arg0, SWT.NONE);
 		btnSynchronize.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
 				false, false, 1, 1));
 		btnSynchronize.setText("Auto Sync");
+		btnSynchronize.setEnabled(false);
+		btnSynchronize.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				switch (e.type) {
+				case SWT.Selection: {
+					File file = contextOperations.getFile(
+							selectedFeatureExpression, projectNameTarget,
+							classNameTarget);
+					persistanceOperations.writeFile(syncCode, file);
+					IResource res = contextOperations.getResource(
+							selectedFeatureExpression, selectedProject,
+							selectedClass);
+					try {
+						res.refreshLocal(IResource.DEPTH_INFINITE, null);
+					} catch (CoreException e1) {
+						e1.printStackTrace();
+					}
+					contextOperations.removeChange(selectedFeatureExpression,
+							selectedProject, selectedClass, selectedChange);
+					setChanges();
+					btnSynchronize.setEnabled(false);
+					if (syncTargets != null)
+						syncTargets.setItems(new String[] {});
+					if (changes != null)
+						changes.setItems(new String[] {});
+					if (codeOfTarget != null)
+						codeOfTarget.removeAll();
+					if (oldCode != null)
+						oldCode.removeAll();
+					if (newCode != null)
+						newCode.removeAll();
+					if (syncPreview != null)
+						syncPreview.removeAll();
+					break;
+				}
+				}
+			}
+		});
 		new Label(arg0, SWT.NONE);
 
-		Button btnManualSync = new Button(arg0, SWT.NONE);
+		btnManualSync = new Button(arg0, SWT.NONE);
 		btnManualSync.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false,
 				false, 1, 1));
 		btnManualSync.setText("Manual Sync");
+		btnManualSync.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				switch (e.type) {
+				case SWT.Selection:
+					ManualMerge m = new ManualMerge(new Shell(Display
+							.getCurrent(), SWT.APPLICATION_MODAL | SWT.SHEET),
+							left, leftClass, right, rightClass);
+					m.open();
+					btnManualSync.setEnabled(false);
+					if (syncTargets != null)
+						syncTargets.setItems(new String[] {});
+					if (changes != null)
+						changes.setItems(new String[] {});
+					if (codeOfTarget != null)
+						codeOfTarget.removeAll();
+					if (oldCode != null)
+						oldCode.removeAll();
+					if (newCode != null)
+						newCode.removeAll();
+					if (syncPreview != null)
+						syncPreview.removeAll();
+					break;
+				}
+			}
+		});
 		new Label(arg0, SWT.NONE);
 
 		codeOfTarget = new Table(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
@@ -425,6 +534,21 @@ public class FeatureView extends ViewPart {
 		gd_text = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
 		gd_text.heightHint = 111;
 		syncPreview.setLayoutData(gd_text);
+	}
+
+	private void setChanges() {
+		collChanges = cc.getChanges(selectedFeatureExpression, selectedProject,
+				selectedClass);
+		java.util.List<String> timestamps = new ArrayList<String>();
+		SimpleDateFormat formatter = new SimpleDateFormat(
+				"hh:mm:ss 'at' dd.MM.yyyy");
+		for (CodeChange ch : collChanges) {
+			timestamps.add(formatter.format(new Date(ch.getTimestamp())));
+		}
+		changes.setItems(timestamps.toArray(new String[] {}));
+
+		syncTargets.setItems(cc.getSyncTargets(selectedFeatureExpression,
+				selectedProject, selectedClass).toArray(new String[] {}));
 	}
 
 	private void setBackground(CodeHighlighting foreground, TableItem item) {

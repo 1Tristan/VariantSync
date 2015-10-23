@@ -72,11 +72,6 @@ public class CodeMapping extends Mapping {
 			// TODO: read base version before save!!!
 			// TODO: String to List<CodeLine> after JDime merge
 			if (mapping.isFirstStep() || actualCode.isEmpty()) {
-				if (((JavaClass) javaElement).getCodeLines().isEmpty()) {
-					((JavaClass) javaElement)
-							.setWholeClass(getCodeLinesFromFile(
-									element.getName(), name));
-				}
 				((JavaClass) javaElement).setBaseVersion();
 			}
 			javaElement.setCodeLines(newLines);

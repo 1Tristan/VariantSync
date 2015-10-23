@@ -9,13 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-
-import de.ovgu.variantsync.VariantSyncPlugin;
-import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
+import de.ovgu.variantsync.applicationlayer.context.ContextProvider;
 import de.ovgu.variantsync.applicationlayer.features.mapping.UtilOperations;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 
@@ -23,7 +17,7 @@ public class JavaClass extends JavaElement {
 
 	private List<CodeLine> codeLines;
 	private List<CodeLine> wholeClass;
-	private Queue<CodeChange> changes;
+	private List<CodeChange> changes;
 	private CodeChange actualChange;
 
 	public JavaClass() {
@@ -89,6 +83,7 @@ public class JavaClass extends JavaElement {
 			baseVersion.add(cl.clone());
 		}
 		List<CodeLine> baseVersionWholeClass = new ArrayList<CodeLine>();
+		this.wholeClass = new ContextProvider().getLinesOfActualFile(getName());
 		for (CodeLine cl : this.wholeClass) {
 			CodeLine baseLine = cl.clone();
 			baseLine.setMapped(false);
@@ -231,8 +226,8 @@ public class JavaClass extends JavaElement {
 			}
 			((JavaClass) copy).setCodeLines(clonedCodeFragments);
 		}
-		Queue<CodeChange> changes = this.changes;
-		Queue<CodeChange> clonedChanges = new LinkedList<CodeChange>();
+		List<CodeChange> changes = this.changes;
+		List<CodeChange> clonedChanges = new LinkedList<CodeChange>();
 		if (changes != null) {
 			for (CodeChange change : changes) {
 				clonedChanges.add(change.clone());
@@ -272,7 +267,7 @@ public class JavaClass extends JavaElement {
 
 	@XmlElementWrapper(name = "changes")
 	@XmlElement(name = "change")
-	public Queue<CodeChange> getChanges() {
+	public List<CodeChange> getChanges() {
 		return changes;
 	}
 
@@ -280,7 +275,12 @@ public class JavaClass extends JavaElement {
 	 * @param changes
 	 *            the changes to set
 	 */
-	public void setChanges(Queue<CodeChange> changes) {
+	public void setChanges(List<CodeChange> changes) {
 		this.changes = changes;
+	}
+
+	public Object removeChange(int selectedChange) {
+		changes.remove(selectedChange);
+		return null;
 	}
 }

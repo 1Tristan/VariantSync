@@ -9,6 +9,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
@@ -158,4 +159,6 @@ public interface IPersistanceOperations {
 	FeatureExpressions loadFeatureExpressions(String path);
 
 	void saveFeatureExpressions(FeatureExpressions fe, String path);
+
+	void writeFile(java.util.List<CodeLine> syncCode, File file);
 }

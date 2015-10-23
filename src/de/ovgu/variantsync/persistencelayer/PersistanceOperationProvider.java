@@ -2,12 +2,14 @@ package de.ovgu.variantsync.persistencelayer;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
@@ -112,6 +114,19 @@ public class PersistanceOperationProvider implements IPersistanceOperations {
 	@Override
 	public void saveFeatureExpressions(FeatureExpressions fe, String path) {
 		JaxbOperations.writeFeatureExpression(fe, path);
+	}
+
+	@Override
+	public void writeFile(List<CodeLine> syncCode, File file) {
+		List<String> lines = new ArrayList<String>();
+		for (CodeLine line : syncCode) {
+			lines.add(line.getCode());
+		}
+		try {
+			fileOperations.writeFile(lines, file);
+		} catch (FileOperationException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

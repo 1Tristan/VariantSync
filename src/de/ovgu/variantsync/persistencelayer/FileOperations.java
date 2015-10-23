@@ -142,4 +142,26 @@ class FileOperations {
 		}
 		return file;
 	}
+
+	public void writeFile(List<String> lines, File file)
+			throws FileOperationException {
+		if (file.exists()) {
+			file.delete();
+		}
+		PrintWriter out = null;
+		try {
+			file.createNewFile();
+			out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+			for (int i = 0; i < lines.size(); i++) {
+				out.println(lines.get(i));
+			}
+		} catch (IOException e) {
+			throw new FileOperationException(ERROR_CODE_FILENOTREAD, e);
+		} finally {
+			if (out != null) {
+				out.flush();
+				out.close();
+			}
+		}
+	}
 }

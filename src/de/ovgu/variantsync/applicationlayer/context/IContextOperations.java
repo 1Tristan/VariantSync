@@ -1,8 +1,12 @@
 package de.ovgu.variantsync.applicationlayer.context;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
@@ -67,4 +71,16 @@ public interface IContextOperations {
 	List<CodeLine> getTargetCodeWholeClass(String fe, String projectName,
 			String className);
 
+	void setBaseVersion(IFile file);
+
+	List<CodeLine> getLinesOfActualFile(String filename);
+
+	File getFile(String selectedFeatureExpression, String projectNameTarget,
+			String classNameTarget);
+
+	void removeChange(String selectedFeatureExpression, String selectedProject,
+			String selectedClass, int selectedChange);
+
+	IResource getResource(String selectedFeatureExpression,
+			String selectedProject, String selectedClass);
 }

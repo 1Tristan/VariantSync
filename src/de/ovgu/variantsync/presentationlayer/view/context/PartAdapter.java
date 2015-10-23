@@ -7,6 +7,9 @@ import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.EditorPart;
 
+import de.ovgu.variantsync.presentationlayer.controller.ContextController;
+import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
+
 /**
  * 
  *
@@ -15,6 +18,9 @@ import org.eclipse.ui.part.EditorPart;
  * @since 17.09.2015
  */
 public class PartAdapter implements IPartListener {
+
+	private ContextController cc = ControllerHandler.getInstance()
+			.getContextController();
 
 	@Override
 	public void partActivated(IWorkbenchPart part) {
@@ -28,6 +34,7 @@ public class PartAdapter implements IPartListener {
 				System.out
 						.println("===============================================");
 				MarkerHandler.getInstance().refreshMarker(file);
+				cc.setBaseVersion(file);
 			}
 		}
 	}

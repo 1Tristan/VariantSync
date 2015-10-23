@@ -1,6 +1,7 @@
 package de.ovgu.variantsync;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -8,6 +9,14 @@ import com.github.javaparser.ast.CompilationUnit;
 public class CuPrinter {
 
 	public static void main(String[] args) throws Exception {
+		
+		ProcessBuilder pb = new ProcessBuilder("git mergetool");
+		try {
+			pb.start();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	/*	
 		// creates an input stream for the file to be parsed
 		FileInputStream in = new FileInputStream(
 				"Z:\\Studium\\Master\\Semester\\SS_15\\Masterarbeit\\runtime-EclipseApplication\\Test1\\src\\mainPackage\\Coloring.java");
@@ -23,6 +32,6 @@ public class CuPrinter {
 		// prints the resulting compilation unit to default system output
 		System.out.println(cu.getChildrenNodes());
 		System.out.println();
-		System.out.println(cu.toString());
+		System.out.println(cu.toString());*/
 	}
 }

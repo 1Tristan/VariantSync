@@ -1,5 +1,6 @@
 package de.ovgu.variantsync.applicationlayer.context;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -327,4 +328,83 @@ public class ContextProvider extends AbstractModel implements
 		return contextHandler.getContext(featureExpression).getColor();
 	}
 
+	@Override
+	public void setBaseVersion(IFile file) {
+		List<String> linesOfFile = null;
+		try {
+			linesOfFile = persistanceOperations.readFile(file.getContents(),
+					file.getCharset());
+		} catch (FileOperationException | CoreException e) {
+			e.printStackTrace();
+		}
+		List<CodeLine> code = new ArrayList<CodeLine>();
+		int i = 0;
+		for (String line : linesOfFile) {
+			code.add(new CodeLine(line, i, false, false));
+			i++;
+		}
+		ContextHandler.getInstance()
+				.setLinesOfActualClass(file.getName(), code);
+	}
+
+	@Override
+	public List<CodeLine> getLinesOfActualFile(String filename) {
+		return ContextHandler.getInstance().getLinesOfActualClass(filename);
+	}
+
+	@Override
+	public File getFile(String selectedFeatureExpression,
+			String projectNameTarget, String classNameTarget) {
+		List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		for (IProject p : supportedProjects) {
+			String name = p.getName();
+			if (name.equals(projectNameTarget)) {
+				IResource javaClass = null;
+				try {
+					javaClass = findFileRecursively(p, classNameTarget);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+				return new File(javaClass.getLocation().toString());
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public void removeChange(String selectedFeatureExpression,
+			String selectedProject, String selectedClass, int selectedChange) {
+		Context c = ContextHandler.getInstance().getContext(
+				selectedFeatureExpression);
+		JavaProject jp = c.getJavaProjects().get(selectedProject);
+		List<JavaElement> classes = new ArrayList<JavaElement>();
+		ContextUtils.iterateElements(jp.getChildren(), classes);
+		for (JavaElement e : classes) {
+			if (e.getName().equals(selectedClass)) {
+				((JavaClass) e).removeChange(selectedChange);
+				return;
+			}
+		}
+	}
+
+	@Override
+	public IResource getResource(String selectedFeatureExpression,
+			String selectedProject, String selectedClass) {
+		List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		for (IProject p : supportedProjects) {
+			String name = p.getName();
+			if (name.equals(selectedProject)) {
+				IResource javaClass = null;
+				try {
+					javaClass = findFileRecursively(p, selectedClass);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+				return javaClass;
+			}
+		}
+		return null;
+	}
 }

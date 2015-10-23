@@ -3,6 +3,8 @@ package de.ovgu.variantsync.presentationlayer.controller;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
@@ -71,6 +73,10 @@ public class ContextController extends AbstractController {
 			String className) {
 		return contextOperations.getTargetCodeWholeClass(
 				selectedFeatureExpression, projectName, className);
+	}
+
+	public void setBaseVersion(IFile file) {
+		contextOperations.setBaseVersion(file);
 	}
 
 }
