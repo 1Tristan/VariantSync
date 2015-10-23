@@ -20,12 +20,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.part.ViewPart;
@@ -84,6 +82,8 @@ public class FeatureView extends ViewPart {
 	private String leftClass;
 	private java.util.List<CodeLine> right;
 	private String rightClass;
+	private FeatureView reference;
+	private Button btnRemoveChangeEntry;
 
 	public FeatureView() {
 	}
@@ -101,6 +101,8 @@ public class FeatureView extends ViewPart {
 		Label lblSelectFeatureExpression = new Label(arg0, SWT.NONE);
 		lblSelectFeatureExpression.setText("Select Feature Expression");
 		new Label(arg0, SWT.NONE);
+
+		reference = this;
 
 		featureExpressions = fc.getFeatureExpressions().getFeatureExpressions()
 				.toArray(new String[] {});
@@ -238,6 +240,7 @@ public class FeatureView extends ViewPart {
 				if (newCode != null)
 					newCode.removeAll();
 				selectedChange = changes.getSelectionIndex();
+				btnRemoveChangeEntry.setEnabled(true);
 				Iterator<CodeChange> it = collChanges.iterator();
 				int i = 0;
 				oldCode.removeAll();
@@ -325,10 +328,31 @@ public class FeatureView extends ViewPart {
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 
-		Button btnRemoveChangeEntry = new Button(arg0, SWT.NONE);
+		btnRemoveChangeEntry = new Button(arg0, SWT.NONE);
 		btnRemoveChangeEntry.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,
 				false, false, 1, 1));
 		btnRemoveChangeEntry.setText("Remove Change Entry");
+		btnRemoveChangeEntry.setEnabled(false);
+		btnRemoveChangeEntry.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				switch (e.type) {
+				case SWT.Selection: {
+					contextOperations.removeChange(selectedFeatureExpression,
+							selectedProject, selectedClass, selectedChange);
+					btnRemoveChangeEntry.setEnabled(false);
+					setChanges();
+					if (codeOfTarget != null)
+						codeOfTarget.removeAll();
+					if (oldCode != null)
+						oldCode.removeAll();
+					if (newCode != null)
+						newCode.removeAll();
+					if (syncPreview != null)
+						syncPreview.removeAll();
+				}
+				}
+			}
+		});
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
@@ -437,6 +461,12 @@ public class FeatureView extends ViewPart {
 							left.add(cl);
 						}
 					}
+					if (left.isEmpty()) {
+						left = syncCode;
+					}
+					if (right.isEmpty()) {
+						right = syncCode;
+					}
 				} else {
 					btnManualSync.setEnabled(true);
 				}
@@ -456,26 +486,9 @@ public class FeatureView extends ViewPart {
 			public void handleEvent(Event e) {
 				switch (e.type) {
 				case SWT.Selection: {
-					File file = contextOperations.getFile(
-							selectedFeatureExpression, projectNameTarget,
-							classNameTarget);
-					persistanceOperations.writeFile(syncCode, file);
-					IResource res = contextOperations.getResource(
-							selectedFeatureExpression, selectedProject,
-							selectedClass);
-					try {
-						res.refreshLocal(IResource.DEPTH_INFINITE, null);
-					} catch (CoreException e1) {
-						e1.printStackTrace();
-					}
-					contextOperations.removeChange(selectedFeatureExpression,
-							selectedProject, selectedClass, selectedChange);
+					solveChange(syncCode);
 					setChanges();
 					btnSynchronize.setEnabled(false);
-					if (syncTargets != null)
-						syncTargets.setItems(new String[] {});
-					if (changes != null)
-						changes.setItems(new String[] {});
 					if (codeOfTarget != null)
 						codeOfTarget.removeAll();
 					if (oldCode != null)
@@ -499,15 +512,10 @@ public class FeatureView extends ViewPart {
 			public void handleEvent(Event e) {
 				switch (e.type) {
 				case SWT.Selection:
-					ManualMerge m = new ManualMerge(new Shell(Display
-							.getCurrent(), SWT.APPLICATION_MODAL | SWT.SHEET),
-							left, leftClass, right, rightClass);
+					ManualMerge m = new ManualMerge(reference, left, leftClass,
+							right, rightClass, syncCode);
 					m.open();
 					btnManualSync.setEnabled(false);
-					if (syncTargets != null)
-						syncTargets.setItems(new String[] {});
-					if (changes != null)
-						changes.setItems(new String[] {});
 					if (codeOfTarget != null)
 						codeOfTarget.removeAll();
 					if (oldCode != null)
@@ -536,7 +544,23 @@ public class FeatureView extends ViewPart {
 		syncPreview.setLayoutData(gd_text);
 	}
 
-	private void setChanges() {
+	public void solveChange(java.util.List<CodeLine> code) {
+		File file = contextOperations.getFile(selectedFeatureExpression,
+				projectNameTarget, classNameTarget);
+		persistanceOperations.writeFile(code, file);
+		IResource res = contextOperations.getResource(
+				selectedFeatureExpression, projectNameTarget, classNameTarget);
+		try {
+			res.refreshLocal(IResource.DEPTH_INFINITE, null);
+		} catch (CoreException e1) {
+			e1.printStackTrace();
+		}
+		contextOperations.removeChange(selectedFeatureExpression,
+				selectedProject, selectedClass, selectedChange);
+		btnRemoveChangeEntry.setEnabled(false);
+	}
+
+	public void setChanges() {
 		collChanges = cc.getChanges(selectedFeatureExpression, selectedProject,
 				selectedClass);
 		java.util.List<String> timestamps = new ArrayList<String>();

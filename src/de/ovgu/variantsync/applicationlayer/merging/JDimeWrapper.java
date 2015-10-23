@@ -39,7 +39,18 @@ class JDimeWrapper {
 	}
 
 	private static File writeTmpFile(List<String> code, String filename) {
-		File f = new File("C:\\Users\\pfofe\\Desktop\\" + filename + ".java");
+		File folder = new File(VariantSyncConstants.MERGE_FOLDER);
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
+		File f = new File(VariantSyncConstants.MERGE_FOLDER + File.separator
+				+ filename + ".java");
+		if (!f.exists())
+			try {
+				f.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		try {
 			persistanceOperations.addLinesToFile(code, f);
 		} catch (FileOperationException e) {
@@ -53,9 +64,12 @@ class JDimeWrapper {
 		command.add(left.getAbsolutePath());
 		command.add(base.getAbsolutePath());
 		command.add(right.getAbsolutePath());
-
+		File folder = new File(VariantSyncConstants.MERGE_FOLDER);
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
 		File f = new File(VariantSyncConstants.MERGE_OUTPUT);
-		if(f.exists())
+		if (f.exists())
 			f.delete();
 		try {
 			f.createNewFile();

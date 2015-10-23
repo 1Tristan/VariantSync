@@ -1,18 +1,24 @@
 package de.ovgu.variantsync.presentationlayer.view.mergeprocess;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 
-public class ManualMerge extends Dialog {
+public class ManualMerge {
 
 	protected Object result;
 	protected Shell shell;
@@ -20,21 +26,33 @@ public class ManualMerge extends Dialog {
 	private String classLeft;
 	private java.util.List<CodeLine> right;
 	private String classRight;
+	private String selectedCode;
+	private boolean isLeftChosen;
+	private boolean isRightChosen;
+	private FeatureView featureView;
+	private List<CodeLine> syncCode;
 
 	/**
 	 * Create the dialog.
 	 * 
+	 * @param reference
+	 * @param syncCode
+	 * 
 	 * @param parent
 	 * @param style
 	 */
-	public ManualMerge(Shell parent, java.util.List<CodeLine> left,
-			String classLeft, java.util.List<CodeLine> right, String classRight) {
-		super(parent, SWT.NONE);
-		setText("SWT Dialog");
+	public ManualMerge(FeatureView reference, java.util.List<CodeLine> left,
+			String classLeft, java.util.List<CodeLine> right,
+			String classRight, List<CodeLine> syncCode) {
+		shell = new Shell(Display.getCurrent(), SWT.APPLICATION_MODAL
+				| SWT.SHEET);
+		shell.setText("Manual Merge");
 		this.classLeft = classLeft;
 		this.classRight = classRight;
 		this.left = left;
 		this.right = right;
+		this.featureView = reference;
+		this.syncCode = syncCode;
 	}
 
 	/**
@@ -46,7 +64,7 @@ public class ManualMerge extends Dialog {
 		createContents();
 		shell.open();
 		shell.layout();
-		Display display = getParent().getDisplay();
+		Display display = Display.getCurrent();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();
@@ -59,31 +77,27 @@ public class ManualMerge extends Dialog {
 	 * Create contents of the dialog.
 	 */
 	private void createContents() {
-		shell = new Shell(getParent(), getStyle());
-		shell.setSize(664, 380);
-		shell.setText(getText());
+		shell.setSize(675, 420);
 
-		List list = new List(shell, SWT.BORDER);
-		list.setBounds(27, 68, 282, 220);
-		java.util.List<String> items = new ArrayList<String>();
+		final Text leftCode = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.WRAP
+				| SWT.H_SCROLL | SWT.V_SCROLL);
+		leftCode.setBounds(27, 68, 282, 220);
 		for (CodeLine cl : left) {
 			if (cl.getCode().contains("<<<<<<<")) {
-				items.add("  " + cl.getCode());
 				continue;
 			}
-			items.add(cl.getLine() + ": " + cl.getCode());
+			leftCode.append(cl.getCode() + "\n");
 		}
-		list.setItems(items.toArray(new String[] {}));
 
-		List list_1 = new List(shell, SWT.BORDER);
-		list_1.setBounds(346, 68, 295, 220);
-		items = new ArrayList<String>();
-		items.add("  " + right.get(right.size() - 1).getCode());
+		final Text rightCode = new Text(shell, SWT.BORDER | SWT.MULTI
+				| SWT.WRAP | SWT.H_SCROLL | SWT.V_SCROLL);
+		rightCode.setBounds(346, 68, 295, 220);
 		for (CodeLine cl : right) {
-			if (!cl.getCode().contains(">>>>>>>"))
-				items.add(cl.getLine() + ": " + cl.getCode());
+			if (cl.getCode().contains(">>>>>>>")) {
+				continue;
+			}
+			rightCode.append(cl.getCode() + "\n");
 		}
-		list_1.setItems(items.toArray(new String[] {}));
 
 		Label lblLeft = new Label(shell, SWT.NONE);
 		lblLeft.setBounds(27, 47, 282, 15);
@@ -93,17 +107,146 @@ public class ManualMerge extends Dialog {
 		lblRight.setBounds(346, 47, 295, 15);
 		lblRight.setText("Right: " + classRight);
 
+		final Button btnCheckLeftVersion = new Button(shell, SWT.CHECK);
+		btnCheckLeftVersion.setBounds(132, 292, 150, 25);
+		btnCheckLeftVersion.setText("choose left version");
+		btnCheckLeftVersion.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				if (btnCheckLeftVersion.getSelection()) {
+					rightCode.setEnabled(false);
+					isLeftChosen = true;
+				} else {
+					rightCode.setEnabled(true);
+					isLeftChosen = false;
+				}
+			}
+		});
+
 		Button btnTakeLeft = new Button(shell, SWT.NONE);
-		btnTakeLeft.setBounds(132, 312, 75, 25);
+		btnTakeLeft.setBounds(132, 343, 75, 25);
 		btnTakeLeft.setText("Take Left");
+		btnTakeLeft.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				switch (e.type) {
+				case SWT.Selection:
+					selectedCode = leftCode.getText();
+					rightCode.setText(selectedCode + "\n");
+				}
+			}
+		});
+
+		final Button btnCheckRightVersion = new Button(shell, SWT.CHECK);
+		btnCheckRightVersion.setBounds(451, 292, 150, 25);
+		btnCheckRightVersion.setText("choose right version");
+		btnCheckRightVersion.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				if (btnCheckRightVersion.getSelection()) {
+					leftCode.setEnabled(false);
+					isRightChosen = true;
+				} else {
+					leftCode.setEnabled(true);
+					isRightChosen = false;
+				}
+			}
+		});
 
 		Button btnTakeRight = new Button(shell, SWT.NONE);
-		btnTakeRight.setBounds(451, 312, 75, 25);
+		btnTakeRight.setBounds(451, 343, 75, 25);
 		btnTakeRight.setText("Take Right");
+		btnTakeRight.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				switch (e.type) {
+				case SWT.Selection:
+					selectedCode = rightCode.getText();
+					leftCode.setText(selectedCode + "\n");
+				}
+			}
+		});
 
 		Button btnConfirm = new Button(shell, SWT.NONE);
 		btnConfirm.setBounds(293, 343, 75, 25);
 		btnConfirm.setText("Confirm");
+		btnConfirm.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				switch (e.type) {
+				case SWT.Selection:
+					if ((isLeftChosen && isRightChosen)
+							|| (!isLeftChosen && !isRightChosen)) {
+						Display display = PlatformUI.getWorkbench()
+								.getDisplay();
+						MessageDialog.openWarning(display.getActiveShell(),
+								"Warning",
+								"Please choose one version to continue.");
+					} else if (isLeftChosen) {
+						String text = leftCode.getText();
+						String[] code = text.split("\n");
+						List<String> codeLines = new ArrayList<String>();
+						for (String s : code) {
+							codeLines.add(s);
+						}
+						List<CodeLine> mergeResult = insertMergedCode(syncCode,
+								codeLines);
+						featureView.solveChange(mergeResult);
+						featureView.setChanges();
+						shell.dispose();
+					} else if (isRightChosen) {
+						String text = rightCode.getText();
+						String[] code = text.split("\n");
+						List<String> codeLines = new ArrayList<String>();
+						for (String s : code) {
+							codeLines.add(s);
+						}
+						List<CodeLine> mergeResult = insertMergedCode(syncCode,
+								codeLines);
+						featureView.solveChange(mergeResult);
+						featureView.setChanges();
+						shell.dispose();
+					}
+				}
+			}
+		});
+	}
 
+	private List<CodeLine> insertMergedCode(List<CodeLine> wholeCode,
+			List<String> mergedCode) {
+		List<CodeLine> codeLines = new ArrayList<CodeLine>();
+		boolean insert = false;
+		boolean wait = false;
+		int lineNumber = wholeCode.get(0).getLine();
+		boolean wasInserted = false;
+		for (CodeLine cl : wholeCode) {
+			if (cl.getCode().contains("<<<<<<<")) {
+				insert = true;
+			}
+			if (cl.getCode().contains(">>>>>>>")) {
+				wait = false;
+			}
+			if (insert) {
+				wasInserted = true;
+				for (String s : mergedCode) {
+					codeLines.add(new CodeLine(s, lineNumber++));
+				}
+				insert = false;
+				wait = true;
+			}
+			if (!wait && !cl.getCode().contains("<<<<<<<")
+					&& !cl.getCode().contains(">>>>>>>")) {
+				codeLines.add(new CodeLine(cl.getCode(), lineNumber++));
+			}
+		}
+		if (!wasInserted) {
+			List<CodeLine> code = new ArrayList<CodeLine>();
+			int i = 0;
+			for (String s : mergedCode) {
+				code.add(new CodeLine(s, i));
+				i++;
+			}
+			return code;
+		}
+		return codeLines;
 	}
 }
