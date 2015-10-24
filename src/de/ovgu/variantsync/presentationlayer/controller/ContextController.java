@@ -79,4 +79,11 @@ public class ContextController extends AbstractController {
 		contextOperations.setBaseVersion(file);
 	}
 
+	public void refreshContext(boolean isAutomaticSync, String fe,
+			String projectName, String filename,
+			java.util.List<CodeLine> codeWC, java.util.List<CodeLine> syncCode) {
+		contextOperations.refresh(isAutomaticSync, fe, projectName, filename,
+				codeWC, syncCode);
+	}
+
 }

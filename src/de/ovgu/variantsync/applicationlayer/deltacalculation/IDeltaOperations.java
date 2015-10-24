@@ -91,4 +91,7 @@ public interface IDeltaOperations {
 	 * @return original text
 	 */
 	List<String> unpatchText(List<String> content, Patch patch);
+
+	List<String> createUnifiedDifference(String filename, String filename2,
+			List<String> oldCode, Patch patch, int i);
 }

@@ -69,4 +69,11 @@ public class DeltaOperationProvider extends AbstractModel implements
 	public List<String> unpatchText(List<String> content, Patch patch) {
 		return externalDeltaCalculation.unpatchText(content, patch);
 	}
+
+	@Override
+	public List<String> createUnifiedDifference(String filename,
+			String filename2, List<String> oldCode, Patch patch, int i) {
+		return externalDeltaCalculation.createUnifiedDifference(filename,
+				filename, oldCode, patch, 0);
+	}
 }

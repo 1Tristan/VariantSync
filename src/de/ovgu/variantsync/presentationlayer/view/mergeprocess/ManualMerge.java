@@ -186,6 +186,10 @@ public class ManualMerge {
 						String[] code = text.split("\n");
 						List<String> codeLines = new ArrayList<String>();
 						for (String s : code) {
+							if(s.equals("\r"))
+								continue;
+							if(s.endsWith("\r"))
+								s = s.substring(0, s.lastIndexOf("\r"));
 							codeLines.add(s);
 						}
 						List<CodeLine> mergeResult = insertMergedCode(syncCode,
@@ -198,6 +202,10 @@ public class ManualMerge {
 						String[] code = text.split("\n");
 						List<String> codeLines = new ArrayList<String>();
 						for (String s : code) {
+							if(s.equals("\r"))
+								continue;
+							if(s.endsWith("\r"))
+								s = s.substring(0, s.lastIndexOf("\r"));
 							codeLines.add(s);
 						}
 						List<CodeLine> mergeResult = insertMergedCode(syncCode,

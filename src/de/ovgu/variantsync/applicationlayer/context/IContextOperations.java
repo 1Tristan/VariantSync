@@ -83,4 +83,7 @@ public interface IContextOperations {
 
 	IResource getResource(String selectedFeatureExpression,
 			String selectedProject, String selectedClass);
+
+	void refresh(boolean isAutomaticSync, String fe, String projectName,
+			String filename, List<CodeLine> codeWC, List<CodeLine> syncCode);
 }

@@ -46,6 +46,7 @@ public class ContextProvider extends AbstractModel implements
 	private ContextHandler contextHandler;
 	private IPersistanceOperations persistanceOperations = ModuleFactory
 			.getPersistanceOperations();
+	private boolean ignoreCodeChange;
 
 	public ContextProvider() {
 		contextHandler = ContextHandler.getInstance();
@@ -70,10 +71,13 @@ public class ContextProvider extends AbstractModel implements
 	public void recordCodeChange(List<String> changedCode, String projectName,
 			String pathToProject, String packageName, String className,
 			List<String> wholeClass) {
-		System.out.println("\n=== Changed Code ===");
-		System.out.println(changedCode.toString());
-		contextHandler.recordCodeChange(projectName, pathToProject,
-				changedCode, className, packageName, wholeClass);
+		if (!ignoreCodeChange) {
+			System.out.println("\n=== Changed Code ===");
+			System.out.println(changedCode.toString());
+			contextHandler.recordCodeChange(projectName, pathToProject,
+					changedCode, className, packageName, wholeClass);
+		}
+		ignoreCodeChange = false;
 	}
 
 	@Override
@@ -306,6 +310,11 @@ public class ContextProvider extends AbstractModel implements
 						IFile file = (IFile) javaClass;
 						List<String> linesOfFile = null;
 						try {
+							file.refreshLocal(IResource.DEPTH_INFINITE, null);
+						} catch (CoreException e1) {
+							e1.printStackTrace();
+						}
+						try {
 							linesOfFile = persistanceOperations.readFile(
 									file.getContents(), file.getCharset());
 						} catch (FileOperationException | CoreException e) {
@@ -355,21 +364,9 @@ public class ContextProvider extends AbstractModel implements
 	@Override
 	public File getFile(String selectedFeatureExpression,
 			String projectNameTarget, String classNameTarget) {
-		List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
-				.getSupportProjectList();
-		for (IProject p : supportedProjects) {
-			String name = p.getName();
-			if (name.equals(projectNameTarget)) {
-				IResource javaClass = null;
-				try {
-					javaClass = findFileRecursively(p, classNameTarget);
-				} catch (CoreException e) {
-					e.printStackTrace();
-				}
-				return new File(javaClass.getLocation().toString());
-			}
-		}
-		return null;
+		IResource res = findResource(projectNameTarget, classNameTarget);
+		return new File(res.getLocation().toString());
+
 	}
 
 	@Override
@@ -407,4 +404,53 @@ public class ContextProvider extends AbstractModel implements
 		}
 		return null;
 	}
+
+	private IResource findResource(String projectNameTarget,
+			String classNameTarget) {
+		List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		for (IProject p : supportedProjects) {
+			String name = p.getName();
+			if (name.equals(projectNameTarget)) {
+				IResource javaClass = null;
+				try {
+					javaClass = findFileRecursively(p, classNameTarget);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+				return javaClass;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public void refresh(boolean isAutomaticSync, String fe, String projectName,
+			String filename, List<CodeLine> codeWC, List<CodeLine> syncCode) {
+
+		if (true) {
+
+			// format code for later diff
+			codeWC = ModuleFactory.getMergeOperations().doAutoSync(codeWC,
+					codeWC, codeWC);
+		}
+		IResource res = findResource(projectName, filename);
+		String packageName = res.getLocation().toString();
+		packageName = packageName.substring(packageName.indexOf("src") + 4,
+				packageName.lastIndexOf("/"));
+		packageName = packageName.replace("/", ".");
+		List<String> oldCode = new ArrayList<String>();
+		for (CodeLine cl : codeWC) {
+			oldCode.add(cl.getCode());
+		}
+
+		List<String> newCode = new ArrayList<String>();
+		for (CodeLine cl : syncCode) {
+			newCode.add(cl.getCode());
+		}
+		contextHandler.refreshContext(fe, projectName, packageName, filename,
+				oldCode, newCode);
+		ignoreCodeChange = true;
+	}
+
 }

@@ -77,10 +77,16 @@ public class Context {
 	}
 
 	public String getPathToProject(String projectName) {
+		if (javaProjects == null || javaProjects.get(projectName) == null)
+			return null;
 		return javaProjects.get(projectName).getPath();
 	}
 
 	public void setPathToProject(String projectName, String path) {
+		if (javaProjects.get(projectName) == null) {
+			javaProjects.put(projectName, new JavaProject(projectName, path));
+			return;
+		}
 		javaProjects.get(projectName).setPath(path);
 	}
 

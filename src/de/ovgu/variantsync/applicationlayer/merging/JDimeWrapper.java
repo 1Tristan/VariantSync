@@ -19,7 +19,9 @@ class JDimeWrapper {
 			.getPersistanceOperations();
 
 	public static void main(String[] args) {
-		merge(new File(""), null, null);
+		merge(new File("C:\\Users\\pfofe\\Desktop\\Left.java"), new File(
+				"C:\\Users\\pfofe\\Desktop\\Left.java"), new File(
+				"C:\\Users\\pfofe\\Desktop\\Left.java"));
 	}
 
 	public static List<String> merge(List<String> left, List<String> base,

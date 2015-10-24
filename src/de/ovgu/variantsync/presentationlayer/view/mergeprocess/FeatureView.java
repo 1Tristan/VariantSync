@@ -84,6 +84,7 @@ public class FeatureView extends ViewPart {
 	private String rightClass;
 	private FeatureView reference;
 	private Button btnRemoveChangeEntry;
+	private java.util.List<CodeLine> codeWC;
 
 	public FeatureView() {
 	}
@@ -392,9 +393,8 @@ public class FeatureView extends ViewPart {
 				java.util.List<CodeLine> code = cc.getTargetCode(
 						selectedFeatureExpression, projectNameTarget,
 						classNameTarget);
-				java.util.List<CodeLine> codeWC = cc.getTargetCodeWholeClass(
-						selectedFeatureExpression, projectNameTarget,
-						classNameTarget);
+				codeWC = cc.getTargetCodeWholeClass(selectedFeatureExpression,
+						projectNameTarget, classNameTarget);
 				for (CodeLine clWC : codeWC) {
 					for (CodeLine cl : code) {
 						if (cl.getLine() == clWC.getLine()) {
@@ -461,10 +461,8 @@ public class FeatureView extends ViewPart {
 							left.add(cl);
 						}
 					}
-					if (left.isEmpty()) {
-						left = syncCode;
-					}
-					if (right.isEmpty()) {
+					if (left.isEmpty() && right.isEmpty()) {
+						left = codeWC;
 						right = syncCode;
 					}
 				} else {
@@ -497,6 +495,9 @@ public class FeatureView extends ViewPart {
 						newCode.removeAll();
 					if (syncPreview != null)
 						syncPreview.removeAll();
+					cc.refreshContext(true, selectedFeatureExpression,
+							projectNameTarget, classNameTarget, codeWC,
+							syncCode);
 					break;
 				}
 				}
@@ -524,6 +525,10 @@ public class FeatureView extends ViewPart {
 						newCode.removeAll();
 					if (syncPreview != null)
 						syncPreview.removeAll();
+					cc.refreshContext(false, selectedFeatureExpression,
+							projectNameTarget, classNameTarget, codeWC,
+							syncCode);
+
 					break;
 				}
 			}

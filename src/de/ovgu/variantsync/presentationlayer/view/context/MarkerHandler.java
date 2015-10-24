@@ -92,9 +92,15 @@ public class MarkerHandler {
 	}
 
 	private void setMarker(IFile file, List<MarkerInformation> markers) {
-		IDocument document = (IDocument) VariantSyncPlugin.getEditor()
-				.getDocumentProvider()
-				.getDocument(VariantSyncPlugin.getEditor().getEditorInput());
+		IDocument document = null;
+		try {
+			document = (IDocument) VariantSyncPlugin
+					.getEditor()
+					.getDocumentProvider()
+					.getDocument(VariantSyncPlugin.getEditor().getEditorInput());
+		} catch (NullPointerException e) {
+			return;
+		}
 		int i = 0;
 		for (MarkerInformation mi : markers) {
 			try {

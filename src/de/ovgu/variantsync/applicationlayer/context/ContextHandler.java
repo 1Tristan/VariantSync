@@ -11,8 +11,10 @@ import de.ovgu.variantsync.applicationlayer.Util;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
+import de.ovgu.variantsync.applicationlayer.deltacalculation.IDeltaOperations;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.view.context.MarkerHandler;
+import difflib.Patch;
 
 /**
  * 
@@ -156,4 +158,20 @@ class ContextHandler {
 		return this.mapBaseVersion.get(filename);
 	}
 
+	public void refreshContext(String fe, String projectName,
+			String packageName, String filename, List<String> oldCode,
+			List<String> newCode) {
+		IDeltaOperations deltaOperations = ModuleFactory.getDeltaOperations();
+		Patch patch = deltaOperations.computeDifference(oldCode, newCode);
+		List<String> tmpUnifiedDiff = deltaOperations.createUnifiedDifference(
+				filename, filename, oldCode, patch, 0);
+		Context c = getContext(fe);
+		ContextAlgorithm ca = new ContextAlgorithm(c);
+		ca.addCode(projectName, packageName, filename, tmpUnifiedDiff, oldCode);
+		UpdateAlgorithm ua = new UpdateAlgorithm();
+		ua.updateCode(projectName, packageName, filename, tmpUnifiedDiff,
+				c.getFeatureExpression());
+		MarkerHandler.getInstance().updateMarker(projectName, packageName,
+				filename, c);
+	}
 }
