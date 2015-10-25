@@ -95,7 +95,6 @@ public class JavaClass extends JavaElement {
 				baseVersionWholeClass.add(baseLine);
 			}
 		}
-		// new ClassGenerator(getPath(), baseVersion);
 		actualChange.setBaseVersion(baseVersion);
 		actualChange.setBaseVersionWholeClass(baseVersionWholeClass);
 	}
@@ -141,10 +140,6 @@ public class JavaClass extends JavaElement {
 			newVersion.add(cl.clone());
 		}
 		List<CodeLine> newVersionWholeClass = new ArrayList<CodeLine>();
-		// if (this.wholeClass == null || this.wholeClass.isEmpty()) {
-		// this.wholeClass = new ContextProvider()
-		// .getLinesOfActualFile(getName());
-		// }
 		if (this.wholeClass != null) {
 			for (CodeLine cl : this.wholeClass) {
 				CodeLine newLine = cl.clone();
@@ -152,18 +147,8 @@ public class JavaClass extends JavaElement {
 				newVersionWholeClass.add(newLine);
 			}
 		}
-		// new ClassGenerator(getPath(), newVersion);
 		if (actualChange == null) {
 			actualChange = new CodeChange();
-			// List<CodeLine> baseVersionWholeClass = new ArrayList<CodeLine>();
-			// if (this.wholeClass != null) {
-			// for (CodeLine cl : this.wholeClass) {
-			// CodeLine baseLine = cl.clone();
-			// baseLine.setMapped(false);
-			// baseVersionWholeClass.add(baseLine);
-			// }
-			// }
-			// actualChange.setBaseVersionWholeClass(baseVersionWholeClass);
 		}
 		actualChange.setNewVersion(newVersion);
 		actualChange.setNewVersionWholeClass(newVersionWholeClass);
@@ -177,7 +162,7 @@ public class JavaClass extends JavaElement {
 			changes.set(changes.size() - 1, actualChange);
 			changes.get(changes.size() - 1).setBaseVersion(base);
 		} else
-		changes.add(actualChange);
+			changes.add(actualChange);
 		System.out.println(changes.toString());
 	}
 
@@ -360,5 +345,12 @@ public class JavaClass extends JavaElement {
 	public Object removeChange(int selectedChange) {
 		changes.remove(selectedChange);
 		return null;
+	}
+
+	public void removeContent() {
+		codeLines.clear();
+		wholeClass.clear();
+		changes.clear();
+		actualChange = new CodeChange();
 	}
 }

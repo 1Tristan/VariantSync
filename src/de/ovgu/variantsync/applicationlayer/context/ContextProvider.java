@@ -31,6 +31,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.view.context.FeatureContextSelection;
+import de.ovgu.variantsync.presentationlayer.view.context.MarkerHandler;
 
 /**
  * Receives controller invocation as part of MVC implementation and encapsulates
@@ -453,6 +454,31 @@ public class ContextProvider extends AbstractModel implements
 		contextHandler.refreshContext(fe, projectName, packageName, filename,
 				oldCode, newCode);
 		ignoreCodeChange = true;
+	}
+
+	@Override
+	public void removeTagging(String path) {
+		String projectName = path.substring(0, path.indexOf("/"));
+		String className = path.substring(path.lastIndexOf("/") + 1);
+		Collection<Context> coll = ContextHandler.getInstance()
+				.getAllContexts();
+		Iterator<Context> it = coll.iterator();
+		while (it.hasNext()) {
+			Context c = it.next();
+			JavaProject jp = c.getJavaProjects().get(projectName);
+			if (jp != null) {
+				List<JavaElement> classes = new ArrayList<JavaElement>();
+				ContextUtils.iterateElements(jp.getChildren(), classes);
+				for (JavaElement e : classes) {
+					if (e.getName().equals(className)) {
+						((JavaClass) e).removeContent();
+						IResource res = findResource(projectName, className);
+						MarkerHandler.getInstance().clearAllMarker(res);
+						return;
+					}
+				}
+			}
+		}
 	}
 
 }

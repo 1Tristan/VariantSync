@@ -14,7 +14,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -48,6 +47,17 @@ import de.ovgu.variantsync.presentationlayer.controller.SynchronizationControlle
  */
 public class FeatureView extends ViewPart {
 
+	private ContextController cc = ControllerHandler.getInstance()
+			.getContextController();
+	private SynchronizationController sc = ControllerHandler.getInstance()
+			.getSynchronizationController();
+	private FeatureController fc = ControllerHandler.getInstance()
+			.getFeatureController();
+	private IPersistanceOperations persistanceOperations = ModuleFactory
+			.getPersistanceOperations();
+	private IContextOperations contextOperations = ModuleFactory
+			.getContextOperations();
+
 	private List projects;
 	private List classes;
 	private List changes;
@@ -58,12 +68,6 @@ public class FeatureView extends ViewPart {
 	private int selectedChange;
 	private Collection<CodeChange> collChanges;
 	private String featureExpressions[];
-	private ContextController cc = ControllerHandler.getInstance()
-			.getContextController();
-	private SynchronizationController sc = ControllerHandler.getInstance()
-			.getSynchronizationController();
-	private FeatureController fc = ControllerHandler.getInstance()
-			.getFeatureController();
 	private Table oldCode;
 	private Table newCode;
 	private Table codeOfTarget;
@@ -72,10 +76,6 @@ public class FeatureView extends ViewPart {
 	private java.util.List<CodeLine> syncCode;
 	private String projectNameTarget;
 	private String classNameTarget;
-	private IPersistanceOperations persistanceOperations = ModuleFactory
-			.getPersistanceOperations();
-	private IContextOperations contextOperations = ModuleFactory
-			.getContextOperations();
 	private Button btnSynchronize;
 	private Button btnManualSync;
 	private java.util.List<CodeLine> left;
@@ -261,7 +261,6 @@ public class FeatureView extends ViewPart {
 								}
 							}
 						}
-						// baseCode = correctMapIndex(baseCode);
 						oldCode.removeAll();
 						for (CodeLine cl : baseCode) {
 							TableItem item = new TableItem(oldCode, SWT.NONE);
@@ -270,7 +269,6 @@ public class FeatureView extends ViewPart {
 								Color color = new Color(getSite().getShell()
 										.getDisplay(), ccolor.getRGB());
 								item.setBackground(color);
-								// setBackground(ccolor, item);
 							}
 						}
 						java.util.List<CodeLine> code = ch
@@ -283,7 +281,6 @@ public class FeatureView extends ViewPart {
 								}
 							}
 						}
-						// code = correctMapIndex(code);
 						newCode.removeAll();
 						for (CodeLine cl : code) {
 							TableItem item = new TableItem(newCode, SWT.NONE);
@@ -292,15 +289,11 @@ public class FeatureView extends ViewPart {
 								Color color = new Color(getSite().getShell()
 										.getDisplay(), ccolor.getRGB());
 								item.setBackground(color);
-								// setBackground(ccolor, item);
 							}
 							if (cl.isNew()) {
 								item.setForeground(getSite().getShell()
 										.getDisplay()
 										.getSystemColor(SWT.COLOR_DARK_RED));
-								// item.setBackground(getSite().getShell()
-								// .getDisplay()
-								// .getSystemColor(SWT.COLOR_BLACK));
 							}
 						}
 						break;
@@ -416,7 +409,6 @@ public class FeatureView extends ViewPart {
 				}
 				CodeHighlighting ccolor = cc
 						.getContextColor(selectedFeatureExpression);
-				// codeWC = correctMapIndex(codeWC);
 				codeOfTarget.removeAll();
 				for (CodeLine cl : codeWC) {
 					TableItem item = new TableItem(codeOfTarget, SWT.NONE);
@@ -425,7 +417,6 @@ public class FeatureView extends ViewPart {
 						Color color = new Color(getSite().getShell()
 								.getDisplay(), ccolor.getRGB());
 						item.setBackground(color);
-						// setBackground(ccolor, item);
 					}
 				}
 				syncCode = sc.doAutoSync(newCode, baseCode, codeWC);
@@ -435,7 +426,6 @@ public class FeatureView extends ViewPart {
 					btnSynchronize.setEnabled(true);
 					boolean addLeft = false;
 					boolean addRight = false;
-					// correctMapIndex(syncCode);
 					syncPreview.removeAll();
 					for (CodeLine cl : syncCode) {
 						TableItem item = new TableItem(syncPreview, SWT.NONE);
@@ -501,12 +491,12 @@ public class FeatureView extends ViewPart {
 					if (syncPreview != null)
 						syncPreview.removeAll();
 
-					// disabled because only changes of merged feature
+					// Problem: only changes of merged feature
 					// expression is mapped, changes of other feature
 					// expressions are lost
-					// cc.refreshContext(true, selectedFeatureExpression,
-					// projectNameTarget, classNameTarget, codeWC,
-					// syncCode);
+					cc.refreshContext(true, selectedFeatureExpression,
+							projectNameTarget, classNameTarget, codeWC,
+							syncCode);
 					break;
 				}
 				}
@@ -534,9 +524,9 @@ public class FeatureView extends ViewPart {
 						newCode.removeAll();
 					if (syncPreview != null)
 						syncPreview.removeAll();
-					// cc.refreshContext(false, selectedFeatureExpression,
-					// projectNameTarget, classNameTarget, codeWC,
-					// syncCode);
+					cc.refreshContext(false, selectedFeatureExpression,
+							projectNameTarget, classNameTarget, codeWC,
+							syncCode);
 
 					break;
 				}
@@ -556,35 +546,6 @@ public class FeatureView extends ViewPart {
 		gd_text = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
 		gd_text.heightHint = 111;
 		syncPreview.setLayoutData(gd_text);
-	}
-
-	private java.util.List<CodeLine> correctMapIndex(
-			java.util.List<CodeLine> code) {
-		java.util.List<CodeLine> correctedCode = new ArrayList<CodeLine>();
-		for (CodeLine cl : code) {
-			correctedCode.add(cl.clone());
-		}
-		int j = 0;
-		int mappIndex = 0;
-		for (CodeLine clWC : code) {
-			if (clWC.isMapped()) {
-				mappIndex = j;
-				break;
-			}
-			j++;
-		}
-		if (mappIndex > 0)
-			code.get(mappIndex - 1).setMapped(true);
-		j = 0;
-		for (CodeLine clWC : code) {
-			if (clWC.isMapped()) {
-				if (code.size() > j + 1 && !code.get(j + 1).isMapped()) {
-					clWC.setMapped(false);
-				}
-			}
-			j++;
-		}
-		return correctedCode;
 	}
 
 	public void solveChange(java.util.List<CodeLine> code) {
@@ -618,41 +579,4 @@ public class FeatureView extends ViewPart {
 				selectedProject, selectedClass).toArray(new String[] {}));
 	}
 
-	private void setBackground(CodeHighlighting foreground, TableItem item) {
-		Color color = null;
-		final RGB BLACK = new RGB(0, 0, 0);
-		final RGB WHITE = new RGB(255, 255, 255);
-		if (foreground.getColorName().equals(
-				CodeHighlighting.YELLOW.getColorName())) {
-			color = new Color(getSite().getShell().getDisplay(), BLACK);
-		} else if (foreground.getColorName().equals(
-				CodeHighlighting.GREEN_BRIGHT.getColorName())) {
-			color = new Color(getSite().getShell().getDisplay(), BLACK);
-		} else if (foreground.getColorName().equals(
-				CodeHighlighting.ORANGE.getColorName())) {
-			color = new Color(getSite().getShell().getDisplay(), BLACK);
-		} else if (foreground.getColorName().equals(
-				CodeHighlighting.GREEN.getColorName())) {
-			color = new Color(getSite().getShell().getDisplay(), WHITE);
-		} else if (foreground.getColorName().equals(
-				CodeHighlighting.RED.getColorName())) {
-			color = new Color(getSite().getShell().getDisplay(), WHITE);
-		} else if (foreground.getColorName().equals(
-				CodeHighlighting.PINK.getColorName())) {
-			color = new Color(getSite().getShell().getDisplay(), WHITE);
-		} else if (foreground.getColorName().equals(
-				CodeHighlighting.BLUE_BRIGHT.getColorName())) {
-			color = new Color(getSite().getShell().getDisplay(), BLACK);
-		} else if (foreground.getColorName().equals(
-				CodeHighlighting.BLUE.getColorName())) {
-			color = new Color(getSite().getShell().getDisplay(), WHITE);
-		} else if (foreground.getColorName().equals(
-				CodeHighlighting.PURPLE.getColorName())) {
-			color = new Color(getSite().getShell().getDisplay(), WHITE);
-		} else if (foreground.getColorName().equals(
-				CodeHighlighting.DEFAULTCONTEXT.getColorName())) {
-			color = new Color(getSite().getShell().getDisplay(), BLACK);
-		}
-		item.setBackground(color);
-	}
 }

@@ -225,6 +225,28 @@
       </menuContribution>
    </extension>
    
+    <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.ui.IEditorInput"
+            nameFilter="*.*"
+            id="SimplePopupMenu.contribution1">
+         <menu
+               label="remove tagging"
+               path="additions"
+               id="SimplePopupMenu.menu1"
+			   icon="icons/VariantSyncSupport.png">
+         </menu>
+         <action
+               label="remove tagging of whole class"
+               class="de.ovgu.variantsync.presentationlayer.controller.popup.actions.RemoveMappingAction"
+               menubarPath="SimplePopupMenu.menu1/group1"
+               enablesFor="1"
+               id="SimplePopupMenu.newAction">
+         </action>
+      </objectContribution>
+   </extension>
+   
    <!-- Defines code highlighting marker -->
 	<extension point="org.eclipse.core.resources.markers"
         id="de.ovgu.pfofe.variantsync.codehighlightmarkerYellow"

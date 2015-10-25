@@ -86,4 +86,8 @@ public class ContextController extends AbstractController {
 				codeWC, syncCode);
 	}
 
+	public void removeTagging(String path) {
+		contextOperations.removeTagging(path);
+	}
+
 }

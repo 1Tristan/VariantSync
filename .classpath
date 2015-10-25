@@ -6,5 +6,13 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="libraries/diffutils-1.2.1.jar"/>
 	<classpathentry kind="lib" path="libraries/javaparser-core-2.2.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="libraries/apache-commons-io.jar"/>
+	<classpathentry kind="lib" path="libraries/apache-commons-lang3.jar"/>
+	<classpathentry kind="lib" path="libraries/commons-cli.jar"/>
+	<classpathentry kind="lib" path="libraries/glpk-java.jar"/>
+	<classpathentry kind="lib" path="libraries/jastaddj.jar"/>
+	<classpathentry kind="lib" path="libraries/JDime.jar" sourcepath="/JDime/src"/>
+	<classpathentry kind="lib" path="libraries/JJ7.jar"/>
+	<classpathentry kind="lib" path="libraries/log4j-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

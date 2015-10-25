@@ -86,4 +86,6 @@ public interface IContextOperations {
 
 	void refresh(boolean isAutomaticSync, String fe, String projectName,
 			String filename, List<CodeLine> codeWC, List<CodeLine> syncCode);
+
+	void removeTagging(String path);
 }
