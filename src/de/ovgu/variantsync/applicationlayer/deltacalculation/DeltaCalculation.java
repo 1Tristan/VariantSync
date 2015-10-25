@@ -120,7 +120,10 @@ class DeltaCalculation {
 		contextOperations.recordCodeChange(tmpUnifiedDiff, res.getProject()
 				.getName(), res.getProject().getLocation().toString(),
 				packageName, ((IFile) res).getName(), currentFilelines);
-		contextOperations.setBaseVersion((IFile) res);
+		if (contextOperations.getActiveFeatureContext() != null
+				&& !contextOperations.getActiveFeatureContext().equals(
+						VariantSyncConstants.DEFAULT_CONTEXT))
+			contextOperations.setBaseVersion((IFile) res);
 
 		int pointer = 0;
 		if (MonitorSet.getInstance().removeSynchroItem(res)) {

@@ -276,59 +276,59 @@ public class ContextProvider extends AbstractModel implements
 	public List<CodeLine> getTargetCodeWholeClass(String fe,
 			String projectName, String className) {
 		List<CodeLine> targetCode = new ArrayList<CodeLine>();
-		Context c = ContextHandler.getInstance().getContext(fe);
-		Map<String, JavaProject> mapJp = c.getJavaProjects();
-		Set<Entry<String, JavaProject>> entries = mapJp.entrySet();
-		Iterator<Entry<String, JavaProject>> it = entries.iterator();
-		while (it.hasNext()) {
-			Entry<String, JavaProject> e = it.next();
-			if (e.getKey().equals(projectName)) {
-				List<JavaElement> classes = new ArrayList<JavaElement>();
-				JavaProject jp = e.getValue();
-				ContextUtils.iterateElements(jp.getChildren(), classes);
-				for (JavaElement element : classes) {
-					if (element.getName().equals(className)) {
-						targetCode.addAll(((JavaClass) element)
-								.getClonedCodeLinesWholeClass());
-					}
+		// Context c = ContextHandler.getInstance().getContext(fe);
+		// Map<String, JavaProject> mapJp = c.getJavaProjects();
+		// Set<Entry<String, JavaProject>> entries = mapJp.entrySet();
+		// Iterator<Entry<String, JavaProject>> it = entries.iterator();
+		// while (it.hasNext()) {
+		// Entry<String, JavaProject> e = it.next();
+		// if (e.getKey().equals(projectName)) {
+		// List<JavaElement> classes = new ArrayList<JavaElement>();
+		// JavaProject jp = e.getValue();
+		// ContextUtils.iterateElements(jp.getChildren(), classes);
+		// for (JavaElement element : classes) {
+		// if (element.getName().equals(className)) {
+		// targetCode.addAll(((JavaClass) element)
+		// .getClonedCodeLinesWholeClass());
+		// }
+		// }
+		// }
+		// }
+		// if (targetCode.isEmpty()) {
+		List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		for (IProject p : supportedProjects) {
+			String name = p.getName();
+			if (name.equals(projectName)) {
+				IResource javaClass = null;
+				try {
+					javaClass = findFileRecursively(p, className);
+				} catch (CoreException e) {
+					e.printStackTrace();
 				}
-			}
-		}
-		if (targetCode.isEmpty()) {
-			List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
-					.getSupportProjectList();
-			for (IProject p : supportedProjects) {
-				String name = p.getName();
-				if (name.equals(projectName)) {
-					IResource javaClass = null;
+				if (javaClass != null) {
+					IFile file = (IFile) javaClass;
+					List<String> linesOfFile = null;
 					try {
-						javaClass = findFileRecursively(p, className);
-					} catch (CoreException e) {
+						file.refreshLocal(IResource.DEPTH_INFINITE, null);
+					} catch (CoreException e1) {
+						e1.printStackTrace();
+					}
+					try {
+						linesOfFile = persistanceOperations.readFile(
+								file.getContents(), file.getCharset());
+					} catch (FileOperationException | CoreException e) {
 						e.printStackTrace();
 					}
-					if (javaClass != null) {
-						IFile file = (IFile) javaClass;
-						List<String> linesOfFile = null;
-						try {
-							file.refreshLocal(IResource.DEPTH_INFINITE, null);
-						} catch (CoreException e1) {
-							e1.printStackTrace();
-						}
-						try {
-							linesOfFile = persistanceOperations.readFile(
-									file.getContents(), file.getCharset());
-						} catch (FileOperationException | CoreException e) {
-							e.printStackTrace();
-						}
-						int i = 0;
-						for (String line : linesOfFile) {
-							targetCode.add(new CodeLine(line, i, false, false));
-							i++;
-						}
+					int i = 1;
+					for (String line : linesOfFile) {
+						targetCode.add(new CodeLine(line, i, false, false));
+						i++;
 					}
 				}
 			}
 		}
+		// }
 		return targetCode;
 	}
 
@@ -341,13 +341,18 @@ public class ContextProvider extends AbstractModel implements
 	public void setBaseVersion(IFile file) {
 		List<String> linesOfFile = null;
 		try {
+			file.refreshLocal(IResource.DEPTH_INFINITE, null);
+		} catch (CoreException e1) {
+			e1.printStackTrace();
+		}
+		try {
 			linesOfFile = persistanceOperations.readFile(file.getContents(),
 					file.getCharset());
 		} catch (FileOperationException | CoreException e) {
 			e.printStackTrace();
 		}
 		List<CodeLine> code = new ArrayList<CodeLine>();
-		int i = 0;
+		int i = 1;
 		for (String line : linesOfFile) {
 			code.add(new CodeLine(line, i, false, false));
 			i++;
@@ -428,12 +433,9 @@ public class ContextProvider extends AbstractModel implements
 	public void refresh(boolean isAutomaticSync, String fe, String projectName,
 			String filename, List<CodeLine> codeWC, List<CodeLine> syncCode) {
 
-		if (true) {
-
-			// format code for later diff
-			codeWC = ModuleFactory.getMergeOperations().doAutoSync(codeWC,
-					codeWC, codeWC);
-		}
+		// format code for later diff
+		codeWC = ModuleFactory.getMergeOperations().doAutoSync(codeWC, codeWC,
+				codeWC);
 		IResource res = findResource(projectName, filename);
 		String packageName = res.getLocation().toString();
 		packageName = packageName.substring(packageName.indexOf("src") + 4,

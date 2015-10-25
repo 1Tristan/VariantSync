@@ -46,6 +46,8 @@ public class Util {
 	}
 
 	public static String parseStorageLocation(Context c) {
+		if (VariantSyncPlugin.getDefault() == null)
+			return "";
 		String storageLocation = VariantSyncPlugin.getDefault()
 				.getWorkspaceLocation() + VariantSyncConstants.CONTEXT_PATH;
 		String filename = "/" + c.getFeatureExpression() + ".xml";

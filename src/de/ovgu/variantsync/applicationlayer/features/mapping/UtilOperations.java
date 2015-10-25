@@ -393,4 +393,11 @@ public class UtilOperations {
 		}
 		return counter;
 	}
+
+	public String removeToSrcInPath(String path) {
+		if (path.contains("src/")) {
+			path = path.substring(path.indexOf("src/") + 4);
+		}
+		return path;
+	}
 }

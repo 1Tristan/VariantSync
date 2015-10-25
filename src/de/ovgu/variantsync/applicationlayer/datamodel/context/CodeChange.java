@@ -27,12 +27,6 @@ public class CodeChange {
 		newVersionWholeClass = new ArrayList<CodeLine>();
 	}
 
-	public CodeChange(List<CodeLine> baseVersion, List<CodeLine> newVersion) {
-		this.baseVersion = baseVersion;
-		this.newVersion = newVersion;
-		this.timestamp = new Timestamp(new Date().getTime()).getTime();
-	}
-
 	public void createTimeStamp() {
 		this.timestamp = new Timestamp(new Date().getTime()).getTime();
 	}
@@ -101,7 +95,7 @@ public class CodeChange {
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
-	protected CodeChange clone() throws CloneNotSupportedException {
+	protected CodeChange clone() {
 		CodeChange copy = new CodeChange();
 		copy.setTimestamp(this.timestamp);
 		List<CodeLine> baseVersion = new ArrayList<CodeLine>();
@@ -111,7 +105,7 @@ public class CodeChange {
 		copy.setBaseVersion(baseVersion);
 		List<CodeLine> newVersion = new ArrayList<CodeLine>();
 		for (CodeLine line : this.newVersion) {
-			baseVersion.add(line.clone());
+			newVersion.add(line.clone());
 		}
 		copy.setNewVersion(newVersion);
 		List<CodeLine> baseVersionWholeClass = new ArrayList<CodeLine>();

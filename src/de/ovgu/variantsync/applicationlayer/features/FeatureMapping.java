@@ -164,7 +164,8 @@ class FeatureMapping {
 	public JavaProject removeMapping(MappingElement mapping, JavaProject project) {
 		String pathToFile = UtilOperations.getInstance().unifyStartOfPath(
 				mapping.getPathToSelectedElement());
-		pathToFile = UtilOperations.getInstance().removeSrcInPath(pathToFile);
+		// pathToFile =
+		// UtilOperations.getInstance().removeSrcInPath(pathToFile);
 		String filename = mapping.getTitle();
 		JavaElements elementType = mapping.getType();
 		switch (elementType) {

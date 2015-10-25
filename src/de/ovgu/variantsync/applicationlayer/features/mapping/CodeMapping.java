@@ -68,17 +68,15 @@ public class CodeMapping extends Mapping {
 					new CodeFragment(code, mapping.getStartLineOfSelection(),
 							mapping.getEndLineOfSelection(),
 							mapping.getOffset()), actualCode);
-			
-			// TODO: read base version before save!!!
-			// TODO: String to List<CodeLine> after JDime merge
-			if (mapping.isFirstStep() || actualCode.isEmpty()) {
+
+			if (mapping.isFirstStep() || actualCode.isEmpty())
 				((JavaClass) javaElement).setBaseVersion();
-			}
+
 			javaElement.setCodeLines(newLines);
 			((JavaClass) javaElement).setWholeClass(mapping.getWholeClass());
-			if (mapping.isLastStep()) {
+
+			if (mapping.isLastStep())
 				((JavaClass) javaElement).addChange(newLines);
-			}
 		} else {
 			JavaElement packageOfClass = packageMapping.getElement(
 					element.getChildren(), name, relativeClassPath);
@@ -89,10 +87,18 @@ public class CodeMapping extends Mapping {
 				packageOfClass = new JavaPackage(packageName, path);
 				element.addChild(packageOfClass);
 			}
-			packageOfClass.addChild(new JavaClass(name, path + "/" + name,
+			JavaClass jc = new JavaClass(name, path + "/" + name,
 					new CodeFragment(code, mapping.getStartLineOfSelection(),
-							mapping.getEndLineOfSelection(), mapping
-									.getOffset())));
+							mapping.getEndLineOfSelection(),
+							mapping.getOffset()));
+			if (mapping.isFirstStep() && !mapping.isLastStep()) {
+				jc.setBaseVersion();
+			}
+			// jc.setWholeClass(mapping.getWholeClass());
+			if (mapping.isLastStep()) {
+				jc.addChange(jc.getClonedCodeLines(), mapping.getWholeClass());
+			}
+			packageOfClass.addChild(jc);
 		}
 	}
 
@@ -159,20 +165,26 @@ public class CodeMapping extends Mapping {
 			CodeFragment code, boolean isFirstStep, boolean isLastStep,
 			List<String> wholeClass) {
 		String nameOfClass = javaElement.getName();
-		String pathOfClass = UtilOperations.getInstance().removeSrcInPath(
+		String pathOfClass = UtilOperations.getInstance().removeToSrcInPath(
 				javaElement.getPath());
 		if (nameOfClass.equals(elementName)
 				&& pathOfClass.equals(UtilOperations.getInstance()
-						.removeSrcInPath(elementPath))) {
+						.removeToSrcInPath(elementPath))) {
+			if (isFirstStep)
+				((JavaClass) javaElement).setBaseVersion();
+
 			List<CodeLine> tmpCode = new ArrayList<CodeLine>();
 			List<CodeLine> actualCode = javaElement.getClonedCodeLines();
 			for (CodeLine cl : actualCode) {
 				tmpCode.add(cl.clone());
 			}
 			((JavaClass) javaElement).setWholeClass(wholeClass);
-			return javaElement
-					.setCodeLines(UtilOperations.getInstance().removeCode(
-							code.getStartLine(), code.getEndLine(), tmpCode));
+			List<CodeLine> codeLines = UtilOperations.getInstance().removeCode(
+					code.getStartLine(), code.getEndLine(), tmpCode);
+			if (isLastStep)
+				((JavaClass) javaElement).addChange(codeLines);
+
+			return javaElement.setCodeLines(codeLines);
 		}
 		return false;
 	}

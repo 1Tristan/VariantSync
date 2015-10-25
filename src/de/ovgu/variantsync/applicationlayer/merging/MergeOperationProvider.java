@@ -51,7 +51,7 @@ public class MergeOperationProvider extends AbstractModel implements
 			targetCode.add(cl.getCode());
 		}		List<CodeLine> syncResult = new ArrayList<CodeLine>();
 		List<String> result = JDimeWrapper.merge(quell, baseCode, targetCode);
-		int i = 0;
+		int i = 1;
 		for(String s : result){
 			syncResult.add(new CodeLine(s, i));
 			i++;

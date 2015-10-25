@@ -261,6 +261,7 @@ public class FeatureView extends ViewPart {
 								}
 							}
 						}
+						// baseCode = correctMapIndex(baseCode);
 						oldCode.removeAll();
 						for (CodeLine cl : baseCode) {
 							TableItem item = new TableItem(oldCode, SWT.NONE);
@@ -282,6 +283,7 @@ public class FeatureView extends ViewPart {
 								}
 							}
 						}
+						// code = correctMapIndex(code);
 						newCode.removeAll();
 						for (CodeLine cl : code) {
 							TableItem item = new TableItem(newCode, SWT.NONE);
@@ -385,6 +387,16 @@ public class FeatureView extends ViewPart {
 			public void widgetSelected(SelectionEvent event) {
 				if (codeOfTarget != null)
 					codeOfTarget.removeAll();
+				Iterator<CodeChange> it = collChanges.iterator();
+				java.util.List<CodeLine> newCode = null;
+				int i = 0;
+				while (it.hasNext()) {
+					CodeChange cc = it.next();
+					if (i == selectedChange) {
+						newCode = cc.getNewVersionWholeClass();
+					}
+					i++;
+				}
 				String selection = syncTargets.getSelection()[0];
 				String[] tmp = selection.split(":");
 				projectNameTarget = tmp[0].trim();
@@ -404,6 +416,7 @@ public class FeatureView extends ViewPart {
 				}
 				CodeHighlighting ccolor = cc
 						.getContextColor(selectedFeatureExpression);
+				// codeWC = correctMapIndex(codeWC);
 				codeOfTarget.removeAll();
 				for (CodeLine cl : codeWC) {
 					TableItem item = new TableItem(codeOfTarget, SWT.NONE);
@@ -415,16 +428,6 @@ public class FeatureView extends ViewPart {
 						// setBackground(ccolor, item);
 					}
 				}
-				Iterator<CodeChange> it = collChanges.iterator();
-				java.util.List<CodeLine> newCode = null;
-				int i = 0;
-				while (it.hasNext()) {
-					CodeChange cc = it.next();
-					if (i == selectedChange) {
-						newCode = cc.getNewVersionWholeClass();
-					}
-					i++;
-				}
 				syncCode = sc.doAutoSync(newCode, baseCode, codeWC);
 				left = new ArrayList<CodeLine>();
 				right = new ArrayList<CodeLine>();
@@ -432,6 +435,8 @@ public class FeatureView extends ViewPart {
 					btnSynchronize.setEnabled(true);
 					boolean addLeft = false;
 					boolean addRight = false;
+					// correctMapIndex(syncCode);
+					syncPreview.removeAll();
 					for (CodeLine cl : syncCode) {
 						TableItem item = new TableItem(syncPreview, SWT.NONE);
 						item.setText(cl.getLine() + ": " + cl.getCode());
@@ -495,9 +500,13 @@ public class FeatureView extends ViewPart {
 						newCode.removeAll();
 					if (syncPreview != null)
 						syncPreview.removeAll();
-					cc.refreshContext(true, selectedFeatureExpression,
-							projectNameTarget, classNameTarget, codeWC,
-							syncCode);
+
+					// disabled because only changes of merged feature
+					// expression is mapped, changes of other feature
+					// expressions are lost
+					// cc.refreshContext(true, selectedFeatureExpression,
+					// projectNameTarget, classNameTarget, codeWC,
+					// syncCode);
 					break;
 				}
 				}
@@ -525,9 +534,9 @@ public class FeatureView extends ViewPart {
 						newCode.removeAll();
 					if (syncPreview != null)
 						syncPreview.removeAll();
-					cc.refreshContext(false, selectedFeatureExpression,
-							projectNameTarget, classNameTarget, codeWC,
-							syncCode);
+					// cc.refreshContext(false, selectedFeatureExpression,
+					// projectNameTarget, classNameTarget, codeWC,
+					// syncCode);
 
 					break;
 				}
@@ -547,6 +556,35 @@ public class FeatureView extends ViewPart {
 		gd_text = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
 		gd_text.heightHint = 111;
 		syncPreview.setLayoutData(gd_text);
+	}
+
+	private java.util.List<CodeLine> correctMapIndex(
+			java.util.List<CodeLine> code) {
+		java.util.List<CodeLine> correctedCode = new ArrayList<CodeLine>();
+		for (CodeLine cl : code) {
+			correctedCode.add(cl.clone());
+		}
+		int j = 0;
+		int mappIndex = 0;
+		for (CodeLine clWC : code) {
+			if (clWC.isMapped()) {
+				mappIndex = j;
+				break;
+			}
+			j++;
+		}
+		if (mappIndex > 0)
+			code.get(mappIndex - 1).setMapped(true);
+		j = 0;
+		for (CodeLine clWC : code) {
+			if (clWC.isMapped()) {
+				if (code.size() > j + 1 && !code.get(j + 1).isMapped()) {
+					clWC.setMapped(false);
+				}
+			}
+			j++;
+		}
+		return correctedCode;
 	}
 
 	public void solveChange(java.util.List<CodeLine> code) {

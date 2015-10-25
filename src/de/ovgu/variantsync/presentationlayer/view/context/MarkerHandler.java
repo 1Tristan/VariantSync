@@ -133,13 +133,15 @@ public class MarkerHandler {
 		file = file.replace(".", "/");
 		file = file.replace("/java", ".java");
 		IPath path = new Path(file);
-		List<IProject> projects = VariantSyncPlugin.getDefault()
-				.getSupportProjectList();
 		IProject iProject = null;
-		for (IProject p : projects) {
-			if (p.getName().equals(projectName)) {
-				iProject = p;
-				break;
+		if (VariantSyncPlugin.getDefault() != null) {
+			List<IProject> projects = VariantSyncPlugin.getDefault()
+					.getSupportProjectList();
+			for (IProject p : projects) {
+				if (p.getName().equals(projectName)) {
+					iProject = p;
+					break;
+				}
 			}
 		}
 		if (iProject != null) {

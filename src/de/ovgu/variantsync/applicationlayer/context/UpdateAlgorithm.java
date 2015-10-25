@@ -133,8 +133,13 @@ public class UpdateAlgorithm {
 	}
 
 	private void saveContext(Context c) {
-		String storageLocation = VariantSyncPlugin.getDefault()
-				.getWorkspaceLocation() + VariantSyncConstants.CONTEXT_PATH;
+		String storageLocation = "";
+		if (VariantSyncPlugin.getDefault() != null) {
+			storageLocation = VariantSyncPlugin.getDefault()
+					.getWorkspaceLocation() + VariantSyncConstants.CONTEXT_PATH;
+		} else {
+			storageLocation = VariantSyncConstants.CONTEXT_PATH;
+		}
 		String filename = "/" + c.getFeatureExpression() + ".xml";
 
 		// creates target folder if it does not already exist

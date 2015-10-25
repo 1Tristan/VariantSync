@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import de.ovgu.variantsync.VariantSyncConstants;
@@ -38,6 +39,11 @@ public class TestDefaultContext {
 	private final String DEFAULT_CONTEXT = VariantSyncConstants.DEFAULT_CONTEXT;
 	private IContextOperations co = ModuleFactory.getContextOperations();
 
+	@Before
+	public void before() {
+		co.activateContext(DEFAULT_CONTEXT);
+	}
+	
 	@After
 	public void after() {
 		co.deleteAllContexts();

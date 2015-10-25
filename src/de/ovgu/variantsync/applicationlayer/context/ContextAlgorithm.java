@@ -65,6 +65,8 @@ class ContextAlgorithm {
 			int addCounter = 0;
 			boolean isFirstStep = true;
 			boolean isLastStep = false;
+			if (diffSteps.size() == 1)
+				isLastStep = true;
 			int j = 0;
 			for (DiffStep ds : diffSteps) {
 				List<String> list = new LinkedList<String>();
@@ -131,8 +133,8 @@ class ContextAlgorithm {
 				JavaElements.CODE_FRAGMENT,
 				context.getPathToProject(projectName) + "/src/"
 						+ packageName.replace(".", "/") + "/" + className,
-				extractedCode, start, end, end - start, wholeClass, isFirstStep,
-				isLastStep);
+				extractedCode, start, end, end - start, wholeClass,
+				isFirstStep, isLastStep);
 		mapping.setPathToProject(context.getPathToProject(projectName));
 		featureOperations.removeMapping(mapping,
 				context.getJavaProject(projectName));
