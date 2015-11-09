@@ -54,6 +54,7 @@ public class CodeMapping extends Mapping {
 	protected void computeElement(JavaElement element, MappingElement mapping,
 			String name, String path) {
 		List<String> code = mapping.getCode();
+		boolean ignoreChange = mapping.isIgnore();
 		String relativeClassPath = UtilOperations.getInstance()
 				.getRelativeClassPath(path);
 		if (classMapping.containsElement(element.getChildren(), name, path, "")) {
@@ -69,13 +70,14 @@ public class CodeMapping extends Mapping {
 							mapping.getEndLineOfSelection(),
 							mapping.getOffset()), actualCode);
 
-			if (mapping.isFirstStep() || actualCode.isEmpty())
+			if (!ignoreChange
+					&& (mapping.isFirstStep() || actualCode.isEmpty()))
 				((JavaClass) javaElement).setBaseVersion();
 
 			javaElement.setCodeLines(newLines);
 			((JavaClass) javaElement).setWholeClass(mapping.getWholeClass());
 
-			if (mapping.isLastStep())
+			if (!ignoreChange && mapping.isLastStep())
 				((JavaClass) javaElement).addChange(newLines);
 		} else {
 			JavaElement packageOfClass = packageMapping.getElement(
@@ -91,11 +93,12 @@ public class CodeMapping extends Mapping {
 					new CodeFragment(code, mapping.getStartLineOfSelection(),
 							mapping.getEndLineOfSelection(),
 							mapping.getOffset()));
-			if (mapping.isFirstStep() && !mapping.isLastStep()) {
+			if (!ignoreChange
+					&& (mapping.isFirstStep() && !mapping.isLastStep())) {
 				jc.setBaseVersion();
 			}
 			// jc.setWholeClass(mapping.getWholeClass());
-			if (mapping.isLastStep()) {
+			if (!ignoreChange && mapping.isLastStep()) {
 				jc.addChange(jc.getClonedCodeLines(), mapping.getWholeClass());
 			}
 			packageOfClass.addChild(jc);

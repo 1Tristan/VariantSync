@@ -17,6 +17,7 @@ public class MappingElement {
 	private List<String> wholeClass;
 	private boolean isFirstStep;
 	private boolean isLastStep;
+	private boolean ignore;
 
 	public MappingElement(String feature, String title, JavaElements type,
 			String pathToSelectedElement, String pathToProject) {
@@ -30,7 +31,8 @@ public class MappingElement {
 	public MappingElement(String feature, String title, JavaElements type,
 			String pathToSelectedElement, List<String> code,
 			int startLineOfSelection, int endLineOfSelection, int offset,
-			List<String> wholeClass, boolean isFirstStep, boolean isLastStep) {
+			List<String> wholeClass, boolean isFirstStep, boolean isLastStep,
+			boolean ignore) {
 		this.feature = feature;
 		this.title = title;
 		this.type = type;
@@ -42,6 +44,7 @@ public class MappingElement {
 		this.wholeClass = wholeClass;
 		this.isFirstStep = isFirstStep;
 		this.isLastStep = isLastStep;
+		this.ignore = ignore;
 	}
 
 	public MappingElement(String feature, String title, JavaElements type,
@@ -177,10 +180,18 @@ public class MappingElement {
 	}
 
 	/**
-	 * @param isFirstStep the isFirstStep to set
+	 * @param isFirstStep
+	 *            the isFirstStep to set
 	 */
 	public void setFirstStep(boolean isFirstStep) {
 		this.isFirstStep = isFirstStep;
+	}
+
+	/**
+	 * @return the ignore
+	 */
+	public boolean isIgnore() {
+		return ignore;
 	}
 
 }

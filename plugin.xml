@@ -474,6 +474,7 @@
      </specification>
    </extension>
    
+   <!--
    <extension point="org.eclipse.ui.editors.markerAnnotationSpecification"
      id="de.ovgu.pfofe.variantsync.codehighlightannotationDefaultContext"
      name="CodeHighlightDefaultContext">
@@ -495,6 +496,7 @@
           textStylePreferenceValue="BOX">
      </specification>
    </extension>
+   -->
       
    <!-- Links the annotation spec (color) to the marker -->
 	<extension point="org.eclipse.ui.editors.annotationTypes">
@@ -560,6 +562,7 @@
             name="codehighlightannotationGreenBright"
             markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerGreenBright"/>
    </extension>
+   <!--
    <extension point="org.eclipse.ui.editors.annotationTypes">
       <type
             markerSeverity="0"
@@ -567,6 +570,7 @@
             name="codehighlightannotationDefaultContext"
             markerType="de.ovgu.pfofe.variantsync.codehighlightmarkerDefaultContext"/>
    </extension>
+   -->
       
   <!-- define the marker updater class-->
   <extension point="org.eclipse.ui.editors.markerUpdaters">

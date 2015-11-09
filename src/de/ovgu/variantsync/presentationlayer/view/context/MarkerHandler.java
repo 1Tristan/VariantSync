@@ -129,6 +129,8 @@ public class MarkerHandler {
 
 	public void updateMarker(String projectName, String packageName,
 			String className, Context activeContext) {
+		if (activeContext.getFeatureExpression().equals("Default_Context"))
+			return;
 		String file = "/src/" + packageName + "/" + className;
 		file = file.replace(".", "/");
 		file = file.replace("/java", ".java");
@@ -159,6 +161,8 @@ public class MarkerHandler {
 
 	private List<MarkerInformation> initMarker(Context context,
 			String projectName, String className) {
+		if (context.getFeatureExpression().equals("Default_Context"))
+			return new ArrayList<MarkerInformation>();
 		Set<MarkerInformation> markers = new HashSet<MarkerInformation>();
 		Map<String, List<JavaClass>> classes = ModuleFactory
 				.getContextOperations().findJavaClass(projectName, className);

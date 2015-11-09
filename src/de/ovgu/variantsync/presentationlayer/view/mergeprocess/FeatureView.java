@@ -32,6 +32,7 @@ import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
+import de.ovgu.variantsync.applicationlayer.features.mapping.UtilOperations;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.ContextController;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
@@ -444,7 +445,7 @@ public class FeatureView extends ViewPart {
 							item.setBackground(new Color(getSite().getShell()
 									.getDisplay(), CodeHighlighting.RED
 									.getRGB()));
-							right.add(cl);
+//							right.add(cl);
 						}
 						if (cl.getCode().contains(">>>>>>>")) {
 							addRight = false;
@@ -453,7 +454,7 @@ public class FeatureView extends ViewPart {
 							item.setBackground(new Color(getSite().getShell()
 									.getDisplay(), CodeHighlighting.RED
 									.getRGB()));
-							left.add(cl);
+//							left.add(cl);
 						}
 					}
 					if (left.isEmpty() && right.isEmpty()) {
@@ -480,7 +481,7 @@ public class FeatureView extends ViewPart {
 				switch (e.type) {
 				case SWT.Selection: {
 					solveChange(syncCode);
-					setChanges();
+					// setChanges();
 					btnSynchronize.setEnabled(false);
 					if (codeOfTarget != null)
 						codeOfTarget.removeAll();
@@ -515,19 +516,6 @@ public class FeatureView extends ViewPart {
 					ManualMerge m = new ManualMerge(reference, left, leftClass,
 							right, rightClass, syncCode);
 					m.open();
-					btnManualSync.setEnabled(false);
-					if (codeOfTarget != null)
-						codeOfTarget.removeAll();
-					if (oldCode != null)
-						oldCode.removeAll();
-					if (newCode != null)
-						newCode.removeAll();
-					if (syncPreview != null)
-						syncPreview.removeAll();
-					cc.refreshContext(false, selectedFeatureExpression,
-							projectNameTarget, classNameTarget, codeWC,
-							syncCode);
-
 					break;
 				}
 			}
@@ -559,9 +547,9 @@ public class FeatureView extends ViewPart {
 		} catch (CoreException e1) {
 			e1.printStackTrace();
 		}
-		contextOperations.removeChange(selectedFeatureExpression,
-				selectedProject, selectedClass, selectedChange);
-		btnRemoveChangeEntry.setEnabled(false);
+		// contextOperations.removeChange(selectedFeatureExpression,
+		// selectedProject, selectedClass, selectedChange);
+		// btnRemoveChangeEntry.setEnabled(false);
 	}
 
 	public void setChanges() {
@@ -579,4 +567,33 @@ public class FeatureView extends ViewPart {
 				selectedProject, selectedClass).toArray(new String[] {}));
 	}
 
+	public void checkManualMerge(java.util.List<CodeLine> mergeResult) {
+		boolean manualMergeIsNeeded = false;
+		for (CodeLine cl : mergeResult) {
+			if (cl.getCode().contains("<<<<<<<")) {
+				manualMergeIsNeeded = true;
+				break;
+			}
+		}
+		if (manualMergeIsNeeded) {
+			UtilOperations.getInstance().printCode(mergeResult);
+			ManualMerge m = new ManualMerge(reference, mergeResult, leftClass, mergeResult,
+					rightClass, syncCode);
+			m.open();
+		} else {
+			btnManualSync.setEnabled(false);
+			if (codeOfTarget != null)
+				codeOfTarget.removeAll();
+			if (oldCode != null)
+				oldCode.removeAll();
+			if (newCode != null)
+				newCode.removeAll();
+			if (syncPreview != null)
+				syncPreview.removeAll();
+			cc.refreshContext(false, selectedFeatureExpression,
+					projectNameTarget, classNameTarget, codeWC, syncCode);
+			solveChange(mergeResult);
+			setChanges();
+		}
+	}
 }

@@ -4,12 +4,21 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.EditorPart;
 
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
+import de.ovgu.variantsync.presentationlayer.view.context.MarkerHandler;
 
 /**
  * Manages context operations and data exchanges between view and model.
@@ -24,6 +33,7 @@ public class ContextController extends AbstractController {
 
 	private IContextOperations contextOperations = ModuleFactory
 			.getContextOperations();
+	private boolean isPartActivated = false;
 
 	public String getActiveFeatureContext() {
 		return contextOperations.getActiveFeatureContext();
@@ -34,6 +44,25 @@ public class ContextController extends AbstractController {
 	}
 
 	public void activateContext(String featureExpression) {
+		if (!isPartActivated) {
+			IWorkbench wb = PlatformUI.getWorkbench();
+			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+			IWorkbenchPage page = win.getActivePage();
+			IWorkbenchPart part = page.getActivePart();
+			if (part instanceof IEditorPart) {
+				if (((IEditorPart) part).getEditorInput() instanceof IFileEditorInput) {
+					IFile file = ((IFileEditorInput) ((EditorPart) part)
+							.getEditorInput()).getFile();
+					System.out
+							.println("\n====== LOCATION OF ACTIVE FILE IN EDITOR ======");
+					System.out.println(file.getLocation());
+					System.out
+							.println("===============================================");
+					MarkerHandler.getInstance().refreshMarker(file);
+					setBaseVersion(file);
+				}
+			}
+		}
 		contextOperations.activateContext(featureExpression);
 	}
 
@@ -76,6 +105,7 @@ public class ContextController extends AbstractController {
 	}
 
 	public void setBaseVersion(IFile file) {
+		isPartActivated = true;
 		contextOperations.setBaseVersion(file);
 	}
 

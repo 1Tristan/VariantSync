@@ -128,6 +128,18 @@ public class UtilOperations {
 			// add new code lines to end of previous lines
 			code.addAll(end);
 		}
+		
+		// refresh line numbers
+		int offset = codeFragment.getEndLine() - codeFragment.getStartLine();
+		if (offset == 0) {
+			offset++;
+		}
+		for (CodeLine cl : code) {
+			if (cl.getLine() > codeFragment.getEndLine()) {
+				cl.setLine(cl.getLine() + offset);
+			}
+		}
+		
 		List<CodeLine> c = new ArrayList<CodeLine>();
 		for (CodeLine cl : code) {
 			c.add(cl.clone());

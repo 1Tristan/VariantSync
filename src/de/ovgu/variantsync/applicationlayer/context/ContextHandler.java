@@ -89,7 +89,7 @@ class ContextHandler {
 			activeContext.initProject(projectName, pathToProject);
 		}
 		ContextAlgorithm ca = new ContextAlgorithm(activeContext);
-		ca.addCode(projectName, packageName, className, changedCode, wholeClass);
+		ca.addCode(projectName, packageName, className, changedCode, wholeClass, false);
 		UpdateAlgorithm ua = new UpdateAlgorithm();
 		ua.updateCode(projectName, packageName, className, changedCode,
 				activeContext.getFeatureExpression());
@@ -167,7 +167,7 @@ class ContextHandler {
 				filename, filename, oldCode, patch, 0);
 		Context c = getContext(fe);
 		ContextAlgorithm ca = new ContextAlgorithm(c);
-		ca.addCode(projectName, packageName, filename, tmpUnifiedDiff, oldCode);
+		ca.addCode(projectName, packageName, filename, tmpUnifiedDiff, oldCode, true);
 		UpdateAlgorithm ua = new UpdateAlgorithm();
 		ua.updateCode(projectName, packageName, filename, tmpUnifiedDiff,
 				c.getFeatureExpression());

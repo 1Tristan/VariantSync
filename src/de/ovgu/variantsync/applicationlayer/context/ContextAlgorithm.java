@@ -34,7 +34,8 @@ class ContextAlgorithm {
 	}
 
 	public void addCode(String projectName, String packageName,
-			String className, List<String> code, List<String> wholeClass) {
+			String className, List<String> code, List<String> wholeClass,
+			boolean ignore) {
 
 		// Mapping auf FeatureExpressions umstellen/ von FeatureExpressions
 		// extrahieren und immer das Project zurückgeben mit angepasstem Mapping
@@ -43,7 +44,8 @@ class ContextAlgorithm {
 		// Context
 
 		List<Diff> diffs = ContextUtils.analyzeDiff(code);
-		refreshCodeBase(diffs, projectName, packageName, className, wholeClass);
+		refreshCodeBase(diffs, projectName, packageName, className, wholeClass,
+				ignore);
 
 		// String file = "/src/" + packageName + "/" + className;
 		// refreshMarker(diffs, file, context.getPathOfJavaProject());
@@ -54,7 +56,8 @@ class ContextAlgorithm {
 	}
 
 	private void refreshCodeBase(List<Diff> diffs, String projectName,
-			String packageName, String className, List<String> wholeClass) {
+			String packageName, String className, List<String> wholeClass,
+			boolean ignore) {
 		int i = 0;
 		for (Diff diff : diffs) {
 			DiffIndices di = diff.getDiffIndices();
@@ -76,14 +79,24 @@ class ContextAlgorithm {
 				list.add(ds.getCode());
 				if (ds.isAddFlag()) {
 					addCode(projectName, packageName, className, startNew,
-							startNew, list, wholeClass, isFirstStep, isLastStep);
+							startNew, list, wholeClass, isFirstStep,
+							isLastStep, ignore);
 					if (!UtilOperations.getInstance().ignoreAddCounter()) {
 						addCounter++;
 					}
 					startNew++;
 				} else {
+					if (j < diffSteps.size() - 2
+							&& diffSteps.get(j + 1).isAddFlag()) {
+						isLastStep = true;
+					}
 					removeCode(projectName, packageName, className, startOld,
-							startOld, list, isFirstStep, isLastStep, wholeClass);
+							startOld, list, isFirstStep, isLastStep,
+							wholeClass, ignore);
+					if (j < diffSteps.size() - 2
+							&& diffSteps.get(j + 1).isAddFlag()) {
+						isLastStep = false;
+					}
 					removeCounter++;
 					if (startNew > startOld) {
 						startNew--;
@@ -109,7 +122,7 @@ class ContextAlgorithm {
 
 	private void addCode(String projectName, String packageName,
 			String className, int start, int end, List<String> extractedCode,
-			List<String> wholeClass, boolean isFirstStep, boolean isLastStep) {
+			List<String> wholeClass, boolean isFirstStep, boolean isLastStep, boolean ignore) {
 		setUpProject(projectName);
 		MappingElement mapping = new MappingElement(
 				context.getFeatureExpression(), className,
@@ -117,7 +130,7 @@ class ContextAlgorithm {
 				context.getPathToProject(projectName) + "/src/"
 						+ packageName.replace(".", "/") + "/" + className,
 				extractedCode, start, end, end - start, wholeClass,
-				isFirstStep, isLastStep);
+				isFirstStep, isLastStep, ignore);
 		mapping.setPathToProject(context.getPathToProject(projectName));
 
 		featureOperations.addCodeFragment(mapping,
@@ -126,7 +139,7 @@ class ContextAlgorithm {
 
 	private void removeCode(String projectName, String packageName,
 			String className, int start, int end, List<String> extractedCode,
-			boolean isFirstStep, boolean isLastStep, List<String> wholeClass) {
+			boolean isFirstStep, boolean isLastStep, List<String> wholeClass, boolean ignore) {
 		setUpProject(projectName);
 		MappingElement mapping = new MappingElement(
 				context.getFeatureExpression(), className,
@@ -134,7 +147,7 @@ class ContextAlgorithm {
 				context.getPathToProject(projectName) + "/src/"
 						+ packageName.replace(".", "/") + "/" + className,
 				extractedCode, start, end, end - start, wholeClass,
-				isFirstStep, isLastStep);
+				isFirstStep, isLastStep, ignore);
 		mapping.setPathToProject(context.getPathToProject(projectName));
 		featureOperations.removeMapping(mapping,
 				context.getJavaProject(projectName));

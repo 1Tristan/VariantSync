@@ -14,17 +14,6 @@
     <mapped>true</mapped>
     <new>true</new>
 </newVersion>
-<timestamp>1445737250238</timestamp>
-                            </change>
-                            <change>
-<baseVersion code="private int a;" line="5">
-    <mapped>true</mapped>
-    <new>true</new>
-</baseVersion>
-<newVersion code="private int a;" line="5">
-    <mapped>true</mapped>
-    <new>true</new>
-</newVersion>
 <newVersion code="public Main(int g) {" line="7">
     <mapped>true</mapped>
     <new>true</new>
@@ -69,7 +58,7 @@
     <mapped>true</mapped>
     <new>true</new>
 </newVersion>
-<timestamp>1445737250239</timestamp>
+<timestamp>1447025424049</timestamp>
                             </change>
                         </changes>
                         <code>

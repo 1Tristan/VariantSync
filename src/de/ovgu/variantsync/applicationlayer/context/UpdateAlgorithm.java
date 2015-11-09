@@ -64,15 +64,10 @@ public class UpdateAlgorithm {
 				List<CodeLine> removeLines = new ArrayList<CodeLine>();
 				for (int i = 0; i < cls.size(); i++) {
 					CodeLine cl = cls.get(i);
-					if (cl.getLine() == di.getStartIndixOldCode()) {
-						// cl.setLine(cl.getLine() -
-						// di.getNumberOfOldCodeLines());
+					if ((cl.getLine() >= di.getStartIndixOldCode())
+							&& (cl.getLine() <= di.getStartIndixOldCode()
+									+ (di.getNumberOfOldCodeLines() - 1))) {
 						removeLines.add(cl);
-						int count = di.getNumberOfOldCodeLines();
-						for (int j = i + 1; j < i + count; j++) {
-							removeLines.add(cls.get(j));
-						}
-						break;
 					}
 				}
 				for (CodeLine cl : removeLines) {

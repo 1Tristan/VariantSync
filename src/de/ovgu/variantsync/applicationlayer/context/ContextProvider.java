@@ -101,7 +101,7 @@ public class ContextProvider extends AbstractModel implements
 			String className, List<String> code, List<String> wholeClass) {
 		ContextAlgorithm ca = new ContextAlgorithm(ContextHandler.getInstance()
 				.getActiveContext());
-		ca.addCode(projectName, packageName, className, code, wholeClass);
+		ca.addCode(projectName, packageName, className, code, wholeClass, false);
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class ContextProvider extends AbstractModel implements
 			String className, List<String> code, Context c,
 			List<String> wholeClass) {
 		ContextAlgorithm ca = new ContextAlgorithm(c);
-		ca.addCode(projectName, packageName, className, code, wholeClass);
+		ca.addCode(projectName, packageName, className, code, wholeClass, false);
 	}
 
 	@Override
@@ -277,25 +277,6 @@ public class ContextProvider extends AbstractModel implements
 	public List<CodeLine> getTargetCodeWholeClass(String fe,
 			String projectName, String className) {
 		List<CodeLine> targetCode = new ArrayList<CodeLine>();
-		// Context c = ContextHandler.getInstance().getContext(fe);
-		// Map<String, JavaProject> mapJp = c.getJavaProjects();
-		// Set<Entry<String, JavaProject>> entries = mapJp.entrySet();
-		// Iterator<Entry<String, JavaProject>> it = entries.iterator();
-		// while (it.hasNext()) {
-		// Entry<String, JavaProject> e = it.next();
-		// if (e.getKey().equals(projectName)) {
-		// List<JavaElement> classes = new ArrayList<JavaElement>();
-		// JavaProject jp = e.getValue();
-		// ContextUtils.iterateElements(jp.getChildren(), classes);
-		// for (JavaElement element : classes) {
-		// if (element.getName().equals(className)) {
-		// targetCode.addAll(((JavaClass) element)
-		// .getClonedCodeLinesWholeClass());
-		// }
-		// }
-		// }
-		// }
-		// if (targetCode.isEmpty()) {
 		List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
 				.getSupportProjectList();
 		for (IProject p : supportedProjects) {
@@ -329,7 +310,6 @@ public class ContextProvider extends AbstractModel implements
 				}
 			}
 		}
-		// }
 		return targetCode;
 	}
 
@@ -386,9 +366,10 @@ public class ContextProvider extends AbstractModel implements
 		for (JavaElement e : classes) {
 			if (e.getName().equals(selectedClass)) {
 				((JavaClass) e).removeChange(selectedChange);
-				return;
+				break;
 			}
 		}
+		persistanceOperations.saveContext(c, Util.parseStorageLocation(c));
 	}
 
 	@Override
