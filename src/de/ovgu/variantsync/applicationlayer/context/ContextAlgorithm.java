@@ -93,7 +93,7 @@ class ContextAlgorithm {
 					removeCode(projectName, packageName, className, startOld,
 							startOld, list, isFirstStep, isLastStep,
 							wholeClass, ignore);
-					if (j < diffSteps.size() - 2
+ 					if (j < diffSteps.size() - 2
 							&& diffSteps.get(j + 1).isAddFlag()) {
 						isLastStep = false;
 					}

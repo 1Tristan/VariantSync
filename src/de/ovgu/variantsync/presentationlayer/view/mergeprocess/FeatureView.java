@@ -445,7 +445,6 @@ public class FeatureView extends ViewPart {
 							item.setBackground(new Color(getSite().getShell()
 									.getDisplay(), CodeHighlighting.RED
 									.getRGB()));
-//							right.add(cl);
 						}
 						if (cl.getCode().contains(">>>>>>>")) {
 							addRight = false;
@@ -454,7 +453,6 @@ public class FeatureView extends ViewPart {
 							item.setBackground(new Color(getSite().getShell()
 									.getDisplay(), CodeHighlighting.RED
 									.getRGB()));
-//							left.add(cl);
 						}
 					}
 					if (left.isEmpty() && right.isEmpty()) {

@@ -100,9 +100,6 @@ public class PersistanceOperationProvider implements IPersistanceOperations {
 
 	@Override
 	public void saveContext(Context context, String path) {
-		// System.out.println("\n================ CONTEXT SAVED ================");
-		// System.out.println(context.toString());
-		// System.out.println("===============================================\n");
 		JaxbOperations.writeContext(context, path);
 	}
 

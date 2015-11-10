@@ -128,18 +128,22 @@ public class UtilOperations {
 			// add new code lines to end of previous lines
 			code.addAll(end);
 		}
-		
+
 		// refresh line numbers
 		int offset = codeFragment.getEndLine() - codeFragment.getStartLine();
 		if (offset == 0) {
 			offset++;
 		}
+		int i = 0;
 		for (CodeLine cl : code) {
 			if (cl.getLine() > codeFragment.getEndLine()) {
 				cl.setLine(cl.getLine() + offset);
+			} else if ((i - 1) >= 0 && cl.getLine() == code.get(i - 1).getLine()) {
+				cl.setLine(cl.getLine() + offset);
 			}
+			i++;
 		}
-		
+
 		List<CodeLine> c = new ArrayList<CodeLine>();
 		for (CodeLine cl : code) {
 			c.add(cl.clone());
@@ -205,15 +209,15 @@ public class UtilOperations {
 			tmp.add(code.get(x).clone());
 		}
 		code.add(listIndex, new CodeLine(newCodeLine, tmpNumber, true, true));
-		for (int k = 0; k < tmp.size(); k++) {
-			try {
-				CodeLine cl = tmp.get(k);
-				cl.setLine(cl.getLine() + 1);
-				code.set(++listIndex, cl);
-			} catch (Exception e) {
-				code.add(tmp.get(k));
-			}
-		}
+		// for (int k = 0; k < tmp.size(); k++) {
+		// try {
+		// CodeLine cl = tmp.get(k);
+		// cl.setLine(cl.getLine() + 1);
+		// code.set(++listIndex, cl);
+		// } catch (Exception e) {
+		// code.add(tmp.get(k));
+		// }
+		// }
 	}
 
 	public void printCode(List<CodeLine> code) {

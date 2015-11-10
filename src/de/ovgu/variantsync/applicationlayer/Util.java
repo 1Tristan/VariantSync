@@ -46,10 +46,12 @@ public class Util {
 	}
 
 	public static String parseStorageLocation(Context c) {
+		String storageLocation = "";
 		if (VariantSyncPlugin.getDefault() == null)
-			return "";
-		String storageLocation = VariantSyncPlugin.getDefault()
-				.getWorkspaceLocation() + VariantSyncConstants.CONTEXT_PATH;
+			storageLocation = "test/context";
+		else
+			storageLocation = VariantSyncPlugin.getDefault()
+					.getWorkspaceLocation() + VariantSyncConstants.CONTEXT_PATH;
 		String filename = "/" + c.getFeatureExpression() + ".xml";
 
 		// creates target folder if it does not already exist
@@ -59,5 +61,4 @@ public class Util {
 		}
 		return storageLocation += filename;
 	}
-
 }
