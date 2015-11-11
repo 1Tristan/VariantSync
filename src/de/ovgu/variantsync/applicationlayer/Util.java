@@ -1,8 +1,14 @@
 package de.ovgu.variantsync.applicationlayer;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+
+import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
@@ -60,5 +66,25 @@ public class Util {
 			folder.mkdirs();
 		}
 		return storageLocation += filename;
+	}
+
+	@SuppressWarnings("serial")
+	public static Collection<String> getConfiguredFeatures(String projectName) {
+		List<IProject> projects = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		for (IProject p : projects) {
+			if (p.getName().equals(projectName)) {
+				Collection<String> features = new HashSet<String>();
+				Iterator<Feature> it = ModuleFactory.getFeatureOperations()
+						.getConfiguredFeaturesOfProject(p).iterator();
+				while (it.hasNext()) {
+					Feature f = it.next();
+					features.add(f.getName());
+				}
+				return features;
+			}
+		}
+		return new HashSet<String>() {
+		};
 	}
 }

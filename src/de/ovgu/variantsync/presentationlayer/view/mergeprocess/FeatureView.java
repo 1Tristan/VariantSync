@@ -10,6 +10,7 @@ import java.util.Iterator;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -17,7 +18,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -86,6 +86,7 @@ public class FeatureView extends ViewPart {
 	private FeatureView reference;
 	private Button btnRemoveChangeEntry;
 	private java.util.List<CodeLine> codeWC;
+	private CCombo combo;
 
 	public FeatureView() {
 	}
@@ -94,6 +95,9 @@ public class FeatureView extends ViewPart {
 	}
 
 	public void setFocus() {
+		featureExpressions = fc.getFeatureExpressions().getFeatureExpressions()
+				.toArray(new String[] {});
+		combo.setItems(featureExpressions);
 	}
 
 	@Override
@@ -108,12 +112,21 @@ public class FeatureView extends ViewPart {
 
 		featureExpressions = fc.getFeatureExpressions().getFeatureExpressions()
 				.toArray(new String[] {});
-		final Combo combo = new Combo(arg0, SWT.NONE);
+		combo = new CCombo(arg0, SWT.BORDER);
 		GridData gd_combo = new GridData(SWT.LEFT, SWT.CENTER, false, false, 3,
 				1);
 		gd_combo.widthHint = 189;
 		combo.setLayoutData(gd_combo);
 		combo.setItems(featureExpressions);
+		Listener listener = new Listener() {
+			@Override
+			public void handleEvent(Event e) {
+				featureExpressions = fc.getFeatureExpressions()
+						.getFeatureExpressions().toArray(new String[] {});
+				combo.setItems(featureExpressions);
+			}
+		};
+		combo.addListener(SWT.MouseDown, listener);
 		combo.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (syncTargets != null)
@@ -561,8 +574,9 @@ public class FeatureView extends ViewPart {
 		}
 		changes.setItems(timestamps.toArray(new String[] {}));
 
-		syncTargets.setItems(cc.getSyncTargets(selectedFeatureExpression,
-				selectedProject, selectedClass).toArray(new String[] {}));
+		String[] items = cc.getSyncTargets(selectedFeatureExpression,
+				selectedProject, selectedClass).toArray(new String[] {});
+		syncTargets.setItems(items);
 	}
 
 	public void checkManualMerge(java.util.List<CodeLine> mergeResult) {
@@ -575,8 +589,8 @@ public class FeatureView extends ViewPart {
 		}
 		if (manualMergeIsNeeded) {
 			UtilOperations.getInstance().printCode(mergeResult);
-			ManualMerge m = new ManualMerge(reference, mergeResult, leftClass, mergeResult,
-					rightClass, syncCode);
+			ManualMerge m = new ManualMerge(reference, mergeResult, leftClass,
+					mergeResult, rightClass, syncCode);
 			m.open();
 		} else {
 			btnManualSync.setEnabled(false);

@@ -75,7 +75,7 @@ public class CodeMapping extends Mapping {
 				((JavaClass) javaElement).setBaseVersion();
 
 			javaElement.setCodeLines(newLines);
-			((JavaClass) javaElement).setWholeClass(mapping.getWholeClass());
+			((JavaClass) javaElement).setLinesOfWholeClass(mapping.getWholeClass());
 
 			if (!ignoreChange && mapping.isLastStep())
 				((JavaClass) javaElement).addChange(newLines);
@@ -181,7 +181,7 @@ public class CodeMapping extends Mapping {
 			for (CodeLine cl : actualCode) {
 				tmpCode.add(cl.clone());
 			}
-			((JavaClass) javaElement).setWholeClass(wholeClass);
+			((JavaClass) javaElement).setLinesOfWholeClass(wholeClass);
 			List<CodeLine> codeLines = UtilOperations.getInstance().removeCode(
 					code.getStartLine(), code.getEndLine(), tmpCode);
 			if (isLastStep)

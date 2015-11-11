@@ -26,8 +26,9 @@ class JaxbOperations {
 	 */
 	public static Context loadContext(String filename) {
 		try {
-			return (Context) loadObject(JAXBContext.newInstance(Context.class),
-					filename);
+			Context c = (Context) loadObject(
+					JAXBContext.newInstance(Context.class), filename);
+			return c;
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}

@@ -28,6 +28,7 @@ import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.Util;
 import de.ovgu.variantsync.applicationlayer.context.ContextProvider;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorItemStorage;
 import de.ovgu.variantsync.applicationlayer.deltacalculation.DeltaOperationProvider;
@@ -112,18 +113,8 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 
 	@Override
 	public void stop(BundleContext context) {
-		String path = VariantSyncPlugin.getDefault().getWorkspaceLocation()
-				+ VariantSyncConstants.FEATURE_EXPRESSION_PATH;
 
-		// creates target folder if it does not already exist
-		File folder = new File(path.substring(0, path.lastIndexOf("/")));
-		if (!folder.exists()) {
-			folder.mkdirs();
-		}
-		FeatureExpressions fe = featureOp.getFeatureExpressions();
-		if (fe != null && fe.getFeatureExpressions() != null) {
-			persistenceOp.saveFeatureExpressions(fe, path);
-		}
+		persistenceOp.saveFeatureExpressions(featureOp.getFeatureExpressions());
 
 		// stop default-context or any other active context
 		try {
@@ -226,7 +217,11 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		if (folder.exists() && folder.isDirectory()) {
 			File[] files = folder.listFiles();
 			for (File f : files) {
-				contextOp.addContext(persistenceOp.loadContext(f.getPath()));
+				Context c = persistenceOp.loadContext(f.getPath());
+				if (c != null)
+					contextOp.addContext(c);
+				else
+					System.out.println(f.toString());
 			}
 		}
 		contextOp.activateContext(VariantSyncConstants.DEFAULT_CONTEXT);

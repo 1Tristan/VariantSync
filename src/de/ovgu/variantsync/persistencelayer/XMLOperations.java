@@ -56,4 +56,5 @@ class XMLOperations {
 		encoder.writeObject(info);
 		encoder.close();
 	}
+
 }

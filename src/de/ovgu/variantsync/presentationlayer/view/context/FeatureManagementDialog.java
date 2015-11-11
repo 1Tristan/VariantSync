@@ -283,6 +283,7 @@ public class FeatureManagementDialog {
 				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 					public void widgetSelected(
 							org.eclipse.swt.events.SelectionEvent e) {
+						FeatureContextSelection.refreshMenuItems();
 						shell.dispose();
 					}
 				});

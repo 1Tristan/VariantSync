@@ -225,12 +225,6 @@ public class JavaClass extends JavaElement {
 		return new JavaClass(name, path);
 	}
 
-	@XmlElementWrapper(name = "code")
-	@XmlElement(name = "codeline")
-	public List<CodeLine> getCodeLines() {
-		return codeLines;
-	}
-
 	public List<CodeLine> getClonedCodeLines() {
 		List<CodeLine> tmpList = new ArrayList<CodeLine>();
 		for (CodeLine cl : codeLines) {
@@ -296,6 +290,12 @@ public class JavaClass extends JavaElement {
 		return copy;
 	}
 
+	@XmlElementWrapper(name = "code")
+	@XmlElement(name = "codeline")
+	public List<CodeLine> getCodeLines() {
+		return codeLines;
+	}
+
 	/**
 	 * @param codeLines
 	 *            the codeFragments to set
@@ -308,7 +308,7 @@ public class JavaClass extends JavaElement {
 		return true;
 	}
 
-	public void setWholeClass(List<String> lines) {
+	public void setLinesOfWholeClass(List<String> lines) {
 		wholeClass = new ArrayList<CodeLine>();
 		int i = 1;
 		for (String line : lines) {
@@ -320,18 +320,20 @@ public class JavaClass extends JavaElement {
 	/**
 	 * @return the wholeClass
 	 */
+	@XmlElementWrapper(name = "wholeClass")
+	@XmlElement(name = "codeline")
 	public List<CodeLine> getWholeClass() {
 		return wholeClass;
+	}
+
+	public void setWholeClass(List<CodeLine> wholeClass) {
+		this.wholeClass = wholeClass;
 	}
 
 	@XmlElementWrapper(name = "changes")
 	@XmlElement(name = "change")
 	public List<CodeChange> getChanges() {
-		List<CodeChange> clonedChanges = new ArrayList<CodeChange>();
-		for (CodeChange ch : changes) {
-			clonedChanges.add(ch.clone());
-		}
-		return clonedChanges;
+		return changes;
 	}
 
 	/**
@@ -341,6 +343,15 @@ public class JavaClass extends JavaElement {
 	public void setChanges(List<CodeChange> changes) {
 		this.changes = changes;
 	}
+	
+	public List<CodeChange> getClonedChanges() {
+		List<CodeChange> clonedChanges = new ArrayList<CodeChange>();
+		for (CodeChange ch : changes) {
+			clonedChanges.add(ch.clone());
+		}
+		return clonedChanges;
+	}
+
 
 	public Object removeChange(int selectedChange) {
 		changes.remove(selectedChange);

@@ -62,4 +62,6 @@ public interface IFeatureOperations {
 	void addFeatureExpression(Set<String> featureExpressions);
 
 	void deleteFeatureExpression(String expr);
+
+	Set<Feature> getConfiguredFeaturesOfProject(IProject project);
 }

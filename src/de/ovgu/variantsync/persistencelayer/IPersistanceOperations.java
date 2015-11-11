@@ -158,7 +158,7 @@ public interface IPersistanceOperations {
 
 	FeatureExpressions loadFeatureExpressions(String path);
 
-	void saveFeatureExpressions(FeatureExpressions fe, String path);
+	void saveFeatureExpressions(FeatureExpressions fe);
 
 	void writeFile(java.util.List<CodeLine> syncCode, File file);
 }

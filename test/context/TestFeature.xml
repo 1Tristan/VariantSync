@@ -58,7 +58,7 @@
     <mapped>true</mapped>
     <new>true</new>
 </newVersion>
-<timestamp>1447103289473</timestamp>
+<timestamp>1447186052645</timestamp>
                             </change>
                         </changes>
                         <code>
@@ -113,6 +113,7 @@
                         </code>
                         <name>Main.java</name>
                         <path>arbitraryPathToProject/src/mainpackage/Main.java</path>
+                        <wholeClass/>
                     </member>
                     <name>mainpackage</name>
                     <path>arbitraryPathToProject/src/mainpackage</path>

@@ -9,6 +9,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
+import de.ovgu.variantsync.VariantSyncConstants;
+import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
@@ -109,8 +111,18 @@ public class PersistanceOperationProvider implements IPersistanceOperations {
 	}
 
 	@Override
-	public void saveFeatureExpressions(FeatureExpressions fe, String path) {
-		JaxbOperations.writeFeatureExpression(fe, path);
+	public void saveFeatureExpressions(FeatureExpressions fe) {
+		String path = VariantSyncPlugin.getDefault().getWorkspaceLocation()
+				+ VariantSyncConstants.FEATURE_EXPRESSION_PATH;
+
+		// creates target folder if it does not already exist
+		File folder = new File(path.substring(0, path.lastIndexOf("/")));
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
+		if (fe != null && fe.getFeatureExpressions() != null) {
+			JaxbOperations.writeFeatureExpression(fe, path);
+		}
 	}
 
 	@Override

@@ -12,8 +12,10 @@ import org.junit.Test;
 
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 
@@ -77,5 +79,9 @@ public class TestXMLOutput {
 		assertEquals("}", cl.getCode());
 		assertEquals(17, cl.getLine());
 		assertEquals(12, codeLines.size());
+
+		JavaClass jc = (JavaClass) jp.getChildren().get(0).getChildren().get(0);
+		List<CodeChange> changes = jc.getChanges();
+		assertTrue(!changes.isEmpty());
 	}
 }

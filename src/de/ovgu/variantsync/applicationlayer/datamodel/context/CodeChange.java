@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlElement;
+
 /**
  * 
  *
@@ -34,6 +36,7 @@ public class CodeChange {
 	/**
 	 * @return the baseVersion
 	 */
+	@XmlElement
 	public List<CodeLine> getBaseVersion() {
 		return baseVersion;
 	}
@@ -49,6 +52,7 @@ public class CodeChange {
 	/**
 	 * @return the newVersion
 	 */
+	@XmlElement
 	public List<CodeLine> getNewVersion() {
 		return newVersion;
 	}
@@ -64,6 +68,7 @@ public class CodeChange {
 	/**
 	 * @return the timestamp
 	 */
+	@XmlElement
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -124,6 +129,7 @@ public class CodeChange {
 	/**
 	 * @return the baseVersionWholeClass
 	 */
+	@XmlElement
 	public List<CodeLine> getBaseVersionWholeClass() {
 		return baseVersionWholeClass;
 	}
@@ -139,6 +145,7 @@ public class CodeChange {
 	/**
 	 * @return the newVersionWholeClass
 	 */
+	@XmlElement
 	public List<CodeLine> getNewVersionWholeClass() {
 		return newVersionWholeClass;
 	}

@@ -1,5 +1,6 @@
 package de.ovgu.variantsync.applicationlayer.features;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -10,7 +11,10 @@ import org.eclipse.core.resources.IProject;
 
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.featureide.fm.core.FeatureModel;
+import de.ovgu.variantsync.VariantSyncConstants;
+import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
+import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FeatureException;
@@ -108,6 +112,21 @@ public class FeatureProvider extends AbstractModel implements
 
 	@Override
 	public FeatureExpressions getFeatureExpressions() {
+		String storageLocation = VariantSyncPlugin.getDefault()
+				.getWorkspaceLocation()
+				+ VariantSyncConstants.FEATURE_EXPRESSION_PATH;
+		File folder = new File(storageLocation.substring(0,
+				storageLocation.lastIndexOf("/")));
+		if (folder.exists() && folder.isDirectory()) {
+			File[] files = folder.listFiles();
+			for (File f : files) {
+				FeatureExpressions featureExpressions = ModuleFactory
+						.getPersistanceOperations().loadFeatureExpressions(
+								f.getPath());
+				featureHandler.setFeatureExpressions(featureExpressions);
+			}
+		}
+
 		try {
 			return featureHandler.getFeatureExpressions();
 		} catch (FeatureException e) {
@@ -126,7 +145,6 @@ public class FeatureProvider extends AbstractModel implements
 		try {
 			return featureHandler.getFeatureModel();
 		} catch (FeatureException e) {
-			// TODO handle exception
 			e.printStackTrace();
 		}
 		return null;
@@ -151,6 +169,16 @@ public class FeatureProvider extends AbstractModel implements
 		propertyChangeSupport.firePropertyChange(
 				ControllerProperties.CONSTRAINT_PROPERTY.getProperty(), null,
 				null);
+	}
+
+	@Override
+	public Set<Feature> getConfiguredFeaturesOfProject(IProject project) {
+		try {
+			return featureHandler.getConfiguredFeaturesOfProject(project);
+		} catch (FeatureException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

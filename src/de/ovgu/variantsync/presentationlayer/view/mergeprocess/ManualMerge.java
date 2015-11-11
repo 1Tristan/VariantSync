@@ -17,8 +17,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
-import de.ovgu.variantsync.applicationlayer.features.mapping.UtilOperations;
-import de.ovgu.variantsync.utilitylayer.UtilityModel;
 
 public class ManualMerge {
 
@@ -85,9 +83,11 @@ public class ManualMerge {
 				| SWT.H_SCROLL | SWT.V_SCROLL);
 		leftCode.setBounds(27, 68, 282, 220);
 		boolean take = false;
+		boolean isConflict = false;
 		for (CodeLine cl : right) {
 			if (cl.getCode().contains("<<<<<<<")) {
 				take = true;
+				isConflict = true;
 				continue;
 			}
 			if (cl.getCode().contains("=======")) {
@@ -114,7 +114,14 @@ public class ManualMerge {
 			if (take)
 				rightCode.append(cl.getCode() + "\n");
 		}
-
+		if (!isConflict) {
+			for (CodeLine cl : left) {
+				leftCode.append(cl.getCode() + "\n");
+			}
+			for (CodeLine cl : right) {
+				rightCode.append(cl.getCode() + "\n");
+			}
+		}
 		Label lblLeft = new Label(shell, SWT.NONE);
 		lblLeft.setBounds(27, 47, 282, 15);
 		lblLeft.setText("Left: " + classLeft);

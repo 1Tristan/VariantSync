@@ -21,6 +21,7 @@ import de.ovgu.featureide.fm.core.configuration.ConfigurationReader;
 import de.ovgu.featureide.fm.core.io.FeatureModelReaderIFileWrapper;
 import de.ovgu.featureide.fm.core.io.UnsupportedModelException;
 import de.ovgu.featureide.fm.core.io.xml.XmlFeatureModelReader;
+import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FeatureException;
 
@@ -156,6 +157,12 @@ class FeatureHandler {
 
 	public void addFeatureExpression(String featureExpression) {
 		featureExpressions.addFeatureExpression(featureExpression);
+		try {
+			ModuleFactory.getPersistanceOperations().saveFeatureExpressions(
+					getFeatureExpressions());
+		} catch (FeatureException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void addFeatureExpressions(Set<String> featureExpressions) {
@@ -168,6 +175,12 @@ class FeatureHandler {
 			String name = itConstraint.next();
 			if (name.equals(expr)) {
 				featureExpressions.removeFeatureExpression(name);
+				try {
+					ModuleFactory.getPersistanceOperations()
+							.saveFeatureExpressions(getFeatureExpressions());
+				} catch (FeatureException e) {
+					e.printStackTrace();
+				}
 				break;
 			}
 		}
@@ -247,6 +260,10 @@ class FeatureHandler {
 			}
 		}
 		return featureInfoProject;
+	}
+
+	public void setFeatureExpressions(FeatureExpressions featureExpressions) {
+		this.featureExpressions = featureExpressions;
 	}
 
 }

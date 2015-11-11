@@ -30,8 +30,10 @@ import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
+import de.ovgu.variantsync.presentationlayer.view.context.ConstraintTextValidator;
 import de.ovgu.variantsync.presentationlayer.view.context.FeatureContextSelection;
 import de.ovgu.variantsync.presentationlayer.view.context.MarkerHandler;
+import de.ovgu.variantsync.presentationlayer.view.context.ConstraintTextValidator.ValidationResult;
 
 /**
  * Receives controller invocation as part of MVC implementation and encapsulates
@@ -48,6 +50,7 @@ public class ContextProvider extends AbstractModel implements
 	private IPersistanceOperations persistanceOperations = ModuleFactory
 			.getPersistanceOperations();
 	private boolean ignoreCodeChange;
+	private static final ConstraintTextValidator VALIDATOR = new ConstraintTextValidator();
 
 	public ContextProvider() {
 		contextHandler = ContextHandler.getInstance();
@@ -182,7 +185,7 @@ public class ContextProvider extends AbstractModel implements
 		ContextUtils.iterateElements(jp.getChildren(), classes);
 		for (JavaElement e : classes) {
 			if (e.getName().equals(className)) {
-				return ((JavaClass) e).getChanges();
+				return ((JavaClass) e).getClonedChanges();
 			}
 		}
 		return null;
@@ -199,7 +202,19 @@ public class ContextProvider extends AbstractModel implements
 		Set<String> usedProjects = new HashSet<String>();
 		while (it.hasNext()) {
 			Entry<String, JavaProject> e = it.next();
-			if (!e.getKey().equals(projectName)) {
+			Collection<String> featuresSyncTarget = Util
+					.getConfiguredFeatures(e.getKey());
+			// TODO if fe is feature expression and not a feature, then proof if
+			// features of sync target conform this expression
+			ValidationResult result = VALIDATOR.validateSync(ModuleFactory
+					.getFeatureOperations().getFeatureModel(), fe);
+			if (result == ValidationResult.OK) {
+				System.out.println("OK");
+			}else{
+				System.out.println("Nicht OK");
+			}
+			if (!e.getKey().equals(projectName)
+					&& featuresSyncTarget.contains(fe)) {
 				List<JavaElement> classes = new ArrayList<JavaElement>();
 				JavaProject jp = e.getValue();
 				ContextUtils.iterateElements(jp.getChildren(), classes);
@@ -207,7 +222,7 @@ public class ContextProvider extends AbstractModel implements
 					if (element.getName().equals(className)) {
 						syncTargets
 								.add(jp.getName() + ": " + element.getName());
-						usedProjects.add(element.getName());
+						usedProjects.add(e.getKey());
 					}
 				}
 			}
@@ -216,7 +231,10 @@ public class ContextProvider extends AbstractModel implements
 				.getSupportProjectList();
 		for (IProject p : supportedProjects) {
 			String name = p.getName();
-			if (!usedProjects.contains(name) && !name.equals(projectName)) {
+			Collection<String> featuresSyncTarget = Util
+					.getConfiguredFeatures(name);
+			if (!usedProjects.contains(name) && !name.equals(projectName)
+					&& featuresSyncTarget.contains(fe)) {
 				IResource javaClass = null;
 				try {
 					javaClass = findFileRecursively(p, className);
