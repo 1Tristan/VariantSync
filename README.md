@@ -4,7 +4,7 @@
 VariantSync is an eclipse-plugin to support conventional development of a small number of software variants by introducing feature-orientation. The plugin not only considers single changes on a low code level, but also extends the granularity of changes by adapting features and feature-expressions which are known from the research area of software product-lines. VariantSync implements a strategy to synchronize features of software variants by combining low-level changes and assign them to features or feature-expressions. The goal is to synchronize features and feature-expressions between variants.
 
 ## System Requirements
-* glpk 4.55 (http://sourceforge.net/projects/winglpk/files/winglpk/GLPK-4.55/)
+* glpk 4.55 (in case of using a Windows OS: http://sourceforge.net/projects/winglpk/files/winglpk/GLPK-4.55/)
 * Eclipse IDE with the following plug-ins:
   * Plug-in Development Environment (PDE - version luna recommended)
   * Feature IDE (version 2.7.4 recommended)
@@ -36,5 +36,9 @@ VariantSync is an eclipse-plugin to support conventional development of a small 
 * Color for code-highlighting can only be changed if the active context is stopped.
 * At program start: If a class is opened in the editor after starting VariantSync, then existing annotations and code-highlighting for this class will sometimes disappear. To avoid misbehavior, open any other file in the code editor and navigate back to the first file. Then, annotations and code-highlighting are displayed correctly.
 * After performing a synchronization, code in synchronized file is sometimes not correctly tagged.
-* Change history is saved after closing VariantSync, but changes are actually not loaded after program start.
-* Manual Sync can only be applied for merge conflicts. If an automated merge is possible, manual sync dialog is empty.
+* Synchronization of feature expressions is not yet possible.
+
+## Open Points
+* Retaining existing code tagging of a file after synchronization. Actually, merging corrupts tagging of the merge target file. Only code is tagged that was inserted by the merge.
+* Implementing the product-view to provide a variant-centric synchronization.
+* Computing synchronization targets for feature expressions. (Validating feature expressions for feature configurations)
