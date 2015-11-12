@@ -202,19 +202,8 @@ public class ContextProvider extends AbstractModel implements
 		Set<String> usedProjects = new HashSet<String>();
 		while (it.hasNext()) {
 			Entry<String, JavaProject> e = it.next();
-			Collection<String> featuresSyncTarget = Util
-					.getConfiguredFeatures(e.getKey());
-			// TODO if fe is feature expression and not a feature, then proof if
-			// features of sync target conform this expression
-			ValidationResult result = VALIDATOR.validateSync(ModuleFactory
-					.getFeatureOperations().getFeatureModel(), fe);
-			if (result == ValidationResult.OK) {
-				System.out.println("OK");
-			}else{
-				System.out.println("Nicht OK");
-			}
-			if (!e.getKey().equals(projectName)
-					&& featuresSyncTarget.contains(fe)) {
+			boolean isValidSyncTarget = checkSyncTarget(e.getKey(), fe);
+			if (!e.getKey().equals(projectName) && isValidSyncTarget) {
 				List<JavaElement> classes = new ArrayList<JavaElement>();
 				JavaProject jp = e.getValue();
 				ContextUtils.iterateElements(jp.getChildren(), classes);
@@ -231,10 +220,9 @@ public class ContextProvider extends AbstractModel implements
 				.getSupportProjectList();
 		for (IProject p : supportedProjects) {
 			String name = p.getName();
-			Collection<String> featuresSyncTarget = Util
-					.getConfiguredFeatures(name);
+			boolean isValidSyncTarget = checkSyncTarget(name, fe);
 			if (!usedProjects.contains(name) && !name.equals(projectName)
-					&& featuresSyncTarget.contains(fe)) {
+					&& isValidSyncTarget) {
 				IResource javaClass = null;
 				try {
 					javaClass = findFileRecursively(p, className);
@@ -248,6 +236,54 @@ public class ContextProvider extends AbstractModel implements
 			}
 		}
 		return syncTargets;
+	}
+
+	private boolean checkSyncTarget(String projectName, String fe) {
+
+		// check if feature expression is a feature that exists in target
+		// variant
+		Collection<String> featuresSyncTarget = Util
+				.getConfiguredFeatures(projectName);
+		if (featuresSyncTarget.contains(fe)) {
+			return true;
+		}
+
+		// check syntax and semantic of feature expressions
+		ValidationResult result = VALIDATOR.validateSync(ModuleFactory
+				.getFeatureOperations().getFeatureModel(), fe);
+		if (result != ValidationResult.OK) {
+			return false;
+		}
+
+		// check if feature expression is valid regarding feature configuration
+		// of variant
+		// TODO if fe is feature expression and not a feature, then proof if
+		// features of sync target conform this expression
+		if (fe.contains("and") && !fe.contains("or")) {
+			boolean isValidTarget = true;
+			String[] parts = fe.split("and");
+			for (String part : parts) {
+				part = part.trim();
+				if (!featuresSyncTarget.contains(part)) {
+					isValidTarget = false;
+				}
+			}
+			return isValidTarget;
+		}
+		if (fe.contains("or") && !fe.contains("and")) {
+			boolean isValidTarget = false;
+			String[] parts = fe.split("or");
+			for (String part : parts) {
+				part = part.trim();
+				if (featuresSyncTarget.contains(part)) {
+					isValidTarget = true;
+				}
+			}
+			return isValidTarget;
+		}
+		// TODO implement more possibilities to evaluate feature expressions
+
+		return false;
 	}
 
 	private IFile findFileRecursively(IContainer container, String name)
