@@ -10,7 +10,7 @@ VariantSync is an eclipse-plugin to support conventional development of a small 
   * Feature IDE (version 2.7.4 recommended)
 
 ## Installation
-* Download and extract winglpk in a folder of your choice
+* Download and extract glpk in a folder of your choice. If you do not use the precompiled winglpk, you probably need to compile and install your version of glpk.
 * Import the VariantSync as existing project in an eclipse workspace/ clone VariantSync as git project in an eclipse workspace
 * Run MANIFEST.MF in folder META-INF as eclipse application with the following run configuration:
   * Program arguments:
@@ -37,8 +37,12 @@ VariantSync is an eclipse-plugin to support conventional development of a small 
 * At program start: If a class is opened in the editor after starting VariantSync, then existing annotations and code-highlighting for this class will sometimes disappear. To avoid misbehavior, open any other file in the code editor and navigate back to the first file. Then, annotations and code-highlighting are displayed correctly.
 * After performing a synchronization, code in synchronized file is sometimes not correctly tagged.
 * Synchronization of feature expressions is not yet possible.
+* Automatic synchronization is only possible for java-files.
+* Code tagging only monitors changes inside a file. It does not monitor adding or removing of whole files.
 
 ## Open Points
 * Retaining existing code tagging of a file after synchronization. Actually, merging corrupts tagging of the merge target file. Only code is tagged that was inserted by the merge.
 * Implementing the product-view to provide a variant-centric synchronization.
 * Computing synchronization targets for feature expressions. (Validating feature expressions for feature configurations)
+* Extending automatic synchronization for other programming languages than java. VariantSync is designed to be language-independent, but the syntactic merge is only implemented for java-files.
+* Extending code tagging to monitor adding or removing of whole files. Actually, only changes inside a file are tagged.
