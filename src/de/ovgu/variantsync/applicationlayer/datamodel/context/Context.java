@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import de.ovgu.variantsync.VariantSyncConstants;
@@ -21,10 +22,12 @@ public class Context {
 	private String featureExpression;
 	private Map<String, JavaProject> javaProjects;
 	private CodeHighlighting color;
+	private ChangeLogMap changeLog;
 
 	public Context() {
 		this.javaProjects = new HashMap<String, JavaProject>();
 		this.color = CodeHighlighting.YELLOW;
+		this.changeLog = new ChangeLogMap();
 	}
 
 	public Context(String featureExpression) {
@@ -35,6 +38,7 @@ public class Context {
 		} else {
 			this.color = CodeHighlighting.YELLOW;
 		}
+		this.changeLog = new ChangeLogMap();
 	}
 
 	public void initProject(String projectName, String pathToProject) {
@@ -132,4 +136,27 @@ public class Context {
 		this.javaProjects = javaProjects;
 	}
 
+	public boolean isSynchronized(long key, String target) {
+		return changeLog.contains(key, target);
+	}
+
+	public void addSynchronizedChange(long key, String target) {
+		changeLog.put(key, target);
+	}
+
+	public void removeSynchronizedChange(long key) {
+		changeLog.removeChange(key);
+	}
+
+	public ChangeLogMap getChangeLog() {
+		return changeLog;
+	}
+
+	/**
+	 * @param changeLog
+	 *            the changeLog to set
+	 */
+	public void setChangeLog(ChangeLogMap changeLog) {
+		this.changeLog = changeLog;
+	}
 }

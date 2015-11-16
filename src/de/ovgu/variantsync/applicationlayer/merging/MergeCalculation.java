@@ -64,6 +64,17 @@ class MergeCalculation {
 		}
 	}
 
+	public boolean checkConflict(List<String> fOrigin, List<String> fList1,
+			List<String> fList2) {
+		Patch patchOriginWithOne = deltaOperations.computeDifference(fOrigin,
+				fList1);
+		Patch patchOriginWithTwo = deltaOperations.computeDifference(fOrigin,
+				fList2);
+		List<Delta> deltasO1 = patchOriginWithOne.getDeltas();
+		List<Delta> deltasO2 = patchOriginWithTwo.getDeltas();
+		return checkConflict(deltasO1, deltasO2);
+	}
+
 	/**
 	 * Checks conflicts between two deltas. A conflict is detected if one of the
 	 * following criteria is satisfied:<br>

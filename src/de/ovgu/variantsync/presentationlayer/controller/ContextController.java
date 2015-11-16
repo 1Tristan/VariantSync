@@ -34,6 +34,7 @@ public class ContextController extends AbstractController {
 	private IContextOperations contextOperations = ModuleFactory
 			.getContextOperations();
 	private boolean isPartActivated = false;
+	private boolean featureView = false;
 
 	public String getActiveFeatureContext() {
 		return contextOperations.getActiveFeatureContext();
@@ -78,10 +79,22 @@ public class ContextController extends AbstractController {
 			String className) {
 		return contextOperations.getChanges(fe, projectName, className);
 	}
-
+	
 	public List<String> getSyncTargets(String fe, String projectName,
 			String className) {
 		return contextOperations.getSyncTargets(fe, projectName, className);
+	}
+
+	public List<String> getAutoSyncTargets(String fe, String projectName,
+			String className, List<CodeLine> ancestor, List<CodeLine> left) {
+		return contextOperations.getAutoSyncTargets(fe, projectName, className,
+				ancestor, left);
+	}
+
+	public List<String> getConflictedSyncTargets(String fe, String projectName,
+			String className, List<CodeLine> ancestor, List<CodeLine> left) {
+		return contextOperations.getConflictSyncTargets(fe, projectName,
+				className, ancestor, left);
 	}
 
 	public Collection<String> getClasses(String fe, String projectName) {
@@ -118,6 +131,22 @@ public class ContextController extends AbstractController {
 
 	public void removeTagging(String path) {
 		contextOperations.removeTagging(path);
+	}
+
+	public void setFeatureView(boolean b) {
+		this.featureView = b;
+	}
+
+	public boolean isFeatureView() {
+		return this.featureView;
+	}
+
+	public boolean isAlreadySynchronized(String fe, long key, String target) {
+		return contextOperations.isAlreadySynchronized(fe, key, target);
+	}
+
+	public void addSynchronizedChange(String fe, long key, String target) {
+		contextOperations.addSynchronizedChange(fe, key, target);
 	}
 
 }

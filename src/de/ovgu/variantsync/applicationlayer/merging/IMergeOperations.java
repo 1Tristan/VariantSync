@@ -1,5 +1,6 @@
 package de.ovgu.variantsync.applicationlayer.merging;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
@@ -25,6 +26,9 @@ public interface IMergeOperations {
 	 */
 	boolean checkConflict(List<Delta> deltas12, List<Delta> deltas13);
 
+	boolean checkConflict(ArrayList<String> fAncestor, ArrayList<String> fLeft,
+			ArrayList<String> fRight);
+
 	/**
 	 * Performs three way merge. Joins three development histories together.
 	 * 
@@ -41,4 +45,7 @@ public interface IMergeOperations {
 
 	List<CodeLine> doAutoSync(List<CodeLine> left, List<CodeLine> base,
 			List<CodeLine> right);
+
+	boolean checkConflict(List<String> fOrigin, List<String> fList1,
+			List<String> fList2);
 }

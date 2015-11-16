@@ -89,12 +89,40 @@ class ContextHandler {
 			activeContext.initProject(projectName, pathToProject);
 		}
 		ContextAlgorithm ca = new ContextAlgorithm(activeContext);
-		ca.addCode(projectName, packageName, className, changedCode, wholeClass, false);
+		ca.addCode(projectName, packageName, className, changedCode,
+				wholeClass, false);
 		UpdateAlgorithm ua = new UpdateAlgorithm();
 		ua.updateCode(projectName, packageName, className, changedCode,
 				activeContext.getFeatureExpression());
 		MarkerHandler.getInstance().updateMarker(projectName, packageName,
 				className, activeContext);
+		contextMap.put(activeContext.getFeatureExpression(), activeContext);
+		persistenceOp.saveContext(activeContext,
+				Util.parseStorageLocation(activeContext));
+	}
+
+	public void recordCodeChange(String projectName, String pathToProject,
+			List<String> changedCode, String className, String packageName,
+			List<String> wholeClass, boolean ignoreChange) {
+		if (!activeContext.containsProject(projectName)) {
+			activeContext.initProject(projectName, pathToProject);
+		}
+		ContextAlgorithm ca = new ContextAlgorithm(activeContext);
+		ca.addCode(projectName, packageName, className, changedCode,
+				wholeClass, ignoreChange);
+		UpdateAlgorithm ua = new UpdateAlgorithm();
+		ua.updateCode(projectName, packageName, className, changedCode,
+				activeContext.getFeatureExpression());
+		MarkerHandler.getInstance().updateMarker(projectName, packageName,
+				className, activeContext);
+		contextMap.put(activeContext.getFeatureExpression(), activeContext);
+		persistenceOp.saveContext(activeContext,
+				Util.parseStorageLocation(activeContext));
+	}
+
+	public void recordFileAdded(String projectName, String pathToProject,
+			String className, String packageName, List<String> wholeClass) {
+		// TODO
 	}
 
 	public void addContext(Context c) {
@@ -167,11 +195,13 @@ class ContextHandler {
 				filename, filename, oldCode, patch, 0);
 		Context c = getContext(fe);
 		ContextAlgorithm ca = new ContextAlgorithm(c);
-		ca.addCode(projectName, packageName, filename, tmpUnifiedDiff, oldCode, true);
+		ca.addCode(projectName, packageName, filename, tmpUnifiedDiff, oldCode,
+				true);
 		UpdateAlgorithm ua = new UpdateAlgorithm();
 		ua.updateCode(projectName, packageName, filename, tmpUnifiedDiff,
 				c.getFeatureExpression());
 		MarkerHandler.getInstance().updateMarker(projectName, packageName,
 				filename, c);
 	}
+
 }

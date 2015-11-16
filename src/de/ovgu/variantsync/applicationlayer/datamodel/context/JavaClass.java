@@ -10,6 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
+import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.ContextProvider;
 import de.ovgu.variantsync.applicationlayer.features.mapping.UtilOperations;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
@@ -20,6 +21,7 @@ public class JavaClass extends JavaElement {
 	private List<CodeLine> wholeClass;
 	private List<CodeChange> changes;
 	private CodeChange actualChange;
+	private boolean logChange;
 
 	public JavaClass() {
 		super();
@@ -33,6 +35,7 @@ public class JavaClass extends JavaElement {
 			changes = new LinkedList<CodeChange>();
 		if (wholeClass == null)
 			wholeClass = new ArrayList<CodeLine>();
+		logChange = true;
 	}
 
 	// TODO: für syntaktischen Merge müssen korrekte JavaKlassen gebildet werden
@@ -81,43 +84,15 @@ public class JavaClass extends JavaElement {
 	 */
 
 	public void setBaseVersion() {
-		actualChange = new CodeChange();
-		List<CodeLine> baseVersion = new ArrayList<CodeLine>();
-		for (CodeLine cl : this.codeLines) {
-			baseVersion.add(cl.clone());
-		}
-		List<CodeLine> baseVersionWholeClass = new ArrayList<CodeLine>();
-		this.wholeClass = new ContextProvider().getLinesOfActualFile(getName());
-		if (this.wholeClass != null) {
-			for (CodeLine cl : this.wholeClass) {
-				CodeLine baseLine = cl.clone();
-				baseLine.setMapped(false);
-				baseVersionWholeClass.add(baseLine);
-			}
-		}
-		actualChange.setBaseVersion(baseVersion);
-		actualChange.setBaseVersionWholeClass(baseVersionWholeClass);
-	}
-
-	public void addChange(List<CodeLine> newLines, List<String> list) {
-		List<CodeLine> newVersion = new ArrayList<CodeLine>();
-		for (CodeLine cl : newLines) {
-			newVersion.add(cl.clone());
-		}
-		List<CodeLine> newVersionWholeClass = new ArrayList<CodeLine>();
-		if (this.wholeClass == null || this.wholeClass.isEmpty()) {
-			this.wholeClass = new ContextProvider()
-					.getLinesOfActualFile(getName());
-		}
-		int i = 1;
-		for (String s : list) {
-			CodeLine newLine = new CodeLine(s, i, false, false);
-			newVersionWholeClass.add(newLine);
-			i++;
-		}
-		if (actualChange == null) {
+		if (logChange) {
 			actualChange = new CodeChange();
+			List<CodeLine> baseVersion = new ArrayList<CodeLine>();
+			for (CodeLine cl : this.codeLines) {
+				baseVersion.add(cl.clone());
+			}
 			List<CodeLine> baseVersionWholeClass = new ArrayList<CodeLine>();
+			this.wholeClass = ModuleFactory.getContextOperations()
+					.getLinesOfActualFile(getName());
 			if (this.wholeClass != null) {
 				for (CodeLine cl : this.wholeClass) {
 					CodeLine baseLine = cl.clone();
@@ -125,45 +100,84 @@ public class JavaClass extends JavaElement {
 					baseVersionWholeClass.add(baseLine);
 				}
 			}
+			actualChange.setBaseVersion(baseVersion);
 			actualChange.setBaseVersionWholeClass(baseVersionWholeClass);
 		}
-		actualChange.setNewVersion(newVersion);
-		actualChange.setNewVersionWholeClass(newVersionWholeClass);
-		actualChange.createTimeStamp();
-		changes.add(actualChange);
-		System.out.println(changes.toString());
+	}
+
+	public void addChange(List<CodeLine> newLines, List<String> list) {
+		if (logChange) {
+			List<CodeLine> newVersion = new ArrayList<CodeLine>();
+			for (CodeLine cl : newLines) {
+				newVersion.add(cl.clone());
+			}
+			List<CodeLine> newVersionWholeClass = new ArrayList<CodeLine>();
+			if (this.wholeClass == null || this.wholeClass.isEmpty()) {
+				this.wholeClass = ModuleFactory.getContextOperations()
+						.getLinesOfActualFile(getName());
+			}
+			int i = 1;
+			for (String s : list) {
+				CodeLine newLine = new CodeLine(s, i, false, false);
+				newVersionWholeClass.add(newLine);
+				i++;
+			}
+			if (actualChange == null) {
+				actualChange = new CodeChange();
+				List<CodeLine> baseVersionWholeClass = new ArrayList<CodeLine>();
+				if (this.wholeClass != null) {
+					for (CodeLine cl : this.wholeClass) {
+						CodeLine baseLine = cl.clone();
+						baseLine.setMapped(false);
+						baseVersionWholeClass.add(baseLine);
+					}
+				}
+				actualChange.setBaseVersionWholeClass(baseVersionWholeClass);
+			}
+			actualChange.setNewVersion(newVersion);
+			actualChange.setNewVersionWholeClass(newVersionWholeClass);
+			actualChange.createTimeStamp();
+			changes.add(actualChange);
+			System.out.println(changes.toString());
+		} else {
+			logChange = true;
+		}
 	}
 
 	public void addChange(List<CodeLine> newLines) {
-		List<CodeLine> newVersion = new ArrayList<CodeLine>();
-		for (CodeLine cl : newLines) {
-			newVersion.add(cl.clone());
-		}
-		List<CodeLine> newVersionWholeClass = new ArrayList<CodeLine>();
-		if (this.wholeClass != null) {
-			for (CodeLine cl : this.wholeClass) {
-				CodeLine newLine = cl.clone();
-				newLine.setMapped(false);
-				newVersionWholeClass.add(newLine);
+		if (logChange) {
+			List<CodeLine> newVersion = new ArrayList<CodeLine>();
+			for (CodeLine cl : newLines) {
+				newVersion.add(cl.clone());
 			}
+			List<CodeLine> newVersionWholeClass = new ArrayList<CodeLine>();
+			if (this.wholeClass != null) {
+				for (CodeLine cl : this.wholeClass) {
+					CodeLine newLine = cl.clone();
+					newLine.setMapped(false);
+					newVersionWholeClass.add(newLine);
+				}
+			}
+			if (actualChange == null) {
+				actualChange = new CodeChange();
+			}
+			actualChange.setNewVersion(newVersion);
+			actualChange.setNewVersionWholeClass(newVersionWholeClass);
+			actualChange.createTimeStamp();
+			if (!changes.isEmpty()
+					&& timestampToString(actualChange.getTimestamp()).equals(
+							timestampToString(changes.get(changes.size() - 1)
+									.getTimestamp()))) {
+				List<CodeLine> base = changes.get(changes.size() - 1)
+						.getBaseVersion();
+				changes.set(changes.size() - 1, actualChange);
+				changes.get(changes.size() - 1).setBaseVersion(base);
+			} else
+				changes.add(actualChange);
+			System.out.println(changes.toString());
+		} else {
+			logChange = true;
 		}
-		if (actualChange == null) {
-			actualChange = new CodeChange();
-		}
-		actualChange.setNewVersion(newVersion);
-		actualChange.setNewVersionWholeClass(newVersionWholeClass);
-		actualChange.createTimeStamp();
-		if (!changes.isEmpty()
-				&& timestampToString(actualChange.getTimestamp()).equals(
-						timestampToString(changes.get(changes.size() - 1)
-								.getTimestamp()))) {
-			List<CodeLine> base = changes.get(changes.size() - 1)
-					.getBaseVersion();
-			changes.set(changes.size() - 1, actualChange);
-			changes.get(changes.size() - 1).setBaseVersion(base);
-		} else
-			changes.add(actualChange);
-		System.out.println(changes.toString());
 	}
 
 	private String timestampToString(long timestamp) {
@@ -343,7 +357,7 @@ public class JavaClass extends JavaElement {
 	public void setChanges(List<CodeChange> changes) {
 		this.changes = changes;
 	}
-	
+
 	public List<CodeChange> getClonedChanges() {
 		List<CodeChange> clonedChanges = new ArrayList<CodeChange>();
 		for (CodeChange ch : changes) {
@@ -351,7 +365,6 @@ public class JavaClass extends JavaElement {
 		}
 		return clonedChanges;
 	}
-
 
 	public Object removeChange(int selectedChange) {
 		changes.remove(selectedChange);
@@ -363,5 +376,12 @@ public class JavaClass extends JavaElement {
 		wholeClass.clear();
 		changes.clear();
 		actualChange = new CodeChange();
+	}
+
+	/**
+	 * @param logChange the logChange to set
+	 */
+	public void setLogChange(boolean logChange) {
+		this.logChange = logChange;
 	}
 }

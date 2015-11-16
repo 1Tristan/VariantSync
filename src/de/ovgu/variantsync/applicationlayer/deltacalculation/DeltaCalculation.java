@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.Path;
 
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.Util;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.datamodel.monitoring.MonitorSet;
@@ -92,13 +93,11 @@ class DeltaCalculation {
 			LogOperations.logError("File states could not be retrieved.", e);
 			return;
 		}
+		List<String> currentFilelines = Util.getFileLines(res);
 		List<String> historyFilelines = null;
-		List<String> currentFilelines = null;
 		try {
 			historyFilelines = persistanceOperations.readFile(
 					states[0].getContents(), states[0].getCharset());
-			currentFilelines = persistanceOperations.readFile(
-					currentFile.getContents(), currentFile.getCharset());
 		} catch (CoreException | FileOperationException e) {
 			LogOperations.logError("File states could not be read.", e);
 		}
@@ -113,10 +112,7 @@ class DeltaCalculation {
 				.createUnifiedDifference(filename, filename, historyFilelines,
 						patch, 0);
 
-		String packageName = res.getLocation().toString();
-		packageName = packageName.substring(packageName.indexOf("src") + 4,
-				packageName.lastIndexOf("/"));
-		packageName = packageName.replace("/", ".");
+		String packageName = Util.parsePackageNameFromResource(res);
 		contextOperations.recordCodeChange(tmpUnifiedDiff, res.getProject()
 				.getName(), res.getProject().getLocation().toString(),
 				packageName, ((IFile) res).getName(), currentFilelines);

@@ -35,6 +35,10 @@ public class PartAdapter implements IPartListener {
 						.println("===============================================");
 				MarkerHandler.getInstance().refreshMarker(file);
 				cc.setBaseVersion(file);
+				if (cc.isFeatureView()) {
+					cc.stopContextRecording();
+					cc.setFeatureView(false);
+				}
 			}
 		}
 	}

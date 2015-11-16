@@ -34,6 +34,12 @@ public interface IContextOperations {
 			String pathToProject, String packageName, String className,
 			List<String> wholeClass);
 
+	void recordFileAdded(String projectName, String pathToProject,
+			String packageName, String className, List<String> wholeClass);
+
+	void recordFileRemoved(String projectName, String pathToProject,
+			String packageName, String className, List<String> wholeClass);
+
 	void setContextColor(String featureExpression, CodeHighlighting color);
 
 	void stopRecording();
@@ -59,7 +65,11 @@ public interface IContextOperations {
 
 	Collection<String> getClasses(String fe, String projectName);
 
-	List<String> getSyncTargets(String fe, String projectName, String className);
+	List<String> getAutoSyncTargets(String fe, String projectName,
+			String className, List<CodeLine> ancestor, List<CodeLine> left);
+
+	List<String> getConflictSyncTargets(String fe, String projectName,
+			String className, List<CodeLine> ancestor, List<CodeLine> left);
 
 	Collection<CodeChange> getChanges(String fe, String projectName,
 			String className);
@@ -78,9 +88,6 @@ public interface IContextOperations {
 	File getFile(String selectedFeatureExpression, String projectNameTarget,
 			String classNameTarget);
 
-	void removeChange(String selectedFeatureExpression, String selectedProject,
-			String selectedClass, int selectedChange);
-
 	IResource getResource(String selectedFeatureExpression,
 			String selectedProject, String selectedClass);
 
@@ -88,4 +95,19 @@ public interface IContextOperations {
 			String filename, List<CodeLine> codeWC, List<CodeLine> syncCode);
 
 	void removeTagging(String path);
+
+	void recordCodeChange(String projectName, String pathToProject,
+			List<String> changedCode, String className, String packageName,
+			List<String> wholeClass, boolean ignoreChange);
+
+	void activateContext(String selectedFeatureExpression, boolean ignoreChange);
+
+	boolean isAlreadySynchronized(String fe, long key, String target);
+
+	void addSynchronizedChange(String fe, long key, String target);
+
+	void removeChange(String selectedFeatureExpression, String selectedProject,
+			String selectedClass, int selectedChange, long timestamp);
+
+	List<String> getSyncTargets(String fe, String projectName, String className);
 }

@@ -31,9 +31,9 @@ import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.view.context.ConstraintTextValidator;
+import de.ovgu.variantsync.presentationlayer.view.context.ConstraintTextValidator.ValidationResult;
 import de.ovgu.variantsync.presentationlayer.view.context.FeatureContextSelection;
 import de.ovgu.variantsync.presentationlayer.view.context.MarkerHandler;
-import de.ovgu.variantsync.presentationlayer.view.context.ConstraintTextValidator.ValidationResult;
 
 /**
  * Receives controller invocation as part of MVC implementation and encapsulates
@@ -51,14 +51,31 @@ public class ContextProvider extends AbstractModel implements
 			.getPersistanceOperations();
 	private boolean ignoreCodeChange;
 	private static final ConstraintTextValidator VALIDATOR = new ConstraintTextValidator();
+	private boolean ignoreAfterMerge;
+	private static ContextProvider instance;
 
-	public ContextProvider() {
+	private ContextProvider() {
 		contextHandler = ContextHandler.getInstance();
+	}
+
+	public static ContextProvider getInstance() {
+		if (instance == null) {
+			instance = new ContextProvider();
+		}
+		return instance;
 	}
 
 	@Override
 	public void activateContext(String featureExpression) {
 		contextHandler.activateContext(featureExpression);
+		ignoreAfterMerge = false;
+	}
+
+	@Override
+	public void activateContext(String selectedFeatureExpression,
+			boolean ignoreChange) {
+		contextHandler.activateContext(selectedFeatureExpression);
+		ignoreAfterMerge = ignoreChange;
 	}
 
 	@Override
@@ -75,6 +92,11 @@ public class ContextProvider extends AbstractModel implements
 	public void recordCodeChange(List<String> changedCode, String projectName,
 			String pathToProject, String packageName, String className,
 			List<String> wholeClass) {
+		if (ignoreAfterMerge) {
+			recordCodeChange(projectName, pathToProject, changedCode,
+					className, packageName, wholeClass, true);
+			return;
+		}
 		if (!ignoreCodeChange) {
 			System.out.println("\n=== Changed Code ===");
 			System.out.println(changedCode.toString());
@@ -82,6 +104,29 @@ public class ContextProvider extends AbstractModel implements
 					changedCode, className, packageName, wholeClass);
 		}
 		ignoreCodeChange = false;
+	}
+
+	@Override
+	public void recordCodeChange(String projectName, String pathToProject,
+			List<String> changedCode, String className, String packageName,
+			List<String> wholeClass, boolean ignoreChange) {
+		contextHandler.recordCodeChange(projectName, pathToProject,
+				changedCode, className, packageName, wholeClass, ignoreChange);
+		ignoreChange = false;
+	}
+
+	@Override
+	public void recordFileAdded(String projectName, String pathToProject,
+			String packageName, String className, List<String> wholeClass) {
+		contextHandler.recordFileAdded(projectName, pathToProject, className,
+				packageName, wholeClass);
+	}
+
+	@Override
+	public void recordFileRemoved(String projectName, String pathToProject,
+			String packageName, String className, List<String> wholeClass) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -192,6 +237,82 @@ public class ContextProvider extends AbstractModel implements
 	}
 
 	@Override
+	public boolean isAlreadySynchronized(String fe, long key, String target) {
+		Context c = getContext(fe);
+		return c.isSynchronized(key, target);
+	}
+
+	@Override
+	public void addSynchronizedChange(String fe, long key, String target) {
+		Context c = getContext(fe);
+		c.addSynchronizedChange(key, target);
+	}
+
+	@Override
+	public List<String> getAutoSyncTargets(String fe, String projectName,
+			String className, List<CodeLine> ancestor, List<CodeLine> left) {
+		List<String> possbileSyncTargets = getSyncTargets(fe, projectName,
+				className);
+		List<String> conflictFreeSyncTargets = new ArrayList<String>();
+		for (String target : possbileSyncTargets) {
+			String[] targetInfo = target.split(":");
+			String targetProject = targetInfo[0].trim();
+			String targetClass = targetInfo[1].trim();
+			List<String> right = getCodeLines(targetProject, targetClass);
+			if (!ModuleFactory.getMergeOperations().checkConflict(
+					Util.parseCodeLinesToString(ancestor),
+					Util.parseCodeLinesToString(left), right)) {
+				conflictFreeSyncTargets.add(target);
+			}
+		}
+		return conflictFreeSyncTargets;
+	}
+
+	@Override
+	public List<String> getConflictSyncTargets(String fe, String projectName,
+			String className, List<CodeLine> ancestor, List<CodeLine> left) {
+		List<String> possbileSyncTargets = getSyncTargets(fe, projectName,
+				className);
+		List<String> conflictedSyncTargets = new ArrayList<String>();
+		for (String target : possbileSyncTargets) {
+			String[] targetInfo = target.split(":");
+			String targetProject = targetInfo[0].trim();
+			String targetClass = targetInfo[1].trim();
+			List<String> right = getCodeLines(targetProject, targetClass);
+			if (ModuleFactory.getMergeOperations().checkConflict(
+					Util.parseCodeLinesToString(ancestor),
+					Util.parseCodeLinesToString(left), right)) {
+				conflictedSyncTargets.add(target);
+			}
+		}
+		return conflictedSyncTargets;
+	}
+
+	private List<String> getCodeLines(String projectName, String className) {
+		java.util.List<IProject> supportedProjects = VariantSyncPlugin
+				.getDefault().getSupportProjectList();
+		IResource javaClass = null;
+		for (IProject p : supportedProjects) {
+			String name = p.getName();
+			if (name.equals(projectName)) {
+				try {
+					javaClass = findFileRecursively(p, className);
+					break;
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		List<String> linesOfCode = null;
+		try {
+			linesOfCode = persistanceOperations.readFile(((IFile) javaClass)
+					.getContents());
+		} catch (FileOperationException | CoreException e) {
+			e.printStackTrace();
+		}
+		return linesOfCode;
+	}
+
 	public List<String> getSyncTargets(String fe, String projectName,
 			String className) {
 		List<String> syncTargets = new ArrayList<String>();
@@ -411,7 +532,7 @@ public class ContextProvider extends AbstractModel implements
 
 	@Override
 	public void removeChange(String selectedFeatureExpression,
-			String selectedProject, String selectedClass, int selectedChange) {
+			String selectedProject, String selectedClass, int selectedChange, long timestamp) {
 		Context c = ContextHandler.getInstance().getContext(
 				selectedFeatureExpression);
 		JavaProject jp = c.getJavaProjects().get(selectedProject);
@@ -423,6 +544,7 @@ public class ContextProvider extends AbstractModel implements
 				break;
 			}
 		}
+		c.removeSynchronizedChange(timestamp);
 		persistanceOperations.saveContext(c, Util.parseStorageLocation(c));
 	}
 
@@ -470,26 +592,48 @@ public class ContextProvider extends AbstractModel implements
 			String filename, List<CodeLine> codeWC, List<CodeLine> syncCode) {
 
 		// format code for later diff
-		codeWC = ModuleFactory.getMergeOperations().doAutoSync(codeWC, codeWC,
-				codeWC);
-		IResource res = findResource(projectName, filename);
-		String packageName = res.getLocation().toString();
-		packageName = packageName.substring(packageName.indexOf("src") + 4,
-				packageName.lastIndexOf("/"));
-		packageName = packageName.replace("/", ".");
-		List<String> oldCode = new ArrayList<String>();
-		for (CodeLine cl : codeWC) {
-			oldCode.add(cl.getCode());
-		}
-
-		List<String> newCode = new ArrayList<String>();
-		for (CodeLine cl : syncCode) {
-			newCode.add(cl.getCode());
-		}
-		contextHandler.refreshContext(fe, projectName, packageName, filename,
-				oldCode, newCode);
-		ignoreCodeChange = true;
+		/*
+		 * codeWC = ModuleFactory.getMergeOperations().doAutoSync(codeWC,
+		 * codeWC, codeWC); IResource res = findResource(projectName, filename);
+		 * String packageName = res.getLocation().toString(); packageName =
+		 * packageName.substring(packageName.indexOf("src") + 4,
+		 * packageName.lastIndexOf("/")); packageName = packageName.replace("/",
+		 * "."); List<String> oldCode = new ArrayList<String>(); for (CodeLine
+		 * cl : codeWC) { oldCode.add(cl.getCode()); }
+		 * 
+		 * List<String> newCode = new ArrayList<String>(); for (CodeLine cl :
+		 * syncCode) { newCode.add(cl.getCode()); }
+		 * contextHandler.refreshContext(fe, projectName, packageName, filename,
+		 * oldCode, newCode);
+		 */
+//		ignoreCodeChange = true;
 	}
+
+	// public void compare(String source1, String source2) throws IOException,
+	// InterruptedException {
+	//
+	// Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("java",
+	// new ResourceFactoryImpl());
+	//
+	// XSDEcoreBuilder builder = new XSDEcoreBuilder();
+	//
+	// Collection<EObject> model1 =
+	// builder.generate(URI.createFileURI("Test1.java"));
+	// Collection<EObject> model2 =
+	// builder.generate(URI.createFileURI("Test2.java"));
+	//
+	// final MatchModel match = MatchService.doMatch(model1.iterator().next(),
+	// model2.iterator().next(), Collections.<String, Object> emptyMap());
+	// final DiffModel diff = DiffService.doDiff(match, false);
+	//
+	// final List<DiffElement> differences = new
+	// ArrayList<DiffElement>(diff.getOwnedElements());
+	//
+	// System.out.println("MatchModel :\n");
+	// System.out.println(ModelUtils.serialize(match));
+	// System.out.println("DiffModel :\n");
+	// System.out.println(ModelUtils.serialize(diff));
+	// }
 
 	@Override
 	public void removeTagging(String path) {

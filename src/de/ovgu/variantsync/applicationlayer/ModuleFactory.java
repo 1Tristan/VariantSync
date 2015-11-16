@@ -39,7 +39,7 @@ public class ModuleFactory {
 	}
 
 	public static IContextOperations getContextOperations() {
-		return new ContextProvider();
+		return ContextProvider.getInstance();
 	}
 
 	public static IMergeOperations getMergeOperations() {

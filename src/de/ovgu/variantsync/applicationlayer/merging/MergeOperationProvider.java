@@ -30,6 +30,12 @@ public class MergeOperationProvider extends AbstractModel implements
 	}
 
 	@Override
+	public boolean checkConflict(ArrayList<String> fAncestor,
+			ArrayList<String> fLeft, ArrayList<String> fRight) {
+		return mergeCalculation.checkConflict(fAncestor, fLeft, fRight);
+	}
+
+	@Override
 	public List<String> performThreeWayMerge(List<String> fOrigin,
 			List<String> fList1, List<String> fList2) {
 		return mergeCalculation.performThreeWayMerge(fOrigin, fList1, fList2);
@@ -49,13 +55,20 @@ public class MergeOperationProvider extends AbstractModel implements
 		List<String> targetCode = new ArrayList<String>();
 		for (CodeLine cl : right) {
 			targetCode.add(cl.getCode());
-		}		List<CodeLine> syncResult = new ArrayList<CodeLine>();
+		}
+		List<CodeLine> syncResult = new ArrayList<CodeLine>();
 		List<String> result = JDimeWrapper.merge(quell, baseCode, targetCode);
 		int i = 1;
-		for(String s : result){
+		for (String s : result) {
 			syncResult.add(new CodeLine(s, i));
 			i++;
 		}
 		return syncResult;
+	}
+
+	@Override
+	public boolean checkConflict(List<String> fOrigin, List<String> fList1,
+			List<String> fList2) {
+		return mergeCalculation.checkConflict(fOrigin, fList1, fList2);
 	}
 }

@@ -1,19 +1,26 @@
 package de.ovgu.variantsync.applicationlayer;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
+import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
+import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
  * 
@@ -86,5 +93,34 @@ public class Util {
 		}
 		return new HashSet<String>() {
 		};
+	}
+
+	public static List<String> getFileLines(IResource res) {
+		List<String> currentFilelines = null;
+		IFile currentFile = (IFile) res;
+		try {
+			currentFilelines = ModuleFactory.getPersistanceOperations()
+					.readFile(currentFile.getContents(),
+							currentFile.getCharset());
+		} catch (CoreException | FileOperationException e) {
+			LogOperations.logError("File states could not be read.", e);
+		}
+		return currentFilelines;
+	}
+
+	public static String parsePackageNameFromResource(IResource res) {
+		String packageName = res.getLocation().toString();
+		packageName = packageName.substring(packageName.indexOf("src") + 4,
+				packageName.lastIndexOf("/"));
+		packageName = packageName.replace("/", ".");
+		return packageName;
+	}
+
+	public static List<String> parseCodeLinesToString(List<CodeLine> codelines) {
+		List<String> list = new ArrayList<String>();
+		for (CodeLine cl : codelines) {
+			list.add(cl.getCode());
+		}
+		return list;
 	}
 }

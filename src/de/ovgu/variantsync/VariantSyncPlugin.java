@@ -202,7 +202,7 @@ public class VariantSyncPlugin extends AbstractUIPlugin {
 		controller
 				.addModel(new DeltaOperationProvider(), ControllerTypes.DELTA);
 		controller.addModel(new FeatureProvider(), ControllerTypes.FEATURE);
-		controller.addModel(new ContextProvider(), ControllerTypes.CONTEXT);
+		controller.addModel(ContextProvider.getInstance(), ControllerTypes.CONTEXT);
 		controller.addModel(MonitorNotifier.getInstance(),
 				ControllerTypes.MONITOR);
 	}

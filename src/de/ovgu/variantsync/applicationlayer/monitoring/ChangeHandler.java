@@ -19,6 +19,8 @@ import org.eclipse.ui.PlatformUI;
 import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
+import de.ovgu.variantsync.applicationlayer.Util;
+import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.deltacalculation.IDeltaOperations;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
@@ -104,6 +106,16 @@ class ChangeHandler implements IResourceDeltaVisitor {
 			int flag) {
 		if ((flag & IResourceDelta.MARKERS) == 0
 				|| (flag & IResourceDelta.MOVED_FROM) != 0) {
+			IContextOperations contextOperations = ModuleFactory
+					.getContextOperations();
+			contextOperations.recordFileAdded(res.getProject().getName(), res
+					.getProject().getLocation().toString(),
+					Util.parsePackageNameFromResource(res),
+					((IFile) res).getName(), Util.getFileLines(res));
+			if (contextOperations.getActiveFeatureContext() != null
+					&& !contextOperations.getActiveFeatureContext().equals(
+							VariantSyncConstants.DEFAULT_CONTEXT))
+				contextOperations.setBaseVersion((IFile) res);
 			try {
 				persistanceOperations.addAdminResource(res);
 			} catch (FileOperationException e) {
@@ -129,6 +141,16 @@ class ChangeHandler implements IResourceDeltaVisitor {
 		VariantSyncPlugin.getDefault().logMessage(
 				RESOURCE + res.getFullPath() + " was removed "
 						+ getFlagTxt(delta.getFlags()));
+		IContextOperations contextOperations = ModuleFactory
+				.getContextOperations();
+		contextOperations.recordFileRemoved(res.getProject().getName(), res
+				.getProject().getLocation().toString(),
+				Util.parsePackageNameFromResource(res),
+				((IFile) res).getName(), Util.getFileLines(res));
+		if (contextOperations.getActiveFeatureContext() != null
+				&& !contextOperations.getActiveFeatureContext().equals(
+						VariantSyncConstants.DEFAULT_CONTEXT))
+			contextOperations.setBaseVersion((IFile) res);
 		try {
 			persistanceOperations.removeAdminFile(res);
 		} catch (FileOperationException e) {

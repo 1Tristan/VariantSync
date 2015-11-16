@@ -1,5 +1,6 @@
 package de.ovgu.variantsync.presentationlayer.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
@@ -36,7 +37,39 @@ public class SynchronizationController extends AbstractController {
 
 	public List<CodeLine> doAutoSync(List<CodeLine> left, List<CodeLine> base,
 			List<CodeLine> right) {
-		return mergeOperations.doAutoSync(left, base, right);
+		// return mergeOperations.doAutoSync(left, base, right);
+//		if (!mergeOperations.checkConflict(parseCodeLinesToString(base),
+//				parseCodeLinesToString(left), parseCodeLinesToString(right))) {
+			List<String> mergeResult = mergeOperations.performThreeWayMerge(
+					parseCodeLinesToString(base), parseCodeLinesToString(left),
+					parseCodeLinesToString(right));
+			return parseStringsToCodeLines(mergeResult);
+//		} else {
+//			return new ArrayList<CodeLine>();
+//		}
 	}
 
+	public boolean checkSyncConflict(List<CodeLine> ancestor,
+			List<CodeLine> left, List<CodeLine> right) {
+		return mergeOperations.checkConflict(parseCodeLinesToString(ancestor),
+				parseCodeLinesToString(left), parseCodeLinesToString(right));
+	}
+
+	private List<String> parseCodeLinesToString(List<CodeLine> codelines) {
+		List<String> list = new ArrayList<String>();
+		for (CodeLine cl : codelines) {
+			list.add(cl.getCode());
+		}
+		return list;
+	}
+
+	private List<CodeLine> parseStringsToCodeLines(List<String> strings) {
+		List<CodeLine> list = new ArrayList<CodeLine>();
+		int i = 0;
+		for (String s : strings) {
+			list.add(new CodeLine(s, i));
+			i++;
+		}
+		return list;
+	}
 }
