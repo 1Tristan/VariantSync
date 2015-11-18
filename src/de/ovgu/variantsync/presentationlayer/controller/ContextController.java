@@ -149,4 +149,8 @@ public class ContextController extends AbstractController {
 		contextOperations.addSynchronizedChange(fe, key, target);
 	}
 
+	public List<String> getFeatures(String variant) {
+		return contextOperations.getFeatures(variant);
+	}
+
 }

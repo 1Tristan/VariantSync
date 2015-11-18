@@ -657,8 +657,8 @@ public class FeatureView extends ViewPart {
 					// manueller Anteil
 					java.util.List<String> manualSyncTargetsAsList = cc
 							.getConflictedSyncTargets(
-									selectedFeatureExpression, selectedProject,
-									selectedClass, baseCode,
+									selectedFeatureExpression, s,
+									c, baseCode,
 									newVersionWholeClass);
 					String[] manualItems = manualSyncTargetsAsList
 							.toArray(new String[] {});

@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.IPath;
 
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.featureide.fm.core.FeatureModel;
+import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
 import de.ovgu.variantsync.applicationlayer.features.IFeatureOperations;
@@ -98,5 +99,14 @@ public class FeatureController extends AbstractController {
 
 	public FeatureExpressions getFeatureExpressions() {
 		return featureOperations.getFeatureExpressions();
+	}
+
+	public List<String> getVariants() {
+		List<String> variants = new ArrayList<String>();
+		List<IProject> projects = VariantSyncPlugin.getDefault().getSupportProjectList();
+		for(IProject p: projects) {
+			variants.add(p.getName());
+		}
+		return variants;
 	}
 }

@@ -246,17 +246,11 @@ class FeatureHandler {
 		IProject featureInfoProject = null;
 		for (IProject p : ResourcesPlugin.getWorkspace().getRoot()
 				.getProjects()) {
-			try {
-				if (p.isOpen()
-						&& p.getName().equals(
-								FeatureConstants.FEATUREINFO_PROJECT_NAME)
-						&& p.hasNature(FeatureConstants.FEATURE_PROJECT_NATURE)) {
-					featureInfoProject = p;
-					break;
-				}
-			} catch (CoreException e) {
-				throw new FeatureException("Nature support of project "
-						+ p.getName() + " could not be checked.", e);
+			if (p.isOpen()
+					&& p.getName().equals(
+							FeatureConstants.FEATUREINFO_PROJECT_NAME)) {
+				featureInfoProject = p;
+				break;
 			}
 		}
 		return featureInfoProject;

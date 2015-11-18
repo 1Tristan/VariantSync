@@ -13,7 +13,6 @@ final class FeatureConstants {
 	public static final String FEATUREINFO_PROJECT_NAME = "variantsyncFeatureInfo";
 	public static final String CONFIG_FILE_EXTENSION = "config";
 	public static final String CONFIGS_PATH = "configs";
-	public static final String FEATURE_PROJECT_NATURE = "de.ovgu.featureide.core.featureProjectNature";
 	public static final String MODEL_FILE = "model.xml";
 
 	private FeatureConstants() {

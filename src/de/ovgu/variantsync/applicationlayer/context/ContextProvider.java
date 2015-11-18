@@ -660,4 +660,19 @@ public class ContextProvider extends AbstractModel implements
 		}
 	}
 
+	@Override
+	public List<String> getFeatures(String variant) {
+		List<String> features = new ArrayList<String>();
+		Collection<Context> contexts = contextHandler.getAllContexts();
+		Iterator<Context> itC = contexts.iterator();
+		while(itC.hasNext()) {
+			Context c = itC.next();
+			JavaProject jp = c.getJavaProject(variant);
+			if(jp != null){
+				features.add(c.getFeatureExpression());
+			}
+		}
+		return features;
+	}
+
 }

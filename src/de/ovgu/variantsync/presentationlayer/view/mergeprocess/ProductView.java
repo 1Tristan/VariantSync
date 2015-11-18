@@ -50,7 +50,6 @@ import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.merging.ResourceCompareInput;
-import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.ContextController;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
 import de.ovgu.variantsync.presentationlayer.controller.FeatureController;
@@ -71,8 +70,6 @@ public class ProductView extends ViewPart {
 			.getSynchronizationController();
 	private FeatureController fc = ControllerHandler.getInstance()
 			.getFeatureController();
-	private IPersistanceOperations persistanceOperations = ModuleFactory
-			.getPersistanceOperations();
 	private IContextOperations contextOperations = ModuleFactory
 			.getContextOperations();
 
@@ -85,7 +82,6 @@ public class ProductView extends ViewPart {
 	private String selectedClass;
 	private int selectedChange;
 	private Collection<CodeChange> collChanges;
-	private String featureExpressions[];
 	private String variants[];
 	private java.util.List<CodeLine> baseCode;
 	private java.util.List<CodeLine> syncCode;
@@ -93,9 +89,6 @@ public class ProductView extends ViewPart {
 	private String classNameTarget;
 	private Button btnSynchronize;
 	private Button btnManualSync;
-	private String leftClass;
-	private String rightClass;
-	private ProductView reference;
 	private Button btnRemoveChangeEntry;
 	private java.util.List<CodeLine> codeWC;
 	private CCombo combo;
@@ -108,13 +101,6 @@ public class ProductView extends ViewPart {
 	private String manualSelection;
 	private long timestamp;
 	private java.util.List<CodeLine> newVersionWholeClass;
-	private Label lblSyncSelectedVariants;
-	private List list_batchVariants;
-	private Label lblSyncSelectedFeatures;
-	private List list_batchFeatures;
-	private Button btnStartBatchVariants;
-	private Button btnStartFeatureSync;
-	private String[] variantBatchSelection;
 
 	public ProductView() {
 	}
@@ -123,8 +109,7 @@ public class ProductView extends ViewPart {
 	}
 
 	public void setFocus() {
-		variants = fc.getFeatureExpressions().getFeatureExpressions()
-				.toArray(new String[] {});
+		variants = fc.getVariants().toArray(new String[] {});
 		combo.setItems(variants);
 		if (selectedVariant != null) {
 			contextOperations.activateContext(selectedVariant, true);
@@ -134,7 +119,6 @@ public class ProductView extends ViewPart {
 
 	@Override
 	public void createPartControl(final Composite arg0) {
-		reference = this;
 		variants = fc.getFeatureExpressions().getFeatureExpressions()
 				.toArray(new String[] {});
 		arg0.setLayout(new GridLayout(6, false));
@@ -150,8 +134,7 @@ public class ProductView extends ViewPart {
 		Listener listener = new Listener() {
 			@Override
 			public void handleEvent(Event e) {
-				variants = fc.getFeatureExpressions()
-						.getFeatureExpressions().toArray(new String[] {});
+				variants = fc.getVariants().toArray(new String[] {});
 				combo.setItems(variants);
 			}
 		};
@@ -169,13 +152,8 @@ public class ProductView extends ViewPart {
 				if (newCode != null)
 					newCode.removeAll();
 				selectedVariant = combo.getText();
-				features.setItems(cc.getProjects(combo.getText()).toArray(
+				features.setItems(cc.getFeatures(combo.getText()).toArray(
 						new String[] {}));
-				list_batchVariants.setItems(cc.getProjects(combo.getText())
-						.toArray(new String[] {}));
-				contextOperations.activateContext(selectedVariant,
-						true);
-				cc.setFeatureView(true);
 			}
 		});
 		new Label(arg0, SWT.NONE);
@@ -224,8 +202,11 @@ public class ProductView extends ViewPart {
 				if (newCode != null)
 					newCode.removeAll();
 				selectedFeature = features.getSelection()[0];
-				classes.setItems(cc.getClasses(selectedVariant,
-						selectedFeature).toArray(new String[] {}));
+				classes.setItems(cc
+						.getClasses(selectedFeature, selectedVariant).toArray(
+								new String[] {}));
+				contextOperations.activateContext(selectedFeature, true);
+				cc.setFeatureView(true);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
@@ -249,7 +230,7 @@ public class ProductView extends ViewPart {
 				MenuItem newItem = new MenuItem(menu, SWT.NONE);
 				newItem.setText("Start Batch Synchronization");
 				newItem.addListener(SWT.Selection, new Listener() {
-					public void handleEvent(Event e) {
+					public void handleEvent(Event e) {// TODO
 						startBatchSync(variants.toArray(new String[] {}));
 					}
 				});
@@ -272,7 +253,6 @@ public class ProductView extends ViewPart {
 				if (newCode != null)
 					newCode.removeAll();
 				selectedClass = classes.getSelection()[0];
-				leftClass = selectedFeature + " - " + selectedClass;
 				setChanges();
 			}
 
@@ -296,8 +276,7 @@ public class ProductView extends ViewPart {
 				Iterator<CodeChange> it = collChanges.iterator();
 				int i = 0;
 				newCode.removeAll();
-				CodeHighlighting ccolor = cc
-						.getContextColor(selectedVariant);
+				CodeHighlighting ccolor = cc.getContextColor(selectedFeature);
 				while (it.hasNext()) {
 					CodeChange ch = it.next();
 					if (i == selectedChange) {
@@ -366,11 +345,9 @@ public class ProductView extends ViewPart {
 				String[] tmp = autoSelection.split(":");
 				projectNameTarget = tmp[0].trim();
 				classNameTarget = tmp[1].trim();
-				rightClass = projectNameTarget + " - " + classNameTarget;
 				java.util.List<CodeLine> code = cc.getTargetCode(
-						selectedVariant, projectNameTarget,
-						classNameTarget);
-				codeWC = cc.getTargetCodeWholeClass(selectedVariant,
+						selectedFeature, projectNameTarget, classNameTarget);
+				codeWC = cc.getTargetCodeWholeClass(selectedFeature,
 						projectNameTarget, classNameTarget);
 				for (CodeLine clWC : codeWC) {
 					for (CodeLine cl : code) {
@@ -379,8 +356,6 @@ public class ProductView extends ViewPart {
 						}
 					}
 				}
-				CodeHighlighting ccolor = cc
-						.getContextColor(selectedVariant);
 				syncCode = sc.doAutoSync(getNewCode(), baseCode, codeWC);
 				if (syncCode != null && !syncCode.isEmpty()) {
 					btnSynchronize.setEnabled(true);
@@ -432,8 +407,8 @@ public class ProductView extends ViewPart {
 			public void handleEvent(Event e) {
 				switch (e.type) {
 				case SWT.Selection: {
-					contextOperations.removeChange(selectedVariant,
-							selectedFeature, selectedClass, selectedChange,
+					contextOperations.removeChange(selectedFeature,
+							selectedVariant, selectedClass, selectedChange,
 							timestamp);
 					btnRemoveChangeEntry.setEnabled(false);
 					setChanges();
@@ -454,8 +429,8 @@ public class ProductView extends ViewPart {
 			public void handleEvent(Event e) {
 				switch (e.type) {
 				case SWT.Selection: {
-					solveChange(syncCode, selectedVariant,
-							projectNameTarget, classNameTarget, true);
+					solveChange(syncCode, selectedFeature, projectNameTarget,
+							classNameTarget, true);
 					// setChanges();
 					btnSynchronize.setEnabled(false);
 					if (newCode != null)
@@ -468,8 +443,8 @@ public class ProductView extends ViewPart {
 					// projectNameTarget, classNameTarget, codeWC,
 					// syncCode);
 
-					cc.addSynchronizedChange(selectedVariant,
-							timestamp, autoSelection);
+					cc.addSynchronizedChange(selectedFeature, timestamp,
+							autoSelection);
 					setChanges();
 					break;
 				}
@@ -493,13 +468,13 @@ public class ProductView extends ViewPart {
 					btnManualSync.setEnabled(false);
 					try {
 						syncWithEclipse(baseCode, getNewCode(),
-								selectedFeature, selectedClass,
+								selectedVariant, selectedClass,
 								projectNameTarget, classNameTarget);
 					} catch (FileOperationException | CoreException ex) {
 						ex.printStackTrace();
 					}
-					cc.addSynchronizedChange(selectedVariant,
-							timestamp, manualSelection);
+					cc.addSynchronizedChange(selectedFeature, timestamp,
+							manualSelection);
 					refreshSyncTargets();
 					setChanges();
 					break;
@@ -524,13 +499,13 @@ public class ProductView extends ViewPart {
 		new Label(arg0, SWT.NONE);
 	}
 
-	private void startBatchSync(String[] variantBatchSelection) {
-		for (String s : variantBatchSelection) {
-			String[] classes = cc.getClasses(selectedVariant, s)
-					.toArray(new String[] {});
+	private void startBatchSync(String[] featureBatchSelection) {
+		for (String s : featureBatchSelection) {
+			String[] classes = cc.getClasses(s, selectedFeature).toArray(
+					new String[] {});
 			for (String c : classes) {
-				Collection<CodeChange> collChanges = cc.getChanges(
-						selectedVariant, s, c);
+				Collection<CodeChange> collChanges = cc.getChanges(s,
+						selectedFeature, c);
 				Iterator<CodeChange> it = collChanges.iterator();
 				while (it.hasNext()) {
 					CodeChange ch = it.next();
@@ -555,9 +530,9 @@ public class ProductView extends ViewPart {
 							}
 						}
 					}
-					String[] autoItems = cc.getAutoSyncTargets(
-							selectedVariant, s, c, baseCode,
-							newVersionWholeClass).toArray(new String[] {});
+					String[] autoItems = cc.getAutoSyncTargets(s,
+							selectedVariant, c, baseCode, newVersionWholeClass)
+							.toArray(new String[] {});
 					java.util.List<String> checkedItems = new ArrayList<String>();
 					for (String target : autoItems) {
 						if (!contextOperations.isAlreadySynchronized(
@@ -570,12 +545,10 @@ public class ProductView extends ViewPart {
 						String targetProject = t[0].trim();
 						String targetClass = t[1].trim();
 						java.util.List<CodeLine> code = cc.getTargetCode(
-								selectedVariant, targetProject,
-								targetClass);
+								selectedVariant, targetProject, targetClass);
 						java.util.List<CodeLine> codeWC = cc
-								.getTargetCodeWholeClass(
-										selectedVariant,
-										targetProject, targetClass);
+								.getTargetCodeWholeClass(s, targetProject,
+										targetClass);
 						for (CodeLine clWC : codeWC) {
 							for (CodeLine cl : code) {
 								if (cl.getLine() == clWC.getLine()) {
@@ -585,24 +558,21 @@ public class ProductView extends ViewPart {
 						}
 						java.util.List<CodeLine> syncCode = sc.doAutoSync(
 								ch.getNewVersionWholeClass(), baseCode, codeWC);
-						solveChange(syncCode, selectedVariant,
-								targetProject, targetClass, false);
-						cc.addSynchronizedChange(selectedVariant,
-								timestamp, target);
+						solveChange(syncCode, s, targetProject, targetClass,
+								false);
+						cc.addSynchronizedChange(s, timestamp, target);
 					}
 
 					// manueller Anteil
 					java.util.List<String> manualSyncTargetsAsList = cc
-							.getConflictedSyncTargets(
-									selectedVariant, selectedFeature,
-									selectedClass, baseCode,
-									newVersionWholeClass);
+							.getConflictedSyncTargets(s, selectedVariant, c,
+									baseCode, newVersionWholeClass);
 					String[] manualItems = manualSyncTargetsAsList
 							.toArray(new String[] {});
 					checkedItems = new ArrayList<String>();
 					for (String target : manualItems) {
-						if (!contextOperations.isAlreadySynchronized(
-								selectedVariant, timestamp, target)) {
+						if (!contextOperations.isAlreadySynchronized(s,
+								timestamp, target)) {
 							checkedItems.add(target);
 						}
 					}
@@ -616,8 +586,8 @@ public class ProductView extends ViewPart {
 						} catch (FileOperationException | CoreException e1) {
 							e1.printStackTrace();
 						}
-						cc.addSynchronizedChange(selectedVariant,
-								timestamp, manualSelection);
+						cc.addSynchronizedChange(selectedVariant, timestamp,
+								manualSelection);
 						// refreshSyncTargets();
 						// setChanges();
 					}
@@ -795,13 +765,13 @@ public class ProductView extends ViewPart {
 
 	private void refreshSyncTargets() {
 		boolean isAutoSyncPossible = false;
-		String[] autoItems = cc.getAutoSyncTargets(selectedVariant,
-				selectedFeature, selectedClass, baseCode, newVersionWholeClass)
+		String[] autoItems = cc.getAutoSyncTargets(selectedFeature,
+				selectedVariant, selectedClass, baseCode, newVersionWholeClass)
 				.toArray(new String[] {});
 		java.util.List<String> checkedItems = new ArrayList<String>();
 		for (String target : autoItems) {
-			if (!contextOperations.isAlreadySynchronized(
-					selectedVariant, timestamp, target)) {
+			if (!contextOperations.isAlreadySynchronized(selectedVariant,
+					timestamp, target)) {
 				checkedItems.add(target);
 			}
 		}
@@ -810,14 +780,13 @@ public class ProductView extends ViewPart {
 			isAutoSyncPossible = true;
 
 		boolean isManualSyncPossible = false;
-		manualSyncTargetsAsList = cc.getConflictedSyncTargets(
-				selectedVariant, selectedFeature, selectedClass,
-				baseCode, newVersionWholeClass);
+		manualSyncTargetsAsList = cc.getConflictedSyncTargets(selectedFeature,
+				selectedVariant, selectedClass, baseCode, newVersionWholeClass);
 		String[] manualItems = manualSyncTargetsAsList.toArray(new String[] {});
 		checkedItems = new ArrayList<String>();
 		for (String target : manualItems) {
-			if (!contextOperations.isAlreadySynchronized(
-					selectedVariant, timestamp, target)) {
+			if (!contextOperations.isAlreadySynchronized(selectedVariant,
+					timestamp, target)) {
 				checkedItems.add(target);
 			}
 		}
@@ -827,13 +796,13 @@ public class ProductView extends ViewPart {
 			isManualSyncPossible = true;
 
 		if (!isAutoSyncPossible && !isManualSyncPossible) {
-			contextOperations.removeChange(selectedVariant,
-					selectedFeature, selectedClass, selectedChange, timestamp);
+			contextOperations.removeChange(selectedFeature, selectedVariant,
+					selectedClass, selectedChange, timestamp);
 		}
 	}
 
 	public void setChanges() {
-		collChanges = cc.getChanges(selectedVariant, selectedFeature,
+		collChanges = cc.getChanges(selectedFeature, selectedVariant,
 				selectedClass);
 		java.util.List<String> timestamps = new ArrayList<String>();
 		SimpleDateFormat formatter = new SimpleDateFormat(

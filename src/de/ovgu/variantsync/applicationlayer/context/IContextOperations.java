@@ -110,4 +110,6 @@ public interface IContextOperations {
 			String selectedClass, int selectedChange, long timestamp);
 
 	List<String> getSyncTargets(String fe, String projectName, String className);
+
+	List<String> getFeatures(String variant);
 }
