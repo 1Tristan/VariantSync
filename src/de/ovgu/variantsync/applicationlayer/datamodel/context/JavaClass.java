@@ -10,8 +10,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 
+import org.eclipse.core.resources.IResource;
+
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
-import de.ovgu.variantsync.applicationlayer.context.ContextProvider;
+import de.ovgu.variantsync.applicationlayer.context.ContextUtils;
 import de.ovgu.variantsync.applicationlayer.features.mapping.UtilOperations;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 
@@ -144,7 +146,8 @@ public class JavaClass extends JavaElement {
 		}
 	}
 
-	public void addChange(List<CodeLine> newLines) {
+	public void addChange(List<CodeLine> newLines, String projectName,
+			String className) {
 		if (logChange) {
 			List<CodeLine> newVersion = new ArrayList<CodeLine>();
 			for (CodeLine cl : newLines) {
@@ -160,6 +163,17 @@ public class JavaClass extends JavaElement {
 			}
 			if (actualChange == null) {
 				actualChange = new CodeChange();
+				IResource res = ContextUtils.findResource(projectName,
+						className);
+				List<String> his = ModuleFactory.getPersistanceOperations()
+						.getHistoryFileLines(res);
+				List<CodeLine> base = new ArrayList<CodeLine>();
+				int i = 0;
+				for (String line : his) {
+					base.add(new CodeLine(line, i));
+					i++;
+				}
+				actualChange.setBaseVersionWholeClass(base);
 			}
 			actualChange.setNewVersion(newVersion);
 			actualChange.setNewVersionWholeClass(newVersionWholeClass);
@@ -379,7 +393,8 @@ public class JavaClass extends JavaElement {
 	}
 
 	/**
-	 * @param logChange the logChange to set
+	 * @param logChange
+	 *            the logChange to set
 	 */
 	public void setLogChange(boolean logChange) {
 		this.logChange = logChange;

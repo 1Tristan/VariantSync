@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -222,6 +221,32 @@ public class ContextProvider extends AbstractModel implements
 	}
 
 	@Override
+	public Collection<String> getClassesForVariant(String fe, String projectName) {
+		Context c = ContextHandler.getInstance().getContext(fe);
+		Map<String, JavaProject> projects = c.getJavaProjects();
+		Set<Entry<String, JavaProject>> entries = projects.entrySet();
+		Iterator<Entry<String, JavaProject>> it = entries.iterator();
+		List<String> classNames = new ArrayList<String>();
+		while (it.hasNext()) {
+			Entry<String, JavaProject> e = it.next();
+			if (e.getKey().equals(projectName)) {
+				continue;
+			}
+			JavaProject jp = e.getValue();
+			if (jp == null || jp.getChildren() == null) {
+				continue;
+			}
+			List<JavaClass> classes = ContextUtils.getClasses(jp);
+			for (JavaClass element : classes) {
+				if (!element.getChanges().isEmpty()) {
+					classNames.add(e.getKey() + ": " + element.getName());
+				}
+			}
+		}
+		return classNames;
+	}
+
+	@Override
 	public Collection<CodeChange> getChanges(String fe, String projectName,
 			String className) {
 		Context c = ContextHandler.getInstance().getContext(fe);
@@ -236,16 +261,55 @@ public class ContextProvider extends AbstractModel implements
 		return null;
 	}
 
+	// only searches for one class with the given className in target
+	// projects. If multiple classes with the same name exist, they will
+	// actually be ignored.
 	@Override
-	public boolean isAlreadySynchronized(String fe, long key, String target) {
-		Context c = getContext(fe);
-		return c.isSynchronized(key, target);
+	public Map<String, Collection<CodeChange>> getChangesForVariant(String fe,
+			String projectName, String className) {
+		Context c = ContextHandler.getInstance().getContext(fe);
+		JavaProject jp = c.getJavaProjects().get(projectName);
+		Map<String, JavaProject> projects = c.getJavaProjects();
+		Set<Entry<String, JavaProject>> entries = projects.entrySet();
+		Iterator<Entry<String, JavaProject>> it = entries.iterator();
+		Map<String, Collection<CodeChange>> changes = new HashMap<String, Collection<CodeChange>>();
+		while (it.hasNext()) {
+			Entry<String, JavaProject> entry = it.next();
+			if (jp == null || !entry.getKey().equals(jp.getName())) {
+				List<JavaElement> classes = new ArrayList<JavaElement>();
+				JavaProject providingVariant = entry.getValue();
+				if (providingVariant != null
+						&& providingVariant.getChildren() != null) {
+					ContextUtils.iterateElements(
+							providingVariant.getChildren(), classes);
+					for (JavaElement e : classes) {
+						if (e.getName().equals(className)) {
+							changes.put(entry.getKey(),
+									((JavaClass) e).getClonedChanges());
+						}
+					}
+				}
+			}
+		}
+		return changes;
 	}
 
 	@Override
-	public void addSynchronizedChange(String fe, long key, String target) {
+	public boolean isAlreadySynchronized(String fe, long key, String source,
+			String target) {
 		Context c = getContext(fe);
-		c.addSynchronizedChange(key, target);
+		if (target.contains(":"))
+			target = target.split(":")[0].trim();
+		return c.isSynchronized(key, source, target);
+	}
+
+	@Override
+	public void addSynchronizedChange(String fe, long key, String source,
+			String target) {
+		Context c = getContext(fe);
+		if (target.contains(":"))
+			target = target.split(":")[0].trim();
+		c.addSynchronizedChange(key, source, target);
 	}
 
 	@Override
@@ -264,6 +328,20 @@ public class ContextProvider extends AbstractModel implements
 					Util.parseCodeLinesToString(left), right)) {
 				conflictFreeSyncTargets.add(target);
 			}
+		}
+		return conflictFreeSyncTargets;
+	}
+
+	@Override
+	public List<String> getAutoSyncTargetsForVariant(String fe,
+			String targetVariant, String className, List<CodeLine> ancestor,
+			List<CodeLine> left) {
+		List<String> conflictFreeSyncTargets = new ArrayList<String>();
+		List<String> right = getCodeLines(targetVariant, className);
+		if (!ModuleFactory.getMergeOperations().checkConflict(
+				Util.parseCodeLinesToString(ancestor),
+				Util.parseCodeLinesToString(left), right)) {
+			conflictFreeSyncTargets.add(targetVariant + ": " + className);
 		}
 		return conflictFreeSyncTargets;
 	}
@@ -288,6 +366,20 @@ public class ContextProvider extends AbstractModel implements
 		return conflictedSyncTargets;
 	}
 
+	@Override
+	public List<String> getConflictedSyncForVariant(String fe,
+			String targetVariant, String className, List<CodeLine> ancestor,
+			List<CodeLine> left) {
+		List<String> conflictedSyncTargets = new ArrayList<String>();
+		List<String> right = getCodeLines(targetVariant, className);
+		if (ModuleFactory.getMergeOperations().checkConflict(
+				Util.parseCodeLinesToString(ancestor),
+				Util.parseCodeLinesToString(left), right)) {
+			conflictedSyncTargets.add(targetVariant + ": " + className);
+		}
+		return conflictedSyncTargets;
+	}
+
 	private List<String> getCodeLines(String projectName, String className) {
 		java.util.List<IProject> supportedProjects = VariantSyncPlugin
 				.getDefault().getSupportProjectList();
@@ -296,12 +388,17 @@ public class ContextProvider extends AbstractModel implements
 			String name = p.getName();
 			if (name.equals(projectName)) {
 				try {
-					javaClass = findFileRecursively(p, className);
+					javaClass = ContextUtils.findFileRecursively(p, className);
 					break;
 				} catch (CoreException e) {
 					e.printStackTrace();
 				}
 			}
+		}
+		try {
+			javaClass.refreshLocal(IResource.DEPTH_INFINITE, null);
+		} catch (CoreException e1) {
+			e1.printStackTrace();
 		}
 		List<String> linesOfCode = null;
 		try {
@@ -346,7 +443,7 @@ public class ContextProvider extends AbstractModel implements
 					&& isValidSyncTarget) {
 				IResource javaClass = null;
 				try {
-					javaClass = findFileRecursively(p, className);
+					javaClass = ContextUtils.findFileRecursively(p, className);
 				} catch (CoreException e) {
 					e.printStackTrace();
 				}
@@ -407,22 +504,6 @@ public class ContextProvider extends AbstractModel implements
 		return false;
 	}
 
-	private IFile findFileRecursively(IContainer container, String name)
-			throws CoreException {
-		for (IResource r : container.members()) {
-			if (r instanceof IContainer) {
-				IFile file = findFileRecursively((IContainer) r, name);
-				if (file != null) {
-					return file;
-				}
-			} else if (r instanceof IFile && r.getName().equals(name)) {
-				return (IFile) r;
-			}
-		}
-
-		return null;
-	}
-
 	// TODO: use package-name to get full-qualified path to class
 	@Override
 	public List<CodeLine> getTargetCode(String fe, String projectName,
@@ -459,7 +540,7 @@ public class ContextProvider extends AbstractModel implements
 			if (name.equals(projectName)) {
 				IResource javaClass = null;
 				try {
-					javaClass = findFileRecursively(p, className);
+					javaClass = ContextUtils.findFileRecursively(p, className);
 				} catch (CoreException e) {
 					e.printStackTrace();
 				}
@@ -525,14 +606,16 @@ public class ContextProvider extends AbstractModel implements
 	@Override
 	public File getFile(String selectedFeatureExpression,
 			String projectNameTarget, String classNameTarget) {
-		IResource res = findResource(projectNameTarget, classNameTarget);
+		IResource res = ContextUtils.findResource(projectNameTarget,
+				classNameTarget);
 		return new File(res.getLocation().toString());
 
 	}
 
 	@Override
 	public void removeChange(String selectedFeatureExpression,
-			String selectedProject, String selectedClass, int selectedChange, long timestamp) {
+			String selectedProject, String selectedClass, int selectedChange,
+			long timestamp) {
 		Context c = ContextHandler.getInstance().getContext(
 				selectedFeatureExpression);
 		JavaProject jp = c.getJavaProjects().get(selectedProject);
@@ -544,7 +627,8 @@ public class ContextProvider extends AbstractModel implements
 				break;
 			}
 		}
-		c.removeSynchronizedChange(timestamp);
+		// TODO
+		// c.removeSynchronizedChange(timestamp);
 		persistanceOperations.saveContext(c, Util.parseStorageLocation(c));
 	}
 
@@ -558,26 +642,8 @@ public class ContextProvider extends AbstractModel implements
 			if (name.equals(selectedProject)) {
 				IResource javaClass = null;
 				try {
-					javaClass = findFileRecursively(p, selectedClass);
-				} catch (CoreException e) {
-					e.printStackTrace();
-				}
-				return javaClass;
-			}
-		}
-		return null;
-	}
-
-	private IResource findResource(String projectNameTarget,
-			String classNameTarget) {
-		List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
-				.getSupportProjectList();
-		for (IProject p : supportedProjects) {
-			String name = p.getName();
-			if (name.equals(projectNameTarget)) {
-				IResource javaClass = null;
-				try {
-					javaClass = findFileRecursively(p, classNameTarget);
+					javaClass = ContextUtils.findFileRecursively(p,
+							selectedClass);
 				} catch (CoreException e) {
 					e.printStackTrace();
 				}
@@ -606,7 +672,7 @@ public class ContextProvider extends AbstractModel implements
 		 * contextHandler.refreshContext(fe, projectName, packageName, filename,
 		 * oldCode, newCode);
 		 */
-//		ignoreCodeChange = true;
+		// ignoreCodeChange = true;
 	}
 
 	// public void compare(String source1, String source2) throws IOException,
@@ -651,7 +717,8 @@ public class ContextProvider extends AbstractModel implements
 				for (JavaElement e : classes) {
 					if (e.getName().equals(className)) {
 						((JavaClass) e).removeContent();
-						IResource res = findResource(projectName, className);
+						IResource res = ContextUtils.findResource(projectName,
+								className);
 						MarkerHandler.getInstance().clearAllMarker(res);
 						return;
 					}
@@ -665,14 +732,30 @@ public class ContextProvider extends AbstractModel implements
 		List<String> features = new ArrayList<String>();
 		Collection<Context> contexts = contextHandler.getAllContexts();
 		Iterator<Context> itC = contexts.iterator();
-		while(itC.hasNext()) {
+		while (itC.hasNext()) {
 			Context c = itC.next();
-			JavaProject jp = c.getJavaProject(variant);
-			if(jp != null){
-				features.add(c.getFeatureExpression());
+			Map<String, JavaProject> projects = c.getJavaProjects();
+			Set<Entry<String, JavaProject>> entries = projects.entrySet();
+			Iterator<Entry<String, JavaProject>> it = entries.iterator();
+			while (it.hasNext()) {
+				Entry<String, JavaProject> e = it.next();
+				if (e.getKey().equals(variant)) {
+					continue;
+				}
+				JavaProject jp = e.getValue();
+				if (jp == null || jp.getChildren() == null) {
+					continue;
+				}
+				List<JavaClass> classes = ContextUtils.getClasses(jp);
+				for (JavaClass element : classes) {
+					if (!element.getChanges().isEmpty()
+							&& !features.contains(c.getFeatureExpression())) {
+						features.add(c.getFeatureExpression());
+						break;
+					}
+				}
 			}
 		}
 		return features;
 	}
-
 }

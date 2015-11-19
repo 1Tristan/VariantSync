@@ -102,9 +102,10 @@ public interface IContextOperations {
 
 	void activateContext(String selectedFeatureExpression, boolean ignoreChange);
 
-	boolean isAlreadySynchronized(String fe, long key, String target);
+	boolean isAlreadySynchronized(String fe, long key, String source,
+			String target);
 
-	void addSynchronizedChange(String fe, long key, String target);
+	void addSynchronizedChange(String fe, long key, String source, String target);
 
 	void removeChange(String selectedFeatureExpression, String selectedProject,
 			String selectedClass, int selectedChange, long timestamp);
@@ -112,4 +113,16 @@ public interface IContextOperations {
 	List<String> getSyncTargets(String fe, String projectName, String className);
 
 	List<String> getFeatures(String variant);
+
+	Map<String, Collection<CodeChange>> getChangesForVariant(String fe,
+			String projectName, String className);
+
+	Collection<String> getClassesForVariant(String fe, String projectName);
+
+	List<String> getAutoSyncTargetsForVariant(String fe, String targetVariant,
+			String className, List<CodeLine> ancestor, List<CodeLine> left);
+
+	List<String> getConflictedSyncForVariant(String fe, String targetVariant,
+			String className, List<CodeLine> ancestor, List<CodeLine> left);
+
 }

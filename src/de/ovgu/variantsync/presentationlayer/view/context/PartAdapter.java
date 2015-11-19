@@ -35,17 +35,35 @@ public class PartAdapter implements IPartListener {
 						.println("===============================================");
 				MarkerHandler.getInstance().refreshMarker(file);
 				cc.setBaseVersion(file);
-				if (cc.isFeatureView()) {
+				if (cc.isFeatureView() || cc.isProductView()) {
 					cc.stopContextRecording();
 					cc.setFeatureView(false);
+					cc.setProductView(false);
 				}
 			}
 		}
 	}
 
 	@Override
-	public void partBroughtToTop(IWorkbenchPart arg0) {
-		// not required
+	public void partBroughtToTop(IWorkbenchPart part) {
+ 		if (part instanceof IEditorPart) {
+			if (((IEditorPart) part).getEditorInput() instanceof IFileEditorInput) {
+				IFile file = ((IFileEditorInput) ((EditorPart) part)
+						.getEditorInput()).getFile();
+				System.out
+						.println("\n====== LOCATION OF ACTIVE FILE IN EDITOR ======");
+				System.out.println(file.getLocation());
+				System.out
+						.println("===============================================");
+				MarkerHandler.getInstance().refreshMarker(file);
+				cc.setBaseVersion(file);
+				if (cc.isFeatureView() || cc.isProductView()) {
+					cc.stopContextRecording();
+					cc.setFeatureView(false);
+					cc.setProductView(false);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -59,8 +77,25 @@ public class PartAdapter implements IPartListener {
 	}
 
 	@Override
-	public void partOpened(IWorkbenchPart arg0) {
-		// not required
+	public void partOpened(IWorkbenchPart part) {
+		if (part instanceof IEditorPart) {
+			if (((IEditorPart) part).getEditorInput() instanceof IFileEditorInput) {
+				IFile file = ((IFileEditorInput) ((EditorPart) part)
+						.getEditorInput()).getFile();
+				System.out
+						.println("\n====== LOCATION OF ACTIVE FILE IN EDITOR ======");
+				System.out.println(file.getLocation());
+				System.out
+						.println("===============================================");
+				MarkerHandler.getInstance().refreshMarker(file);
+				cc.setBaseVersion(file);
+				if (cc.isFeatureView() || cc.isProductView()) {
+					cc.stopContextRecording();
+					cc.setFeatureView(false);
+					cc.setProductView(false);
+				}
+			}
+		}
 	}
 
 }

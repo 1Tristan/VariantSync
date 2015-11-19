@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFileState;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
@@ -163,5 +164,25 @@ class FileOperations {
 				out.close();
 			}
 		}
+	}
+
+	public List<String> getHistoryFileLines(IResource res) {
+		IFile currentFile = (IFile) res;
+		IFileState[] states = null;
+		try {
+			states = currentFile.getHistory(null);
+		} catch (CoreException e) {
+			LogOperations.logError("File states could not be retrieved.", e);
+			return null;
+		}
+		// List<String> currentFilelines = Util.getFileLines(res);
+		List<String> historyFilelines = null;
+		try {
+			historyFilelines = readFile(states[0].getContents(),
+					states[0].getCharset());
+		} catch (CoreException | FileOperationException e) {
+			LogOperations.logError("File states could not be read.", e);
+		}
+		return historyFilelines;
 	}
 }

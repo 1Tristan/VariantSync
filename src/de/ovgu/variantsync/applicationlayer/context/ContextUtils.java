@@ -3,6 +3,13 @@ package de.ovgu.variantsync.applicationlayer.context;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
+import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
@@ -10,7 +17,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.diff.Diff;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.DiffIndices;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.DiffStep;
 
-class ContextUtils {
+public class ContextUtils {
 
 	public static void decreaseCodeLines(List<Diff> diffs, int removeCounter) {
 		for (Diff diff : diffs) {
@@ -28,6 +35,41 @@ class ContextUtils {
 					+ addCounter, di.getNumberOfOldCodeLines(), di
 					.getStartIndixNewCode(), di.getNumberOfNewCodeLines()));
 		}
+	}
+
+	public static IFile findFileRecursively(IContainer container, String name)
+			throws CoreException {
+		for (IResource r : container.members()) {
+			if (r instanceof IContainer) {
+				IFile file = findFileRecursively((IContainer) r, name);
+				if (file != null) {
+					return file;
+				}
+			} else if (r instanceof IFile && r.getName().equals(name)) {
+				return (IFile) r;
+			}
+		}
+
+		return null;
+	}
+
+	public static IResource findResource(String projectNameTarget,
+			String classNameTarget) {
+		List<IProject> supportedProjects = VariantSyncPlugin.getDefault()
+				.getSupportProjectList();
+		for (IProject p : supportedProjects) {
+			String name = p.getName();
+			if (name.equals(projectNameTarget)) {
+				IResource javaClass = null;
+				try {
+					javaClass = findFileRecursively(p, classNameTarget);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+				return javaClass;
+			}
+		}
+		return null;
 	}
 
 	public static List<Diff> analyzeDiff(List<String> code) {
@@ -59,6 +101,10 @@ class ContextUtils {
 	}
 
 	public static List<JavaClass> getClasses(JavaProject jp) {
+		if (jp == null || jp.getChildren() == null
+				|| jp.getChildren().isEmpty()) {
+			return new ArrayList<JavaClass>();
+		}
 		List<JavaElement> javaElements = new ArrayList<JavaElement>();
 		ContextUtils.iterateElements(jp.getChildren(), javaElements);
 		List<JavaClass> classes = new ArrayList<JavaClass>();

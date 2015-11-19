@@ -75,10 +75,16 @@ public class CodeMapping extends Mapping {
 				((JavaClass) javaElement).setBaseVersion();
 
 			javaElement.setCodeLines(newLines);
-			((JavaClass) javaElement).setLinesOfWholeClass(mapping.getWholeClass());
+			((JavaClass) javaElement).setLinesOfWholeClass(mapping
+					.getWholeClass());
 
 			if (!ignoreChange && mapping.isLastStep())
-				((JavaClass) javaElement).addChange(newLines);
+				((JavaClass) javaElement).addChange(
+						newLines,
+						mapping.getPathToProject()
+								.substring(
+										mapping.getPathToProject().lastIndexOf(
+												"/") + 1), name);
 		} else {
 			JavaElement packageOfClass = packageMapping.getElement(
 					element.getChildren(), name, relativeClassPath);
@@ -184,8 +190,14 @@ public class CodeMapping extends Mapping {
 			((JavaClass) javaElement).setLinesOfWholeClass(wholeClass);
 			List<CodeLine> codeLines = UtilOperations.getInstance().removeCode(
 					code.getStartLine(), code.getEndLine(), tmpCode);
-			if (isLastStep)
-				((JavaClass) javaElement).addChange(codeLines);
+			if (isLastStep) {
+				String projectName = elementPath.substring(0,
+						elementPath.indexOf("/src"));
+				projectName = projectName.substring(projectName
+						.lastIndexOf("/"));
+				((JavaClass) javaElement).addChange(codeLines, projectName,
+						elementName);
+			}
 
 			return javaElement.setCodeLines(codeLines);
 		}

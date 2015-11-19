@@ -2,6 +2,7 @@ package de.ovgu.variantsync.presentationlayer.controller;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.ui.IEditorPart;
@@ -35,6 +36,7 @@ public class ContextController extends AbstractController {
 			.getContextOperations();
 	private boolean isPartActivated = false;
 	private boolean featureView = false;
+	private boolean productView = false;
 
 	public String getActiveFeatureContext() {
 		return contextOperations.getActiveFeatureContext();
@@ -79,7 +81,7 @@ public class ContextController extends AbstractController {
 			String className) {
 		return contextOperations.getChanges(fe, projectName, className);
 	}
-	
+
 	public List<String> getSyncTargets(String fe, String projectName,
 			String className) {
 		return contextOperations.getSyncTargets(fe, projectName, className);
@@ -91,9 +93,25 @@ public class ContextController extends AbstractController {
 				ancestor, left);
 	}
 
+	public List<String> getAutoSyncTargetsForVariant(String fe,
+			String projectName, String className, List<CodeLine> ancestor,
+			List<CodeLine> left) {
+		className = className.split(":")[1].trim();
+		return contextOperations.getAutoSyncTargetsForVariant(fe, projectName,
+				className, ancestor, left);
+	}
+
 	public List<String> getConflictedSyncTargets(String fe, String projectName,
 			String className, List<CodeLine> ancestor, List<CodeLine> left) {
 		return contextOperations.getConflictSyncTargets(fe, projectName,
+				className, ancestor, left);
+	}
+
+	public List<String> getConflictedSyncForVariant(String fe,
+			String projectName, String className, List<CodeLine> ancestor,
+			List<CodeLine> left) {
+		className = className.split(":")[1].trim();
+		return contextOperations.getConflictedSyncForVariant(fe, projectName,
 				className, ancestor, left);
 	}
 
@@ -141,16 +159,37 @@ public class ContextController extends AbstractController {
 		return this.featureView;
 	}
 
-	public boolean isAlreadySynchronized(String fe, long key, String target) {
-		return contextOperations.isAlreadySynchronized(fe, key, target);
+	public void setProductView(boolean b) {
+		this.productView = b;
 	}
 
-	public void addSynchronizedChange(String fe, long key, String target) {
-		contextOperations.addSynchronizedChange(fe, key, target);
+	public boolean isProductView() {
+		return productView;
+	}
+
+	public boolean isAlreadySynchronized(String fe, long key, String source,
+			String target) {
+		return contextOperations.isAlreadySynchronized(fe, key, source, target);
+	}
+
+	public void addSynchronizedChange(String fe, long key, String source,
+			String target) {
+		contextOperations.addSynchronizedChange(fe, key, source, target);
 	}
 
 	public List<String> getFeatures(String variant) {
 		return contextOperations.getFeatures(variant);
+	}
+
+	public Map<String, Collection<CodeChange>> getChangesForVariant(
+			String selectedFeature, String selectedVariant, String selectedClass) {
+		String className = selectedClass.split(":")[1].trim();
+		return contextOperations.getChangesForVariant(selectedFeature,
+				selectedVariant, className);
+	}
+
+	public Collection<String> getClassesForVariant(String fe, String projectName) {
+		return contextOperations.getClassesForVariant(fe, projectName);
 	}
 
 }

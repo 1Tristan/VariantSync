@@ -136,12 +136,12 @@ public class Context {
 		this.javaProjects = javaProjects;
 	}
 
-	public boolean isSynchronized(long key, String target) {
-		return changeLog.contains(key, target);
+	public boolean isSynchronized(long key, String source, String target) {
+		return changeLog.contains(key, source, target);
 	}
 
-	public void addSynchronizedChange(long key, String target) {
-		changeLog.put(key, target);
+	public void addSynchronizedChange(long key, String source, String target) {
+		changeLog.put(key, source, target);
 	}
 
 	public void removeSynchronizedChange(long key) {

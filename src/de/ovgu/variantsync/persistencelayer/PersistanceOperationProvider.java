@@ -138,4 +138,9 @@ public class PersistanceOperationProvider implements IPersistanceOperations {
 		}
 	}
 
+	@Override
+	public List<String> getHistoryFileLines(IResource res) {
+		return fileOperations.getHistoryFileLines(res);
+	}
+
 }

@@ -161,4 +161,6 @@ public interface IPersistanceOperations {
 	void saveFeatureExpressions(FeatureExpressions fe);
 
 	void writeFile(java.util.List<CodeLine> syncCode, File file);
+
+	List<String> getHistoryFileLines(IResource res);
 }

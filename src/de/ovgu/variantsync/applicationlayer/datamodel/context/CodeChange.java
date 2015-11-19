@@ -1,6 +1,5 @@
 package de.ovgu.variantsync.applicationlayer.datamodel.context;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +29,7 @@ public class CodeChange {
 	}
 
 	public void createTimeStamp() {
-		this.timestamp = new Timestamp(new Date().getTime()).getTime();
+		this.timestamp = new Date().getTime();
 	}
 
 	/**

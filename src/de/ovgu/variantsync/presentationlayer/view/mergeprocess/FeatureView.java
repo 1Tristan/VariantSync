@@ -51,7 +51,6 @@ import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.applicationlayer.features.mapping.UtilOperations;
 import de.ovgu.variantsync.applicationlayer.merging.ResourceCompareInput;
-import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.ContextController;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
 import de.ovgu.variantsync.presentationlayer.controller.FeatureController;
@@ -72,8 +71,6 @@ public class FeatureView extends ViewPart {
 			.getSynchronizationController();
 	private FeatureController fc = ControllerHandler.getInstance()
 			.getFeatureController();
-	private IPersistanceOperations persistanceOperations = ModuleFactory
-			.getPersistanceOperations();
 	private IContextOperations contextOperations = ModuleFactory
 			.getContextOperations();
 
@@ -108,13 +105,7 @@ public class FeatureView extends ViewPart {
 	private String manualSelection;
 	private long timestamp;
 	private java.util.List<CodeLine> newVersionWholeClass;
-	private Label lblSyncSelectedVariants;
 	private List list_batchVariants;
-	private Label lblSyncSelectedFeatures;
-	private List list_batchFeatures;
-	private Button btnStartBatchVariants;
-	private Button btnStartFeatureSync;
-	private String[] variantBatchSelection;
 
 	public FeatureView() {
 	}
@@ -322,14 +313,16 @@ public class FeatureView extends ViewPart {
 							}
 						}
 						newCode.removeAll();
-						for (CodeLine cl : newVersionWholeClass) {
+						java.util.List<CodeLine> changedCode = getDifference(
+								baseCode, newVersionWholeClass);
+						for (CodeLine cl : changedCode) {
 							TableItem item = new TableItem(newCode, SWT.NONE);
 							item.setText(cl.getLine() + ": " + cl.getCode());
-							if (cl.isMapped()) {
-								Color color = new Color(getSite().getShell()
-										.getDisplay(), ccolor.getRGB());
-								item.setBackground(color);
-							}
+							// if (cl.isMapped()) {
+							Color color = new Color(getSite().getShell()
+									.getDisplay(), ccolor.getRGB());
+							item.setBackground(color);
+							// }
 							if (cl.isNew()) {
 								item.setForeground(getSite().getShell()
 										.getDisplay()
@@ -349,7 +342,8 @@ public class FeatureView extends ViewPart {
 
 		newCode = new Table(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
 				| SWT.CANCEL);
-		GridData gd_text_1 = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
+		GridData gd_text_1 = new GridData(SWT.FILL, SWT.FILL, false, false, 1,
+				1);
 		gd_text_1.widthHint = 157;
 		newCode.setLayoutData(gd_text_1);
 
@@ -469,7 +463,7 @@ public class FeatureView extends ViewPart {
 					// syncCode);
 
 					cc.addSynchronizedChange(selectedFeatureExpression,
-							timestamp, autoSelection);
+							timestamp, selectedProject, autoSelection);
 					setChanges();
 					break;
 				}
@@ -499,7 +493,7 @@ public class FeatureView extends ViewPart {
 						ex.printStackTrace();
 					}
 					cc.addSynchronizedChange(selectedFeatureExpression,
-							timestamp, manualSelection);
+							timestamp, selectedProject, manualSelection);
 					refreshSyncTargets();
 					setChanges();
 					break;
@@ -522,69 +516,24 @@ public class FeatureView extends ViewPart {
 				false, false, 1, 1));
 		btnSyncPreview.setText("sync preview");
 		new Label(arg0, SWT.NONE);
+	}
 
-		lblSyncSelectedVariants = new Label(arg0, SWT.NONE);
-		lblSyncSelectedVariants.setText("sync feature in selected variants");
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-
-		lblSyncSelectedFeatures = new Label(arg0, SWT.NONE);
-		lblSyncSelectedFeatures.setText("sync selected features");
-		new Label(arg0, SWT.NONE);
-
-		list_batchVariants = new List(arg0, SWT.BORDER | SWT.MULTI
-				| SWT.V_SCROLL);
-		list_batchVariants.setLayoutData(new GridData(SWT.FILL, SWT.FILL,
-				false, false, 1, 1));
-		list_batchVariants.addSelectionListener(new SelectionListener() {
-
-			public void widgetSelected(SelectionEvent event) {
-				variantBatchSelection = list_batchVariants.getSelection();
-				btnStartBatchVariants.setEnabled(true);
+	private java.util.List<CodeLine> getDifference(
+			java.util.List<CodeLine> base, java.util.List<CodeLine> changed) {
+		java.util.List<CodeLine> diff = new ArrayList<CodeLine>();
+		int i = 0;
+		for (CodeLine cl : changed) {
+			if (i > base.size() - 1
+					|| !base.get(i).getCode().trim()
+							.equals(cl.getCode().trim())) {
+				diff.add(cl.clone());
 			}
-
-			public void widgetDefaultSelected(SelectionEvent event) {
-			}
-		});
-
-		btnStartBatchVariants = new Button(arg0, SWT.NONE);
-		btnStartBatchVariants.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,
-				false, false, 1, 1));
-		btnStartBatchVariants.setText("start");
-		btnStartBatchVariants.setEnabled(false);
-		btnStartBatchVariants.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				switch (e.type) {
-				case SWT.Selection:
-					startBatchSync(variantBatchSelection);
-					break;
-				}
-			}
-		});
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-
-		list_batchFeatures = new List(arg0, SWT.BORDER | SWT.MULTI
-				| SWT.V_SCROLL);
-		list_batchFeatures.setLayoutData(new GridData(SWT.FILL, SWT.FILL,
-				false, false, 1, 1));
-		list_batchFeatures.setItems(featureExpressions);
-
-		btnStartFeatureSync = new Button(arg0, SWT.NONE);
-		btnStartFeatureSync.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
-				false, false, 1, 1));
-		btnStartFeatureSync.setText("start feature sync");
-		btnStartFeatureSync.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				switch (e.type) {
-				case SWT.Selection: {
-					// TODO nachfragen
-					break;
-				}
-				}
-			}
-		});
+			i++;
+		}
+		if (diff.size() > 1) {
+			diff.remove(diff.size() - 1);
+		}
+		return diff;
 	}
 
 	private void startBatchSync(String[] variantBatchSelection) {
@@ -624,7 +573,8 @@ public class FeatureView extends ViewPart {
 					java.util.List<String> checkedItems = new ArrayList<String>();
 					for (String target : autoItems) {
 						if (!contextOperations.isAlreadySynchronized(
-								selectedFeatureExpression, timestamp, target)) {
+								selectedFeatureExpression, timestamp,
+								selectedProject, target)) {
 							checkedItems.add(target);
 						}
 					}
@@ -651,21 +601,21 @@ public class FeatureView extends ViewPart {
 						solveChange(syncCode, selectedFeatureExpression,
 								targetProject, targetClass, false);
 						cc.addSynchronizedChange(selectedFeatureExpression,
-								timestamp, target);
+								timestamp, selectedProject, target);
 					}
 
 					// manueller Anteil
 					java.util.List<String> manualSyncTargetsAsList = cc
 							.getConflictedSyncTargets(
-									selectedFeatureExpression, s,
-									c, baseCode,
+									selectedFeatureExpression, s, c, baseCode,
 									newVersionWholeClass);
 					String[] manualItems = manualSyncTargetsAsList
 							.toArray(new String[] {});
 					checkedItems = new ArrayList<String>();
 					for (String target : manualItems) {
 						if (!contextOperations.isAlreadySynchronized(
-								selectedFeatureExpression, timestamp, target)) {
+								selectedFeatureExpression, timestamp,
+								selectedProject, target)) {
 							checkedItems.add(target);
 						}
 					}
@@ -680,7 +630,7 @@ public class FeatureView extends ViewPart {
 							e1.printStackTrace();
 						}
 						cc.addSynchronizedChange(selectedFeatureExpression,
-								timestamp, manualSelection);
+								timestamp, selectedProject, targetProject);
 						// refreshSyncTargets();
 						// setChanges();
 					}
@@ -864,7 +814,8 @@ public class FeatureView extends ViewPart {
 		java.util.List<String> checkedItems = new ArrayList<String>();
 		for (String target : autoItems) {
 			if (!contextOperations.isAlreadySynchronized(
-					selectedFeatureExpression, timestamp, target)) {
+					selectedFeatureExpression, timestamp, selectedProject,
+					target)) {
 				checkedItems.add(target);
 			}
 		}
@@ -880,7 +831,8 @@ public class FeatureView extends ViewPart {
 		checkedItems = new ArrayList<String>();
 		for (String target : manualItems) {
 			if (!contextOperations.isAlreadySynchronized(
-					selectedFeatureExpression, timestamp, target)) {
+					selectedFeatureExpression, timestamp, selectedProject,
+					target)) {
 				checkedItems.add(target);
 			}
 		}
@@ -890,6 +842,7 @@ public class FeatureView extends ViewPart {
 			isManualSyncPossible = true;
 
 		if (!isAutoSyncPossible && !isManualSyncPossible) {
+			// TODO
 			contextOperations.removeChange(selectedFeatureExpression,
 					selectedProject, selectedClass, selectedChange, timestamp);
 		}
