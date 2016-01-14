@@ -15,14 +15,15 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.expressions;bundle-version="3.4.600",
  org.eclipse.jdt.core;bundle-version="3.10.2",
  org.eclipse.ui.ide;bundle-version="3.10.2",
- de.ovgu.featureide.fm.core;bundle-version="2.7.4",
  de.ovgu.featureide.fm.ui;bundle-version="2.7.4",
  org.junit,
  org.eclipse.e4.ui.di;bundle-version="1.0.0",
  org.eclipse.compare;bundle-version="3.5.501",
  org.eclipse.compare.core;bundle-version="3.5.400",
  org.eclipse.jdt.ui;bundle-version="3.10.2",
- org.eclipse.team.ui;bundle-version="3.7.100"
+ org.eclipse.team.ui;bundle-version="3.7.100",
+ de.ovgu.featureide.core;bundle-version="2.7.4",
+ de.ovgu.featureide.fm.core;bundle-version="2.7.3"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: libraries/diffutils-1.2.1.jar,
@@ -37,3 +38,4 @@ Bundle-ClassPath: libraries/diffutils-1.2.1.jar,
  libraries/JDime.jar,
  libraries/JJ7.jar,
  libraries/log4j-1.2.jar
+Import-Package: org.prop4j

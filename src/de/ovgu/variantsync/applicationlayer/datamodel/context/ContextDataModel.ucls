@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <class-diagram version="1.1.8" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
   associations="true" dependencies="false" nesting-relationships="true">  
-  <class id="1" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass" 
-    project="VariantSync" file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/JavaClass.java" 
+  <class id="1" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.Class" 
+    project="VariantSync" file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/Class.java" 
     binary="false" corner="BOTTOM_RIGHT">    
-    <position height="39" width="87" x="484" y="126"/>    
+    <position height="39" width="87" x="479" y="139"/>    
     <display autosize="true" stereotype="true" package="false" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="false">      
       <attributes public="false" package="false" protected="false" private="false" static="false"/>      
@@ -14,40 +14,37 @@
   <class id="2" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.Context" 
     project="VariantSync" file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/Context.java" 
     binary="false" corner="BOTTOM_RIGHT">    
-    <position height="39" width="87" x="200" y="37"/>    
+    <position height="62" width="149" x="193" y="37"/>    
+    <display autosize="true" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="true" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="3" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.Element" 
+    project="VariantSync" file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/Element.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="39" width="87" x="479" y="37"/>    
     <display autosize="true" stereotype="true" package="false" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="false">      
       <attributes public="false" package="false" protected="false" private="false" static="false"/>      
       <operations public="false" package="false" protected="false" private="false" static="false"/>    
     </display>  
   </class>  
-  <class id="3" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement" 
-    project="VariantSync" 
-    file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/JavaElement.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="39" width="98" x="484" y="37"/>    
+  <class id="4" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.Package" 
+    project="VariantSync" file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/Package.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="39" width="87" x="606" y="139"/>    
     <display autosize="true" stereotype="true" package="false" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="false">      
       <attributes public="false" package="false" protected="false" private="false" static="false"/>      
       <operations public="false" package="false" protected="false" private="false" static="false"/>    
     </display>  
   </class>  
-  <class id="4" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.JavaPackage" 
-    project="VariantSync" 
-    file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/JavaPackage.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="39" width="101" x="611" y="126"/>    
-    <display autosize="true" stereotype="true" package="false" initial-value="false" signature="false" 
-      sort-features="false" accessors="true" visibility="false">      
-      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
-      <operations public="false" package="false" protected="false" private="false" static="false"/>    
-    </display>  
-  </class>  
-  <class id="5" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject" 
-    project="VariantSync" 
-    file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/JavaProject.java" binary="false" 
-    corner="BOTTOM_RIGHT">    
-    <position height="39" width="92" x="352" y="126"/>    
+  <class id="5" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.Variant" 
+    project="VariantSync" file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/Variant.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="39" width="87" x="352" y="139"/>    
     <display autosize="true" stereotype="true" package="false" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="false">      
       <attributes public="false" package="false" protected="false" private="false" static="false"/>      
@@ -57,10 +54,10 @@
   <class id="6" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine" 
     project="VariantSync" file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/CodeLine.java" 
     binary="false" corner="BOTTOM_RIGHT">    
-    <position height="39" width="87" x="431" y="284"/>    
+    <position height="98" width="116" x="323" y="218"/>    
     <display autosize="true" stereotype="true" package="false" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="false">      
-      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <attributes public="false" package="false" protected="false" private="true" static="false"/>      
       <operations public="false" package="false" protected="false" private="false" static="false"/>    
     </display>  
   </class>  
@@ -68,7 +65,7 @@
     project="VariantSync" 
     file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/CodeHighlighting.java" binary="false" 
     corner="BOTTOM_RIGHT">    
-    <position height="39" width="119" x="41" y="126"/>    
+    <position height="39" width="119" x="193" y="139"/>    
     <display autosize="true" stereotype="true" package="false" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="false">      
       <attributes public="false" package="false" protected="false" private="false" static="false"/>      
@@ -78,10 +75,10 @@
   <class id="8" language="java" name="de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange" 
     project="VariantSync" file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/CodeChange.java" 
     binary="false" corner="BOTTOM_RIGHT">    
-    <position height="39" width="96" x="367" y="205"/>    
+    <position height="134" width="224" x="479" y="218"/>    
     <display autosize="true" stereotype="true" package="false" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="false">      
-      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <attributes public="false" package="false" protected="false" private="true" static="false"/>      
       <operations public="false" package="false" protected="false" private="false" static="false"/>    
     </display>  
   </class>  
@@ -89,7 +86,7 @@
     project="VariantSync" 
     file="/VariantSync/src/de/ovgu/variantsync/applicationlayer/datamodel/context/ChangeLogMap.java" binary="false" 
     corner="BOTTOM_RIGHT">    
-    <position height="39" width="112" x="200" y="126"/>    
+    <position height="39" width="112" x="41" y="139"/>    
     <display autosize="true" stereotype="true" package="false" initial-value="false" signature="false" 
       sort-features="false" accessors="true" visibility="false">      
       <attributes public="false" package="false" protected="false" private="false" static="false"/>      
@@ -97,162 +94,91 @@
     </display>  
   </class>  
   <association id="10">    
-    <bendpoint x="534" y="257"/>    
     <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="11" name="codeLines">        
-        <position height="18" width="58" x="541" y="268"/>      
+      <attribute id="11" name="changes">        
+        <position height="18" width="50" x="553" y="193"/>      
       </attribute>      
       <multiplicity id="12" minimum="0" maximum="2147483647">        
-        <position height="16" width="21" x="517" y="268"/>      
+        <position height="16" width="21" x="608" y="194"/>      
       </multiplicity>    
     </end>    
-    <end type="TARGET" refId="6" navigable="true"/>    
+    <end type="TARGET" refId="8" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <association id="13">    
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="14" name="color">        
+        <position height="18" width="32" x="219" y="111"/>      
+      </attribute>      
+      <multiplicity id="15" minimum="0" maximum="1">        
+        <position height="16" width="23" x="265" y="113"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="7" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="16">    
     <bendpoint x="601" y="73"/>    
     <bendpoint x="619" y="72"/>    
     <bendpoint x="622" y="44"/>    
     <bendpoint x="602" y="41"/>    
     <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="14" name="children">        
-        <position height="18" width="46" x="627" y="50"/>      
+      <attribute id="17" name="children">        
+        <position height="18" width="46" x="624" y="51"/>      
       </attribute>      
-      <multiplicity id="15" minimum="0" maximum="2147483647"/>    
+      <multiplicity id="18" minimum="0" maximum="2147483647">        
+        <position height="16" width="21" x="671" y="53"/>      
+      </multiplicity>    
     </end>    
     <end type="TARGET" refId="3" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <association id="16">    
-    <bendpoint x="496" y="219"/>    
-    <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="17" name="changes">        
-        <position height="18" width="50" x="460" y="192"/>      
-      </attribute>      
-      <multiplicity id="18" minimum="0" maximum="2147483647">        
-        <position height="16" width="21" x="473" y="223"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="8" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <generalization id="19">    
-    <end type="SOURCE" refId="4"/>    
-    <end type="TARGET" refId="3"/>  
-  </generalization>  
-  <association id="20">    
-    <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="21" name="actualChange">        
-        <position height="18" width="74" x="363" y="176"/>      
-      </attribute>      
-      <multiplicity id="22" minimum="0" maximum="1">        
-        <position height="16" width="23" x="437" y="178"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="8" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <generalization id="23">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="3"/>  
-  </generalization>  
-  <association id="24">    
-    <bendpoint x="436" y="269"/>    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="25" name="baseVersion">        
-        <position height="18" width="69" x="492" y="241"/>      
-      </attribute>      
-      <multiplicity id="26" minimum="0" maximum="2147483647">        
-        <position height="16" width="21" x="468" y="243"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="6" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="27">    
+  <association id="19">    
     <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="28" name="javaProjects">        
-        <position height="18" width="67" x="342" y="93"/>      
+      <attribute id="20" name="variants">        
+        <position height="18" width="67" x="341" y="102"/>      
       </attribute>      
-      <multiplicity id="29" minimum="0" maximum="2147483647">        
+      <multiplicity id="21" minimum="0" maximum="2147483647">        
         <position height="16" width="21" x="325" y="81"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="5" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <generalization id="30">    
+  <association id="22">    
+    <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="23" name="codeLines">        
+        <position height="18" width="58" x="372" y="193"/>      
+      </attribute>      
+      <multiplicity id="24" minimum="0" maximum="2147483647">        
+        <position height="16" width="21" x="432" y="194"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="25">    
     <end type="SOURCE" refId="5"/>    
     <end type="TARGET" refId="3"/>  
   </generalization>  
-  <association id="31">    
-    <bendpoint x="470" y="260"/>    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="32" name="newVersionWholeClass">        
-        <position height="18" width="124" x="307" y="253"/>      
-      </attribute>      
-      <multiplicity id="33" minimum="0" maximum="2147483647">        
-        <position height="16" width="21" x="439" y="253"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="6" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="34">    
+  <generalization id="26">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="3"/>  
+  </generalization>  
+  <generalization id="27">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="3"/>  
+  </generalization>  
+  <association id="28">    
     <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="35" name="changeLog"/>      
-      <multiplicity id="36" minimum="0" maximum="1"/>    
+      <attribute id="29" name="changeLog">        
+        <position height="18" width="62" x="66" y="108"/>      
+      </attribute>      
+      <multiplicity id="30" minimum="0" maximum="1">        
+        <position height="16" width="23" x="137" y="110"/>      
+      </multiplicity>    
     </end>    
     <end type="TARGET" refId="9" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="37">    
-    <bendpoint x="337" y="305"/>    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="38" name="newVersion">        
-        <position height="18" width="67" x="328" y="306"/>      
-      </attribute>      
-      <multiplicity id="39" minimum="0" maximum="2147483647"/>    
-    </end>    
-    <end type="TARGET" refId="6" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="40">    
-    <bendpoint x="390" y="286"/>    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="41" name="baseVersionWholeClass">        
-        <position height="18" width="126" x="248" y="285"/>      
-      </attribute>      
-      <multiplicity id="42" minimum="0" maximum="2147483647">        
-        <position height="16" width="21" x="378" y="287"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="6" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="43">    
-    <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="44" name="color">        
-        <position height="18" width="32" x="95" y="98"/>      
-      </attribute>      
-      <multiplicity id="45" minimum="0" maximum="1">        
-        <position height="16" width="23" x="130" y="99"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="7" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="46">    
-    <bendpoint x="586" y="303"/>    
-    <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="47" name="wholeClass">        
-        <position height="18" width="65" x="545" y="311"/>      
-      </attribute>      
-      <multiplicity id="48" minimum="0" maximum="2147483647">        
-        <position height="16" width="21" x="520" y="313"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="6" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 

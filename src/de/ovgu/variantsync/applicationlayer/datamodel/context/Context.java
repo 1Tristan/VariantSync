@@ -20,19 +20,19 @@ import de.ovgu.variantsync.VariantSyncConstants;
 public class Context {
 
 	private String featureExpression;
-	private Map<String, JavaProject> javaProjects;
+	private Map<String, Variant> variants;
 	private CodeHighlighting color;
 	private ChangeLogMap changeLog;
 
 	public Context() {
-		this.javaProjects = new HashMap<String, JavaProject>();
+		this.variants = new HashMap<String, Variant>();
 		this.color = CodeHighlighting.YELLOW;
 		this.changeLog = new ChangeLogMap();
 	}
 
 	public Context(String featureExpression) {
 		this.featureExpression = featureExpression;
-		this.javaProjects = new HashMap<String, JavaProject>();
+		this.variants = new HashMap<String, Variant>();
 		if (featureExpression.equals(VariantSyncConstants.DEFAULT_CONTEXT)) {
 			this.color = CodeHighlighting.DEFAULTCONTEXT;
 		} else {
@@ -42,12 +42,12 @@ public class Context {
 	}
 
 	public void initProject(String projectName, String pathToProject) {
-		javaProjects.put(projectName, new JavaProject(projectName,
+		variants.put(projectName, new Variant(projectName,
 				pathToProject));
 	}
 
 	public boolean containsProject(String projectName) {
-		return javaProjects.containsKey(projectName);
+		return variants.containsKey(projectName);
 	}
 
 	/**
@@ -68,30 +68,30 @@ public class Context {
 	/**
 	 * @return the javaProject
 	 */
-	public JavaProject getJavaProject(String projectName) {
-		return javaProjects.get(projectName);
+	public Variant getJavaProject(String projectName) {
+		return variants.get(projectName);
 	}
 
 	/**
 	 * @param javaProject
 	 *            the javaProject to set
 	 */
-	public void setJavaProject(JavaProject javaProject) {
-		this.javaProjects.put(javaProject.getName(), javaProject);
+	public void setJavaProject(Variant javaProject) {
+		this.variants.put(javaProject.getName(), javaProject);
 	}
 
 	public String getPathToProject(String projectName) {
-		if (javaProjects == null || javaProjects.get(projectName) == null)
+		if (variants == null || variants.get(projectName) == null)
 			return null;
-		return javaProjects.get(projectName).getPath();
+		return variants.get(projectName).getPath();
 	}
 
 	public void setPathToProject(String projectName, String path) {
-		if (javaProjects.get(projectName) == null) {
-			javaProjects.put(projectName, new JavaProject(projectName, path));
+		if (variants.get(projectName) == null) {
+			variants.put(projectName, new Variant(projectName, path));
 			return;
 		}
-		javaProjects.get(projectName).setPath(path);
+		variants.get(projectName).setPath(path);
 	}
 
 	/*
@@ -102,7 +102,7 @@ public class Context {
 	@Override
 	public String toString() {
 		return "Context [featureExpression=" + featureExpression
-				+ ", javaProject=" + javaProjects + ", color=" + color + "]";
+				+ ", javaProject=" + variants + ", color=" + color + "]";
 	}
 
 	/**
@@ -124,16 +124,16 @@ public class Context {
 	 * @return the javaProjects
 	 */
 	@XmlElement(name = "color")
-	public Map<String, JavaProject> getJavaProjects() {
-		return javaProjects;
+	public Map<String, Variant> getJavaProjects() {
+		return variants;
 	}
 
 	/**
 	 * @param javaProjects
 	 *            the javaProjects to set
 	 */
-	public void setJavaProjects(Map<String, JavaProject> javaProjects) {
-		this.javaProjects = javaProjects;
+	public void setJavaProjects(Map<String, Variant> javaProjects) {
+		this.variants = javaProjects;
 	}
 
 	public boolean isSynchronized(long key, String source, String target) {

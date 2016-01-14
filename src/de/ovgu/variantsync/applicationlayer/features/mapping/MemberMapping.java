@@ -3,7 +3,7 @@ package de.ovgu.variantsync.applicationlayer.features.mapping;
 import java.util.List;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeFragment;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
 
 /**
@@ -16,38 +16,38 @@ import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
 public class MemberMapping extends Mapping {
 
 	@Override
-	public JavaElement createElement(String pathToProject, String elementName,
+	public Element createElement(String pathToProject, String elementName,
 			String pathToElement) {
 		return null;
 	}
 
 	@Override
-	protected JavaElement computeElement(JavaElement element, String name,
+	protected Element computeElement(Element element, String name,
 			String path) {
 		return null;
 	}
 
 	@Override
-	protected void computeElement(JavaElement element, MappingElement mapping,
+	protected void computeElement(Element element, MappingElement mapping,
 			String elementName, String elementPath) {
 	}
 
 	@Override
-	protected JavaElement createProject(String pathToProject,
+	protected Element createProject(String pathToProject,
 			String elementName, String elementPath, MappingElement mapping) {
 		return null;
 	}
 
 	@Override
-	protected boolean removeElement(JavaElement element,
-			List<JavaElement> elements, String elementName, String elementPath,
+	protected boolean removeElement(Element element,
+			List<Element> elements, String elementName, String elementPath,
 			CodeFragment code, boolean isFirstStep, boolean isLastStep,
 			List<String> wholeClass) {
 		return false;
 	}
 
 	@Override
-	protected boolean checkElement(JavaElement element, String elementName,
+	protected boolean checkElement(Element element, String elementName,
 			String pathToElement) {
 		return false;
 	}

@@ -9,7 +9,7 @@ import org.eclipse.core.resources.IProject;
 import de.ovgu.featureide.fm.core.Feature;
 import de.ovgu.featureide.fm.core.FeatureModel;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FeatureException;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
 
@@ -49,11 +49,11 @@ public interface IFeatureOperations {
 
 	FeatureExpressions getFeatureExpressions();
 
-	void addElement(MappingElement mapping, JavaProject project);
+	void addElement(MappingElement mapping, Variant project);
 
-	void addCodeFragment(MappingElement mapping, JavaProject project);
+	void addCodeFragment(MappingElement mapping, Variant project);
 
-	void removeMapping(MappingElement mapping, JavaProject project);
+	void removeMapping(MappingElement mapping, Variant project);
 
 	FeatureModel getFeatureModel();
 

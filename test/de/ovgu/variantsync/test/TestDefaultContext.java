@@ -14,7 +14,7 @@ import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 
 /**
  * Test behavior and code tagging of default context. Run this test as JUnit
@@ -69,7 +69,7 @@ public class TestDefaultContext {
 				CLASS_NAME, new ArrayList<String>());
 		co.stopRecording();
 		Context defaultContext = co.getContext(DEFAULT_CONTEXT);
-		JavaProject jp = defaultContext.getJavaProject(PROJECT_NAME);
+		Variant jp = defaultContext.getJavaProject(PROJECT_NAME);
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
@@ -152,7 +152,7 @@ public class TestDefaultContext {
 		co.stopRecording();
 		Context defaultContext = co
 				.getContext(VariantSyncConstants.DEFAULT_CONTEXT);
-		JavaProject jp = defaultContext.getJavaProject(PROJECT_NAME);
+		Variant jp = defaultContext.getJavaProject(PROJECT_NAME);
 
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();

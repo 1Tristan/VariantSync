@@ -15,8 +15,8 @@ import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Class;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 
 public class TestXMLOutput {
@@ -58,7 +58,7 @@ public class TestXMLOutput {
 	@Test
 	public void testReadXML() {
 		Context c = persistenceOp.loadContext(PATH_CONTEXT_STORAGE);
-		JavaProject jp = c.getJavaProject(PROJECT_NAME);
+		Variant jp = c.getJavaProject(PROJECT_NAME);
 		List<CodeLine> codeLines = jp.getClonedCodeLines();
 		CodeLine cl = codeLines.get(0);
 		assertEquals("private int a;", cl.getCode());
@@ -80,7 +80,7 @@ public class TestXMLOutput {
 		assertEquals(17, cl.getLine());
 		assertEquals(12, codeLines.size());
 
-		JavaClass jc = (JavaClass) jp.getChildren().get(0).getChildren().get(0);
+		Class jc = (Class) jp.getChildren().get(0).getChildren().get(0);
 		List<CodeChange> changes = jc.getChanges();
 		assertTrue(!changes.isEmpty());
 	}

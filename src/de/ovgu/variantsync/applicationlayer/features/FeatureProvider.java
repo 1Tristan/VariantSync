@@ -16,7 +16,7 @@ import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.AbstractModel;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.FeatureExpressions;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FeatureException;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerProperties;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
@@ -96,17 +96,17 @@ public class FeatureProvider extends AbstractModel implements
 	}
 
 	@Override
-	public void addElement(MappingElement mapping, JavaProject project) {
+	public void addElement(MappingElement mapping, Variant project) {
 		featureMapping.mapElement(mapping, project);
 	}
 
 	@Override
-	public void addCodeFragment(MappingElement mapping, JavaProject project) {
+	public void addCodeFragment(MappingElement mapping, Variant project) {
 		featureMapping.mapCodeFragment(mapping, project);
 	}
 
 	@Override
-	public void removeMapping(MappingElement mapping, JavaProject project) {
+	public void removeMapping(MappingElement mapping, Variant project) {
 		featureMapping.removeMapping(mapping, project);
 	}
 

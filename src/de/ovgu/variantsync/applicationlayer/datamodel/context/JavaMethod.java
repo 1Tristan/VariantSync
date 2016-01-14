@@ -4,7 +4,7 @@ import java.util.List;
 
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 
-public class JavaMethod extends JavaElement {
+public class JavaMethod extends Element {
 
 	public JavaMethod() {
 		super();
@@ -29,7 +29,7 @@ public class JavaMethod extends JavaElement {
 	}
 
 	@Override
-	protected JavaElement getConcreteType(String name, String path) {
+	protected Element getConcreteType(String name, String path) {
 		return new JavaMethod(name, path);
 	}
 

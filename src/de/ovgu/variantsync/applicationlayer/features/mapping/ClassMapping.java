@@ -3,10 +3,10 @@ package de.ovgu.variantsync.applicationlayer.features.mapping;
 import java.util.List;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeFragment;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaPackage;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Class;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Package;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
 
 public class ClassMapping extends Mapping {
@@ -18,17 +18,17 @@ public class ClassMapping extends Mapping {
 	}
 
 	@Override
-	public JavaElement createElement(String pathToProject, String elementName,
+	public Element createElement(String pathToProject, String elementName,
 			String pathToElement) {
 		return createProjectWithClass(pathToProject, elementName, pathToElement);
 	}
 
 	@Override
-	protected JavaElement computeElement(JavaElement element, String name,
+	protected Element computeElement(Element element, String name,
 			String path) {
-		List<JavaElement> javaClasses = element.getChildren();
+		List<Element> javaClasses = element.getChildren();
 		if (javaClasses != null && !javaClasses.isEmpty()) {
-			for (JavaElement javaClass : javaClasses) {
+			for (Element javaClass : javaClasses) {
 				if (javaClass.getName().equals(name)) {
 					return javaClass;
 				}
@@ -38,12 +38,12 @@ public class ClassMapping extends Mapping {
 	}
 
 	@Override
-	protected void computeElement(JavaElement element, MappingElement mapping,
+	protected void computeElement(Element element, MappingElement mapping,
 			String elementName, String elementPath) {
 		if (containsElement(element.getChildren(), elementName, elementPath, "")) {
 			removeClass(element.getChildren(), elementName, elementPath);
 		}
-		JavaElement packageOfClass = packageMapping.getElement(
+		Element packageOfClass = packageMapping.getElement(
 				element.getChildren(), elementName, elementPath);
 		if (packageOfClass == null) {
 			String packageName = elementPath.substring(0,
@@ -53,7 +53,7 @@ public class ClassMapping extends Mapping {
 					.getIndexOfFirstPathSeparator(packageName));
 			packageName = packageName.substring(5);
 			packageName = packageName.replace("/", ".");
-			packageOfClass = new JavaPackage(packageName,
+			packageOfClass = new Package(packageName,
 					elementPath.substring(0, elementPath.lastIndexOf("/")));
 			element.addChild(packageOfClass);
 		}
@@ -63,17 +63,17 @@ public class ClassMapping extends Mapping {
 	}
 
 	@Override
-	protected JavaElement createProject(String pathToProject,
+	protected Element createProject(String pathToProject,
 			String elementName, String elementPath, MappingElement mapping) {
 		return createProjectWithClass(pathToProject, elementName, elementPath);
 	}
 
 	@Override
-	protected boolean removeElement(JavaElement element,
-			List<JavaElement> elements, String elementName, String elementPath,
+	protected boolean removeElement(Element element,
+			List<Element> elements, String elementName, String elementPath,
 			CodeFragment code, boolean isFirstStep, boolean isLastStep, List<String> wholeClass) {
-		List<JavaElement> classes = element.getChildren();
-		for (JavaElement javaClass : classes) {
+		List<Element> classes = element.getChildren();
+		for (Element javaClass : classes) {
 			String nameOfClass = javaClass.getName();
 			String pathOfClass = UtilOperations.getInstance().removeSrcInPath(
 					javaClass.getPath());
@@ -90,14 +90,14 @@ public class ClassMapping extends Mapping {
 	}
 
 	@Override
-	protected boolean checkElement(JavaElement element, String elementName,
+	protected boolean checkElement(Element element, String elementName,
 			String pathToElement) {
 		String packageName = UtilOperations.getInstance().parsePackageName(
 				pathToElement);
 		if (element.getName().equals(packageName)) {
-			List<JavaElement> javaClasses = element.getChildren();
+			List<Element> javaClasses = element.getChildren();
 			if (javaClasses != null && !javaClasses.isEmpty()) {
-				for (JavaElement javaClass : javaClasses) {
+				for (Element javaClass : javaClasses) {
 					if (javaClass.getName().equals(elementName)) {
 						return true;
 					}
@@ -107,7 +107,7 @@ public class ClassMapping extends Mapping {
 		return false;
 	}
 
-	private void removeClass(List<JavaElement> javaPackages, String className,
+	private void removeClass(List<Element> javaPackages, String className,
 			String classPath) {
 		String packageName = classPath.substring(0, classPath.lastIndexOf("/"));
 		packageName = packageName.substring(1);
@@ -116,11 +116,11 @@ public class ClassMapping extends Mapping {
 		packageName = packageName.substring(5);
 		packageName = packageName.replace("/", ".");
 		if (javaPackages != null && !javaPackages.isEmpty()) {
-			for (JavaElement pa : javaPackages) {
+			for (Element pa : javaPackages) {
 				if (pa.getName().equals(packageName)) {
-					List<JavaElement> javaClasses = pa.getChildren();
+					List<Element> javaClasses = pa.getChildren();
 					if (javaClasses != null && !javaClasses.isEmpty()) {
-						for (JavaElement javaClass : javaClasses) {
+						for (Element javaClass : javaClasses) {
 							if (javaClass.getName().equals(className)) {
 								UtilOperations.getInstance().removeChild(
 										className, pa.getChildren());
@@ -132,11 +132,11 @@ public class ClassMapping extends Mapping {
 		}
 	}
 
-	private JavaProject createProjectWithClass(String projectPath,
+	private Variant createProjectWithClass(String projectPath,
 			String elementName, String elementPath) {
 		String projectName = UtilOperations.getInstance().parseProjectName(
 				projectPath);
-		JavaProject javaProject = new JavaProject(projectName, projectPath);
+		Variant javaProject = new Variant(projectName, projectPath);
 		elementPath = elementPath.substring(1);
 		String packagePath = elementPath.substring(UtilOperations.getInstance()
 				.getIndexOfFirstPathSeparator(elementPath));
@@ -148,41 +148,41 @@ public class ClassMapping extends Mapping {
 		String packageName = packagePath.replace("/", ".");
 		elementPath = elementPath.substring(0,
 				elementPath.lastIndexOf(elementName) - 1);
-		JavaPackage javaPackage = null;
+		Package javaPackage = null;
 		javaPackage = addPackage(packageName, elementPath, projectPath,
 				elementName);
 		javaProject.addChild(javaPackage);
 		return javaProject;
 	}
 
-	private JavaPackage addPackage(String elementName, String elementPath,
+	private Package addPackage(String elementName, String elementPath,
 			String projectPath, String className) {
-		JavaPackage javaPackage = new JavaPackage(elementName, elementPath);
+		Package javaPackage = new Package(elementName, elementPath);
 		javaPackage.addChild(addClassToPackage(projectPath, elementPath + "/",
 				className));
 		return javaPackage;
 	}
 
-	private JavaElement addClassToPackage(String projectPath,
+	private Element addClassToPackage(String projectPath,
 			String packagePath, String className) {
 		return UtilOperations.getInstance()
 				.readClassFiles(projectPath, packagePath, className).get(0);
 	}
 
-	public JavaProject addClassWithCode(String projectPath, String elementName,
+	public Variant addClassWithCode(String projectPath, String elementName,
 			String elementPath, List<String> code, int startLine, int endLine,
 			int offset) {
 		String projectName = UtilOperations.getInstance().parseProjectName(
 				projectPath);
-		JavaProject javaProject = new JavaProject(projectName, projectPath);
+		Variant javaProject = new Variant(projectName, projectPath);
 		String packagePath = elementPath.substring(projectName.length() + 1);
 		packagePath = packagePath.substring(0,
 				packagePath.lastIndexOf(elementName) - 1);
 		String packageName = packagePath.replace("/", ".");
 		elementPath = elementPath.substring(0,
 				elementPath.lastIndexOf(elementName) - 1);
-		JavaPackage javaPackage = new JavaPackage(packageName, elementPath);
-		javaPackage.addChild(new JavaClass(elementName, elementPath + "/"
+		Package javaPackage = new Package(packageName, elementPath);
+		javaPackage.addChild(new Class(elementName, elementPath + "/"
 				+ elementName, new CodeFragment(code, startLine, endLine,
 				offset)));
 		javaProject.addChild(javaPackage);

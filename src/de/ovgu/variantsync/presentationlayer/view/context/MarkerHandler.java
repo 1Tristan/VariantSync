@@ -27,9 +27,9 @@ import de.ovgu.variantsync.applicationlayer.Util;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Class;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.presentationlayer.view.codemapping.CodeMarkerFactory;
 import de.ovgu.variantsync.presentationlayer.view.codemapping.MarkerInformation;
 import de.ovgu.variantsync.presentationlayer.view.codemapping.RemoveMarkerJob;
@@ -164,14 +164,14 @@ public class MarkerHandler {
 		if (context.getFeatureExpression().equals("Default_Context"))
 			return new ArrayList<MarkerInformation>();
 		Set<MarkerInformation> markers = new HashSet<MarkerInformation>();
-		Map<String, List<JavaClass>> classes = ModuleFactory
+		Map<String, List<Class>> classes = ModuleFactory
 				.getContextOperations().findJavaClass(projectName, className);
-		Set<Entry<String, List<JavaClass>>> set = classes.entrySet();
-		Iterator<Entry<String, List<JavaClass>>> it = set.iterator();
+		Set<Entry<String, List<Class>>> set = classes.entrySet();
+		Iterator<Entry<String, List<Class>>> it = set.iterator();
 		while (it.hasNext()) {
-			Entry<String, List<JavaClass>> entry = it.next();
-			List<JavaClass> listClasses = entry.getValue();
-			for (JavaClass c : listClasses) {
+			Entry<String, List<Class>> entry = it.next();
+			List<Class> listClasses = entry.getValue();
+			for (Class c : listClasses) {
 				List<CodeLine> cls = c.getCodeLines();
 				int i = 0;
 				List<CodeLine> tmp = new ArrayList<CodeLine>();
@@ -194,11 +194,11 @@ public class MarkerHandler {
 				}
 			}
 		}
-		JavaProject jp = context.getJavaProject(projectName);
-		List<JavaElement> elements = jp.getChildren();
-		List<JavaClass> cc = new ArrayList<JavaClass>();
+		Variant jp = context.getJavaProject(projectName);
+		List<Element> elements = jp.getChildren();
+		List<Class> cc = new ArrayList<Class>();
 		Util.getClassesByClassName(elements, cc, className);
-		for (JavaClass c : cc) {
+		for (Class c : cc) {
 			List<CodeLine> cls = c.getCodeLines();
 			int i = 0;
 			List<CodeLine> tmp = new ArrayList<CodeLine>();
@@ -234,17 +234,17 @@ public class MarkerHandler {
 		if (file != null && file.getProject() != null) {
 			String projectName = file.getProject().getName();
 			String fileName = file.getName();
-			Map<String, List<JavaClass>> classes = contextOp.findJavaClass(
+			Map<String, List<Class>> classes = contextOp.findJavaClass(
 					projectName, fileName);
 
 			MarkerHandler.getInstance().clearAllMarker(file);
 			List<MarkerInformation> markers = new ArrayList<MarkerInformation>();
-			Set<Entry<String, List<JavaClass>>> set = classes.entrySet();
-			Iterator<Entry<String, List<JavaClass>>> it = set.iterator();
+			Set<Entry<String, List<Class>>> set = classes.entrySet();
+			Iterator<Entry<String, List<Class>>> it = set.iterator();
 			while (it.hasNext()) {
-				Entry<String, List<JavaClass>> entry = it.next();
-				List<JavaClass> listClasses = entry.getValue();
-				for (JavaClass c : listClasses) {
+				Entry<String, List<Class>> entry = it.next();
+				List<Class> listClasses = entry.getValue();
+				for (Class c : listClasses) {
 					List<CodeLine> cls = c.getCodeLines();
 					int i = 0;
 					List<CodeLine> tmp = new ArrayList<CodeLine>();

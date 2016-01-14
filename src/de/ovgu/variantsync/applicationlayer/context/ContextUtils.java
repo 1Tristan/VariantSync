@@ -10,9 +10,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
 import de.ovgu.variantsync.VariantSyncPlugin;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Class;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.Diff;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.DiffIndices;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.DiffStep;
@@ -40,6 +40,11 @@ public class ContextUtils {
 	public static IFile findFileRecursively(IContainer container, String name)
 			throws CoreException {
 		for (IResource r : container.members()) {
+			try {
+				r.refreshLocal(IResource.DEPTH_INFINITE, null);
+			} catch (CoreException e1) {
+				e1.printStackTrace();
+			}
 			if (r instanceof IContainer) {
 				IFile file = findFileRecursively((IContainer) r, name);
 				if (file != null) {
@@ -100,23 +105,23 @@ public class ContextUtils {
 		return diffs;
 	}
 
-	public static List<JavaClass> getClasses(JavaProject jp) {
+	public static List<Class> getClasses(Variant jp) {
 		if (jp == null || jp.getChildren() == null
 				|| jp.getChildren().isEmpty()) {
-			return new ArrayList<JavaClass>();
+			return new ArrayList<Class>();
 		}
-		List<JavaElement> javaElements = new ArrayList<JavaElement>();
+		List<Element> javaElements = new ArrayList<Element>();
 		ContextUtils.iterateElements(jp.getChildren(), javaElements);
-		List<JavaClass> classes = new ArrayList<JavaClass>();
-		for (JavaElement e : javaElements) {
-			classes.add((JavaClass) e);
+		List<Class> classes = new ArrayList<Class>();
+		for (Element e : javaElements) {
+			classes.add((Class) e);
 		}
 		return classes;
 	}
 
-	public static void iterateElements(List<JavaElement> elements,
-			List<JavaElement> classes) {
-		for (JavaElement e : elements) {
+	public static void iterateElements(List<Element> elements,
+			List<Element> classes) {
+		for (Element e : elements) {
 			if (e.getChildren() != null) {
 				iterateElements(e.getChildren(), classes);
 			} else {

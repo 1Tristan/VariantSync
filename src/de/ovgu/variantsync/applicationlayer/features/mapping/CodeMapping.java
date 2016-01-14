@@ -13,9 +13,9 @@ import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeFragment;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaPackage;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Class;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Package;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
@@ -33,32 +33,32 @@ public class CodeMapping extends Mapping {
 	}
 
 	@Override
-	public JavaElement getElement(List<JavaElement> javaPackages,
+	public Element getElement(List<Element> javaPackages,
 			String className, String classPath) {
 		return null;
 	}
 
 	@Override
-	public JavaElement createElement(String pathToProject, String elementName,
+	public Element createElement(String pathToProject, String elementName,
 			String pathToElement) {
 		return null;
 	}
 
 	@Override
-	public boolean containsElement(List<JavaElement> elements,
+	public boolean containsElement(List<Element> elements,
 			String elementName, String pathToElement, String contentOfElement) {
 		return false;
 	}
 
 	@Override
-	protected void computeElement(JavaElement element, MappingElement mapping,
+	protected void computeElement(Element element, MappingElement mapping,
 			String name, String path) {
 		List<String> code = mapping.getCode();
 		boolean ignoreChange = mapping.isIgnore();
 		String relativeClassPath = UtilOperations.getInstance()
 				.getRelativeClassPath(path);
 		if (classMapping.containsElement(element.getChildren(), name, path, "")) {
-			JavaElement javaElement = classMapping.getElement(
+			Element javaElement = classMapping.getElement(
 					element.getChildren(), name, relativeClassPath);
 			List<CodeLine> tmpCode = new ArrayList<CodeLine>();
 			List<CodeLine> actualCode = javaElement.getClonedCodeLines();
@@ -72,30 +72,30 @@ public class CodeMapping extends Mapping {
 
 			if (!ignoreChange
 					&& (mapping.isFirstStep() || actualCode.isEmpty()))
-				((JavaClass) javaElement).setBaseVersion();
+				((Class) javaElement).setBaseVersion();
 
 			javaElement.setCodeLines(newLines);
-			((JavaClass) javaElement).setLinesOfWholeClass(mapping
+			((Class) javaElement).setLinesOfWholeClass(mapping
 					.getWholeClass());
 
 			if (!ignoreChange && mapping.isLastStep())
-				((JavaClass) javaElement).addChange(
+				((Class) javaElement).addChange(
 						newLines,
 						mapping.getPathToProject()
 								.substring(
 										mapping.getPathToProject().lastIndexOf(
 												"/") + 1), name);
 		} else {
-			JavaElement packageOfClass = packageMapping.getElement(
+			Element packageOfClass = packageMapping.getElement(
 					element.getChildren(), name, relativeClassPath);
 			if (packageOfClass == null) {
 				String packageName = UtilOperations.getInstance()
 						.parsePackageName(path);
 				path = UtilOperations.getInstance().parsePackagePath(path);
-				packageOfClass = new JavaPackage(packageName, path);
+				packageOfClass = new Package(packageName, path);
 				element.addChild(packageOfClass);
 			}
-			JavaClass jc = new JavaClass(name, path + "/" + name,
+			Class jc = new Class(name, path + "/" + name,
 					new CodeFragment(code, mapping.getStartLineOfSelection(),
 							mapping.getEndLineOfSelection(),
 							mapping.getOffset()));
@@ -157,7 +157,7 @@ public class CodeMapping extends Mapping {
 	}
 
 	@Override
-	protected JavaElement createProject(String pathToProject,
+	protected Element createProject(String pathToProject,
 			String elementName, String elementPath, MappingElement mapping) {
 		String relativeClassPath = UtilOperations.getInstance()
 				.getRelativeClassPath(elementPath);
@@ -169,8 +169,8 @@ public class CodeMapping extends Mapping {
 	}
 
 	@Override
-	protected boolean removeElement(JavaElement javaElement,
-			List<JavaElement> elements, String elementName, String elementPath,
+	protected boolean removeElement(Element javaElement,
+			List<Element> elements, String elementName, String elementPath,
 			CodeFragment code, boolean isFirstStep, boolean isLastStep,
 			List<String> wholeClass) {
 		String nameOfClass = javaElement.getName();
@@ -180,22 +180,26 @@ public class CodeMapping extends Mapping {
 				&& pathOfClass.equals(UtilOperations.getInstance()
 						.removeToSrcInPath(elementPath))) {
 			if (isFirstStep)
-				((JavaClass) javaElement).setBaseVersion();
+				((Class) javaElement).setBaseVersion();
 
 			List<CodeLine> tmpCode = new ArrayList<CodeLine>();
 			List<CodeLine> actualCode = javaElement.getClonedCodeLines();
 			for (CodeLine cl : actualCode) {
 				tmpCode.add(cl.clone());
 			}
-			((JavaClass) javaElement).setLinesOfWholeClass(wholeClass);
-			List<CodeLine> codeLines = UtilOperations.getInstance().removeCode(
-					code.getStartLine(), code.getEndLine(), tmpCode);
+			if (wholeClass != null)
+				((Class) javaElement).setLinesOfWholeClass(wholeClass);
+			List<CodeLine> codeLines = new ArrayList<CodeLine>();
+			if (tmpCode != null && !tmpCode.isEmpty())
+				codeLines = UtilOperations.getInstance().removeCode(
+						code.getStartLine(), code.getEndLine(), tmpCode);
 			if (isLastStep) {
 				String projectName = elementPath.substring(0,
 						elementPath.indexOf("/src"));
-				projectName = projectName.substring(projectName
-						.lastIndexOf("/"));
-				((JavaClass) javaElement).addChange(codeLines, projectName,
+				if (projectName.contains("/"))
+					projectName = projectName.substring(projectName
+							.lastIndexOf("/"));
+				((Class) javaElement).addChange(codeLines, projectName,
 						elementName);
 			}
 
@@ -205,13 +209,13 @@ public class CodeMapping extends Mapping {
 	}
 
 	@Override
-	protected boolean checkElement(JavaElement element, String elementName,
+	protected boolean checkElement(Element element, String elementName,
 			String pathToElement) {
 		return false;
 	}
 
 	@Override
-	protected JavaElement computeElement(JavaElement element, String name,
+	protected Element computeElement(Element element, String name,
 			String path) {
 		return null;
 	}

@@ -13,7 +13,7 @@ import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 
 /**
  * Tests the update algorithm. This algorithms checks if the code inside
@@ -61,7 +61,7 @@ public class TestUpdateCodeAlgorithm {
 		co.stopRecording();
 
 		Context testFeatureContext = co.getContext(TESTFEATURE_CONTEXT);
-		JavaProject jp = testFeatureContext.getJavaProject(PROJECT_NAME);
+		Variant jp = testFeatureContext.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
 
 		// add code line inside existing code
@@ -163,7 +163,7 @@ public class TestUpdateCodeAlgorithm {
 		co.stopRecording();
 
 		Context testFeatureContext = co.getContext(TESTFEATURE_CONTEXT);
-		JavaProject jp = testFeatureContext.getJavaProject(PROJECT_NAME);
+		Variant jp = testFeatureContext.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
 
 		// remove code from the inside of existing code

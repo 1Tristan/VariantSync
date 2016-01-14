@@ -94,6 +94,8 @@ class ContextHandler {
 		UpdateAlgorithm ua = new UpdateAlgorithm();
 		ua.updateCode(projectName, packageName, className, changedCode,
 				activeContext.getFeatureExpression());
+		if (packageName.equals("defaultpackage"))
+			packageName = "";
 		MarkerHandler.getInstance().updateMarker(projectName, packageName,
 				className, activeContext);
 		contextMap.put(activeContext.getFeatureExpression(), activeContext);
@@ -113,6 +115,8 @@ class ContextHandler {
 		UpdateAlgorithm ua = new UpdateAlgorithm();
 		ua.updateCode(projectName, packageName, className, changedCode,
 				activeContext.getFeatureExpression());
+		if (packageName.equals("defaultpackage"))
+			packageName = "";
 		MarkerHandler.getInstance().updateMarker(projectName, packageName,
 				className, activeContext);
 		contextMap.put(activeContext.getFeatureExpression(), activeContext);
@@ -122,7 +126,14 @@ class ContextHandler {
 
 	public void recordFileAdded(String projectName, String pathToProject,
 			String className, String packageName, List<String> wholeClass) {
-		// TODO
+		ContextAlgorithm ca = new ContextAlgorithm(activeContext);
+		ca.addClass(projectName, packageName, className, wholeClass);
+	}
+
+	public void recordFileRemoved(String projectName, String pathToProject,
+			String className, String packageName, List<String> wholeClass) {
+		ContextAlgorithm ca = new ContextAlgorithm(activeContext);
+		ca.removeClass(projectName, packageName, className, wholeClass);
 	}
 
 	public void addContext(Context c) {
@@ -200,6 +211,8 @@ class ContextHandler {
 		UpdateAlgorithm ua = new UpdateAlgorithm();
 		ua.updateCode(projectName, packageName, filename, tmpUnifiedDiff,
 				c.getFeatureExpression());
+		if (packageName.equals("defaultpackage"))
+			packageName = "";
 		MarkerHandler.getInstance().updateMarker(projectName, packageName,
 				filename, c);
 	}

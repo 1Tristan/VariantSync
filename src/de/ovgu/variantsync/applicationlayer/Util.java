@@ -17,8 +17,8 @@ import de.ovgu.variantsync.VariantSyncConstants;
 import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Class;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
@@ -31,12 +31,12 @@ import de.ovgu.variantsync.utilitylayer.log.LogOperations;
  */
 public class Util {
 
-	public static void getClassesByClassName(List<JavaElement> elements,
-			List<JavaClass> classes, String className) {
+	public static void getClassesByClassName(List<Element> elements,
+			List<Class> classes, String className) {
 		if (elements != null && !elements.isEmpty()) {
-			for (JavaElement je : elements) {
-				if (je instanceof JavaClass && je.getName().equals(className)) {
-					classes.add((JavaClass) je);
+			for (Element je : elements) {
+				if (je instanceof Class && je.getName().equals(className)) {
+					classes.add((Class) je);
 				} else {
 					getClassesByClassName(je.getChildren(), classes, className);
 				}
@@ -44,11 +44,11 @@ public class Util {
 		}
 	}
 
-	public static boolean containsClass(List<JavaElement> elements,
+	public static boolean containsClass(List<Element> elements,
 			String className) {
 		if (elements != null && !elements.isEmpty()) {
-			for (JavaElement je : elements) {
-				if (je instanceof JavaClass && je.getName().equals(className)) {
+			for (Element je : elements) {
+				if (je instanceof Class && je.getName().equals(className)) {
 					return true;
 				} else {
 					return containsClass(je.getChildren(), className);
@@ -110,9 +110,13 @@ public class Util {
 
 	public static String parsePackageNameFromResource(IResource res) {
 		String packageName = res.getLocation().toString();
-		packageName = packageName.substring(packageName.indexOf("src") + 4,
-				packageName.lastIndexOf("/"));
-		packageName = packageName.replace("/", ".");
+		try {
+			packageName = packageName.substring(packageName.indexOf("src") + 4,
+					packageName.lastIndexOf("/"));
+			packageName = packageName.replace("/", ".");
+		} catch (IndexOutOfBoundsException e) {
+			return "defaultpackage";
+		}
 		return packageName;
 	}
 

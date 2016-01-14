@@ -3,8 +3,8 @@ package de.ovgu.variantsync.applicationlayer.features;
 import java.util.List;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeFragment;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.applicationlayer.features.mapping.ClassMapping;
 import de.ovgu.variantsync.applicationlayer.features.mapping.CodeMapping;
 import de.ovgu.variantsync.applicationlayer.features.mapping.IMappingOperations;
@@ -60,8 +60,8 @@ class FeatureMapping {
 		return instance;
 	}
 
-	public JavaProject mapCodeFragment(MappingElement mapping,
-			JavaProject project) {
+	public Variant mapCodeFragment(MappingElement mapping,
+			Variant project) {
 		readMappingInfo(mapping);
 		List<String> code = mapping.getCode();
 		String projectPath = project.getPath();
@@ -77,14 +77,14 @@ class FeatureMapping {
 
 				// check
 			} else {
-				JavaProject javaProject = ((ClassMapping) classMapping)
+				Variant javaProject = ((ClassMapping) classMapping)
 						.addClassWithCode(projectPath, elementName,
 								relativeClassPath, code,
 								mapping.getStartLineOfSelection(),
 								mapping.getEndLineOfSelection(),
 								mapping.getOffset());
 				try {
-					return (JavaProject) javaProject.clone();
+					return (Variant) javaProject.clone();
 				} catch (CloneNotSupportedException e) {
 					LogOperations
 							.logError(
@@ -99,7 +99,7 @@ class FeatureMapping {
 		return project;
 	}
 
-	public JavaProject mapElement(MappingElement mapping, JavaProject project) {
+	public Variant mapElement(MappingElement mapping, Variant project) {
 		readMappingInfo(mapping);
 		String projectPath = mapping.getPathToProject();
 		if (project != null) {
@@ -124,7 +124,7 @@ class FeatureMapping {
 				break;
 			}
 		} else {
-			JavaElement javaProject = new JavaProject(UtilOperations
+			Element javaProject = new Variant(UtilOperations
 					.getInstance().parseProjectName(projectPath), projectPath,
 					null);
 			switch (elementType) {
@@ -138,7 +138,7 @@ class FeatureMapping {
 
 			// check
 			case CLASS: {
-				javaProject = (JavaProject) classMapping.createElement(
+				javaProject = (Variant) classMapping.createElement(
 						projectPath, elementName, elementPath);
 				break;
 			}
@@ -150,7 +150,7 @@ class FeatureMapping {
 				break;
 			}
 			try {
-				return (JavaProject) javaProject.clone();
+				return (Variant) javaProject.clone();
 			} catch (CloneNotSupportedException e) {
 				LogOperations
 						.logError(
@@ -161,7 +161,7 @@ class FeatureMapping {
 		return null;
 	}
 
-	public JavaProject removeMapping(MappingElement mapping, JavaProject project) {
+	public Variant removeMapping(MappingElement mapping, Variant project) {
 		String pathToFile = UtilOperations.getInstance().unifyStartOfPath(
 				mapping.getPathToSelectedElement());
 		// pathToFile =

@@ -106,6 +106,7 @@ public class FeatureView extends ViewPart {
 	private long timestamp;
 	private java.util.List<CodeLine> newVersionWholeClass;
 	private List list_batchVariants;
+	private GridData gd_list_2;
 
 	public FeatureView() {
 	}
@@ -128,7 +129,7 @@ public class FeatureView extends ViewPart {
 		reference = this;
 		featureExpressions = fc.getFeatureExpressions().getFeatureExpressions()
 				.toArray(new String[] {});
-		arg0.setLayout(new GridLayout(6, false));
+		arg0.setLayout(new GridLayout(5, false));
 
 		Label lblSelectFeatureExpression = new Label(arg0, SWT.NONE);
 		lblSelectFeatureExpression.setText("Select Feature Expression");
@@ -177,8 +178,6 @@ public class FeatureView extends ViewPart {
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
 
 		Label lblProjects = new Label(arg0, SWT.NONE);
 		lblProjects.setText("Projects");
@@ -195,11 +194,8 @@ public class FeatureView extends ViewPart {
 		Label lblSyncTargets = new Label(arg0, SWT.NONE);
 		lblSyncTargets.setText("automatic sync possible");
 
-		lblMergeConflict = new Label(arg0, SWT.NONE);
-		lblMergeConflict.setText("conflict - manual sync");
-
 		projects = new List(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.MULTI);
-		GridData gd_list = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
+		GridData gd_list = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 4);
 		gd_list.heightHint = 255;
 		gd_list.widthHint = 119;
 		projects.setLayoutData(gd_list);
@@ -249,7 +245,7 @@ public class FeatureView extends ViewPart {
 
 		classes = new List(arg0, SWT.BORDER | SWT.H_SCROLL);
 		GridData gd_list_1 = new GridData(SWT.FILL, SWT.FILL, false, false, 1,
-				1);
+				4);
 		gd_list_1.heightHint = 259;
 		gd_list_1.widthHint = 83;
 		classes.setLayoutData(gd_list_1);
@@ -273,7 +269,7 @@ public class FeatureView extends ViewPart {
 
 		changes = new List(arg0, SWT.H_SCROLL | SWT.BORDER);
 		GridData gd_changes = new GridData(SWT.FILL, SWT.FILL, false, false, 1,
-				1);
+				4);
 		gd_changes.heightHint = 256;
 		gd_changes.widthHint = 165;
 		changes.setLayoutData(gd_changes);
@@ -343,14 +339,15 @@ public class FeatureView extends ViewPart {
 		newCode = new Table(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
 				| SWT.CANCEL);
 		GridData gd_text_1 = new GridData(SWT.FILL, SWT.FILL, false, false, 1,
-				1);
+				2);
 		gd_text_1.widthHint = 157;
 		newCode.setLayoutData(gd_text_1);
 
-		autoSyncTargets = new List(arg0, SWT.BORDER | SWT.H_SCROLL);
-		GridData gd_syncTargets = new GridData(SWT.FILL, SWT.FILL, false,
-				false, 1, 1);
-		gd_syncTargets.heightHint = 79;
+		autoSyncTargets = new List(arg0, SWT.BORDER | SWT.H_SCROLL
+				| SWT.V_SCROLL);
+		GridData gd_syncTargets = new GridData(SWT.FILL, SWT.TOP, false, false,
+				1, 1);
+		gd_syncTargets.heightHint = 89;
 		gd_syncTargets.widthHint = 143;
 		autoSyncTargets.setLayoutData(gd_syncTargets);
 		autoSyncTargets.addSelectionListener(new SelectionListener() {
@@ -388,57 +385,6 @@ public class FeatureView extends ViewPart {
 			}
 		});
 
-		manualSyncTargets = new List(arg0, SWT.BORDER | SWT.H_SCROLL);
-		gd_list_1 = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
-		gd_list_1.widthHint = 191;
-		manualSyncTargets.setLayoutData(gd_list_1);
-		manualSyncTargets.addSelectionListener(new SelectionListener() {
-
-			public void widgetSelected(SelectionEvent event) {
-				int selectedTargetIndex = manualSyncTargets.getSelectionIndex();
-				int i = 0;
-				for (String target : manualSyncTargetsAsList) {
-					if (i == selectedTargetIndex) {
-						btnManualSync.setEnabled(true);
-						String[] targetInfo = target.split(":");
-						projectNameTarget = targetInfo[0].trim();
-						classNameTarget = targetInfo[1].trim();
-						manualSelection = target;
-						break;
-					}
-					i++;
-				}
-			}
-
-			public void widgetDefaultSelected(SelectionEvent event) {
-			}
-		});
-
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-
-		btnRemoveChangeEntry = new Button(arg0, SWT.NONE);
-		btnRemoveChangeEntry.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,
-				false, false, 1, 1));
-		btnRemoveChangeEntry.setText("Remove Change Entry");
-		btnRemoveChangeEntry.setEnabled(false);
-		btnRemoveChangeEntry.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				switch (e.type) {
-				case SWT.Selection: {
-					contextOperations.removeChange(selectedFeatureExpression,
-							selectedProject, selectedClass, selectedChange,
-							timestamp);
-					btnRemoveChangeEntry.setEnabled(false);
-					setChanges();
-					if (newCode != null)
-						newCode.removeAll();
-				}
-				}
-			}
-		});
-		new Label(arg0, SWT.NONE);
-
 		btnSynchronize = new Button(arg0, SWT.NONE);
 		btnSynchronize.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
 				false, false, 1, 1));
@@ -470,6 +416,63 @@ public class FeatureView extends ViewPart {
 				}
 			}
 		});
+
+		lblMergeConflict = new Label(arg0, SWT.NONE);
+		lblMergeConflict.setText("conflict - manual sync necessary");
+
+		manualSyncTargets = new List(arg0, SWT.BORDER | SWT.H_SCROLL
+				| SWT.V_SCROLL);
+		gd_list_2 = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
+		gd_list_2.heightHint = 89;
+		gd_list_2.widthHint = 191;
+		manualSyncTargets.setLayoutData(gd_list_2);
+		manualSyncTargets.addSelectionListener(new SelectionListener() {
+
+			public void widgetSelected(SelectionEvent event) {
+				int selectedTargetIndex = manualSyncTargets.getSelectionIndex();
+				int i = 0;
+				for (String target : manualSyncTargetsAsList) {
+					if (i == selectedTargetIndex) {
+						btnManualSync.setEnabled(true);
+						String[] targetInfo = target.split(":");
+						projectNameTarget = targetInfo[0].trim();
+						classNameTarget = targetInfo[1].trim();
+						manualSelection = target;
+						break;
+					}
+					i++;
+				}
+			}
+
+			public void widgetDefaultSelected(SelectionEvent event) {
+			}
+		});
+
+		new Label(arg0, SWT.NONE);
+		new Label(arg0, SWT.NONE);
+
+		btnRemoveChangeEntry = new Button(arg0, SWT.NONE);
+		btnRemoveChangeEntry.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,
+				false, false, 1, 1));
+		btnRemoveChangeEntry.setText("Remove Change Entry");
+		btnRemoveChangeEntry.setVisible(false);
+		btnRemoveChangeEntry.setEnabled(false);
+		btnRemoveChangeEntry.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				switch (e.type) {
+				case SWT.Selection: {
+					contextOperations.removeChange(selectedFeatureExpression,
+							selectedProject, selectedClass, selectedChange,
+							timestamp);
+					btnRemoveChangeEntry.setEnabled(false);
+					setChanges();
+					if (newCode != null)
+						newCode.removeAll();
+				}
+				}
+			}
+		});
+		new Label(arg0, SWT.NONE);
 
 		btnManualSync = new Button(arg0, SWT.NONE);
 		btnManualSync.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false,
@@ -509,13 +512,12 @@ public class FeatureView extends ViewPart {
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
 		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
 
 		Button btnSyncPreview = new Button(arg0, SWT.CHECK);
 		btnSyncPreview.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
 				false, false, 1, 1));
 		btnSyncPreview.setText("sync preview");
-		new Label(arg0, SWT.NONE);
+		btnSyncPreview.setVisible(false);
 	}
 
 	private java.util.List<CodeLine> getDifference(

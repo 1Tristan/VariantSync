@@ -12,7 +12,7 @@ import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.context.IContextOperations;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 
 /**
  * Basis for all tests (except AddCodeToEmptyContext-Test) is the adding of the
@@ -56,7 +56,7 @@ public class TestSingleContextMapping {
 		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
 				new ArrayList<String>());
 
-		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		Variant jp = context.getJavaProject(PROJECT_NAME);
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();
 
@@ -120,7 +120,7 @@ public class TestSingleContextMapping {
 		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
 				new ArrayList<String>());
 
-		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		Variant jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
 
 		// add code line inside existing code
@@ -205,7 +205,7 @@ public class TestSingleContextMapping {
 		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
 				new ArrayList<String>());
 
-		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		Variant jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
 
 		// add code line inside existing code
@@ -290,7 +290,7 @@ public class TestSingleContextMapping {
 		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
 				new ArrayList<String>());
 
-		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		Variant jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
 
 		// add code line inside existing code
@@ -409,7 +409,7 @@ public class TestSingleContextMapping {
 		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
 				new ArrayList<String>());
 
-		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		Variant jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
 
 		// add code line inside existing code
@@ -528,7 +528,7 @@ public class TestSingleContextMapping {
 		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
 				new ArrayList<String>());
 
-		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		Variant jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
 
 		// Step 1
@@ -711,7 +711,7 @@ public class TestSingleContextMapping {
 		co.addCode(PROJECT_NAME, "mainpackage", "Main.java", diff, context,
 				new ArrayList<String>());
 
-		JavaProject jp = context.getJavaProject(PROJECT_NAME);
+		Variant jp = context.getJavaProject(PROJECT_NAME);
 		System.out.println("JavaProject:\n" + jp.toString());
 		List<CodeLine> codeOfClass = jp.getChildren().get(0).getChildren()
 				.get(0).getClonedCodeLines();

@@ -99,6 +99,8 @@ public class ProductView extends ViewPart {
 	private java.util.List<CodeLine> newVersionWholeClass;
 	private Map<String, Collection<CodeChange>> changeMap;
 	private String selClass;
+	private Button btnRemoveChangeEntry;
+	private int selIn;
 
 	public ProductView() {
 	}
@@ -266,6 +268,8 @@ public class ProductView extends ViewPart {
 				if (newCode != null)
 					newCode.removeAll();
 				selectedChange = changes.getSelection()[0];
+				selIn = changes.getSelectionIndex();
+				btnRemoveChangeEntry.setEnabled(true);
 				String time = changes.getSelection()[0].trim();
 				SimpleDateFormat formatter = new SimpleDateFormat(
 						"HH:mm:ss 'at' dd.MM.yyyy");
@@ -412,6 +416,31 @@ public class ProductView extends ViewPart {
 		btnSyncPreview.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
 				false, false, 1, 1));
 		btnSyncPreview.setText("sync preview");
+		new Label(arg0, SWT.NONE);
+
+		new Label(arg0, SWT.NONE);
+		new Label(arg0, SWT.NONE);
+
+		btnRemoveChangeEntry = new Button(arg0, SWT.NONE);
+		btnRemoveChangeEntry.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,
+				false, false, 1, 1));
+		btnRemoveChangeEntry.setText("Remove Change Entry");
+		btnRemoveChangeEntry.setEnabled(false);
+		btnRemoveChangeEntry.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				switch (e.type) {
+				case SWT.Selection: {
+					contextOperations.removeChange(selectedFeature,
+							selectedVariant, selectedClass, selIn,
+							timestamp);
+					btnRemoveChangeEntry.setEnabled(false);
+					setChanges();
+					if (newCode != null)
+						newCode.removeAll();
+				}
+				}
+			}
+		});
 		new Label(arg0, SWT.NONE);
 	}
 
@@ -678,6 +707,8 @@ public class ProductView extends ViewPart {
 		}
 
 		java.util.List<String> source = new ArrayList<String>();
+		if (code.isEmpty())
+			code = baseCode;
 		for (CodeLine line : code) {
 			source.add(line.getCode() + "\n");
 		}

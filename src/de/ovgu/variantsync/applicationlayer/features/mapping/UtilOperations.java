@@ -11,10 +11,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeFragment;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaPackage;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Class;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Package;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
@@ -37,12 +37,12 @@ public class UtilOperations {
 		return instance;
 	}
 
-	public List<JavaElement> addChild(JavaElement element,
-			List<JavaElement> elements) {
+	public List<Element> addChild(Element element,
+			List<Element> elements) {
 		if (elements == null) {
-			elements = new CopyOnWriteArrayList<JavaElement>();
+			elements = new CopyOnWriteArrayList<Element>();
 		}
-		for (JavaElement e : elements) {
+		for (Element e : elements) {
 			if (e != null && e.getName() != null
 					&& e.getName().equals(element.getName())) {
 				elements.remove(e);
@@ -56,10 +56,10 @@ public class UtilOperations {
 		return elements;
 	}
 
-	public List<JavaElement> removeChild(String name, List<JavaElement> elements) {
+	public List<Element> removeChild(String name, List<Element> elements) {
 		if (elements != null) {
 			int i = 0;
-			for (JavaElement p : elements) {
+			for (Element p : elements) {
 				if (p.getName().equals(name)) {
 					break;
 				}
@@ -226,24 +226,24 @@ public class UtilOperations {
 		}
 	}
 
-	public void printProject(JavaElement element) {
-		if (element instanceof JavaProject) {
+	public void printProject(Element element) {
+		if (element instanceof Variant) {
 			System.out
 					.println("\n=================== Project ===================");
 			System.out.println(element.getName());
 		}
 		if (element.getChildren() != null) {
-			for (JavaElement child : element.getChildren()) {
-				if (child instanceof JavaPackage) {
+			for (Element child : element.getChildren()) {
+				if (child instanceof Package) {
 					System.out.println("\nPackage: " + child.getName());
 					printProject(child);
-				} else if (child instanceof JavaClass) {
+				} else if (child instanceof Class) {
 					System.out.println("\nClass: " + child.getName());
 					printCode(child.getClonedCodeLines());
 				}
 			}
 		} else {
-			if (element instanceof JavaClass) {
+			if (element instanceof Class) {
 				System.out.println("\nClass: " + element.getName());
 				printCode(element.getClonedCodeLines());
 			}
@@ -366,9 +366,9 @@ public class UtilOperations {
 		}
 	}
 
-	public List<JavaElement> readClassFiles(String projectPath,
+	public List<Element> readClassFiles(String projectPath,
 			String packagePath, String className) {
-		CopyOnWriteArrayList<JavaElement> classes = new CopyOnWriteArrayList<JavaElement>();
+		CopyOnWriteArrayList<Element> classes = new CopyOnWriteArrayList<Element>();
 		String tmpPackagePath = packagePath.substring(1);
 		tmpPackagePath = tmpPackagePath.substring(tmpPackagePath.indexOf("/"));
 		String path = projectPath + tmpPackagePath;
@@ -386,11 +386,11 @@ public class UtilOperations {
 				String name = filePath
 						.substring(getIndexOfLastPathSeparator(filePath) + 1);
 				if (!className.isEmpty() && name.equals(className)) {
-					classes.add(new JavaClass(name, packagePath + name,
+					classes.add(new Class(name, packagePath + name,
 							listString, listString.size()));
 					break;
 				} else if (className.isEmpty()) {
-					classes.add(new JavaClass(name, packagePath + "/" + name,
+					classes.add(new Class(name, packagePath + "/" + name,
 							listString, listString.size()));
 				}
 			} catch (FileNotFoundException | FileOperationException e) {

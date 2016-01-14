@@ -260,9 +260,9 @@ public class FeatureManagementDialog {
 		formDataDelete.bottom = new FormAttachment(100, -5);
 
 		okButton = new Button(lastComposite, SWT.NONE);
-		okButton.setText("Create new Constraint");
+		okButton.setText("Create new Feature Expression");
 		FormData formDataOk = new FormData();
-		formDataOk.width = 150;
+		formDataOk.width = 200;
 		formDataOk.right = new FormAttachment(deleteButton, -5);
 		formDataOk.bottom = new FormAttachment(100, -5);
 		okButton.setLayoutData(formDataOk);

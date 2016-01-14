@@ -7,7 +7,7 @@ public class CodeLine {
 	private String code;
 	private int line;
 	private boolean isMapped;
-	private boolean isNew;
+	protected boolean isNew;
 
 	public CodeLine() {
 	}

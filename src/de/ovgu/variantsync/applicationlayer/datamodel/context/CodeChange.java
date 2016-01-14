@@ -16,9 +16,9 @@ import javax.xml.bind.annotation.XmlElement;
 public class CodeChange {
 
 	private List<CodeLine> baseVersion;
-	private List<CodeLine> baseVersionWholeClass;
+	protected List<CodeLine> baseVersionWholeClass;
 	private List<CodeLine> newVersion;
-	private List<CodeLine> newVersionWholeClass;
+	protected List<CodeLine> newVersionWholeClass;
 	private long timestamp;
 
 	public CodeChange() {

@@ -1,5 +1,6 @@
 package de.ovgu.variantsync.applicationlayer.context;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +32,20 @@ class ContextAlgorithm {
 
 	public ContextAlgorithm(Context context) {
 		this.context = context;
+	}
+
+	public void addClass(String projectName, String packageName,
+			String className, List<String> wholeClass) {
+		addCode(projectName, packageName, className, 0, 0, wholeClass,
+				new ArrayList<String>() {
+				}, true, true, false);
+	}
+
+	public void removeClass(String projectName, String packageName,
+			String className, List<String> wholeClass) {
+		removeCode(projectName, packageName, className, 0, 0,
+				new ArrayList<String>() {
+				}, true, true, wholeClass, false);
 	}
 
 	public void addCode(String projectName, String packageName,
@@ -93,7 +108,7 @@ class ContextAlgorithm {
 					removeCode(projectName, packageName, className, startOld,
 							startOld, list, isFirstStep, isLastStep,
 							wholeClass, ignore);
- 					if (j < diffSteps.size() - 2
+					if (j < diffSteps.size() - 2
 							&& diffSteps.get(j + 1).isAddFlag()) {
 						isLastStep = false;
 					}
@@ -122,7 +137,8 @@ class ContextAlgorithm {
 
 	private void addCode(String projectName, String packageName,
 			String className, int start, int end, List<String> extractedCode,
-			List<String> wholeClass, boolean isFirstStep, boolean isLastStep, boolean ignore) {
+			List<String> wholeClass, boolean isFirstStep, boolean isLastStep,
+			boolean ignore) {
 		setUpProject(projectName);
 		MappingElement mapping = new MappingElement(
 				context.getFeatureExpression(), className,
@@ -139,7 +155,8 @@ class ContextAlgorithm {
 
 	private void removeCode(String projectName, String packageName,
 			String className, int start, int end, List<String> extractedCode,
-			boolean isFirstStep, boolean isLastStep, List<String> wholeClass, boolean ignore) {
+			boolean isFirstStep, boolean isLastStep, List<String> wholeClass,
+			boolean ignore) {
 		setUpProject(projectName);
 		MappingElement mapping = new MappingElement(
 				context.getFeatureExpression(), className,

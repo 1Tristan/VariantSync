@@ -12,7 +12,7 @@ import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Class;
 
 /**
  * Defines functions to manage contexts.
@@ -52,7 +52,7 @@ public interface IContextOperations {
 	void addCode(String projectName, String packageName, String className,
 			List<String> code, Context c, List<String> wholeClass);
 
-	Map<String, List<JavaClass>> findJavaClass(String projectName,
+	Map<String, List<Class>> findJavaClass(String projectName,
 			String className);
 
 	CodeHighlighting findColor(String featureExpression);

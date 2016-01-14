@@ -123,9 +123,9 @@ public class ConstraintDialog implements GUIDefaults {
 			ERROR, WARNING, NONE
 		}
 
-		private static final String STRING_HEADER_LABEL_DEFAULT = "Create new propositional feature-expression";
+		private static final String STRING_HEADER_LABEL_DEFAULT = "Create new propositional feature expression";
 
-		private static final String STRING_HEADER_DETAILS_DEFAULT = "You can create or edit constraints with this dialog.";
+		private static final String STRING_HEADER_DETAILS_DEFAULT = "You can create or edit feature expressions with this dialog.";
 
 		/**
 		 * The panels background color
@@ -294,61 +294,61 @@ public class ConstraintDialog implements GUIDefaults {
 
 	static class StringTable {
 
-		static final String CHECK_STARTED = "Performing additional checks. This may take a while. Although it is not recommended, you can %s your constraint by clicking \"%s\" before this process has ended.";
+		static final String CHECK_STARTED = "Performing additional checks. This may take a while. Although it is not recommended, you can %s your feature expression by clicking \"%s\" before this process has ended.";
 
-		static final String CONSTRAINT_VOIDS_MODEL = "Your constraint voids the model";
+		static final String CONSTRAINT_VOIDS_MODEL = "Your feature expression voids the model";
 
-		static final String CONSTRAINT_FALSE_OPTIONAL = "Your constraint leads to false optional features.\n\n%s";
+		static final String CONSTRAINT_FALSE_OPTIONAL = "Your feature expression leads to false optional features.\n\n%s";
 
-		static final String CONSTRAINT_DEAD_FEATURES = "Your constraint leads to dead features.\n\n%s";
+		static final String CONSTRAINT_DEAD_FEATURES = "Your feature expression leads to dead features.\n\n%s";
 
-		static final String CONSTRAINT_REDUNDANCE = "Redundancy occurred inside your constraint.";
+		static final String CONSTRAINT_REDUNDANCE = "Redundancy occurred inside your feature expression.";
 
 		static final String CONSTRAINT_CHECK_ENDED = "Click \"%s\" to %s .";
 
-		static final String CONSTRAINT_TAUTOLOGY = "Your constraint is a tautology.";
+		static final String CONSTRAINT_TAUTOLOGY = "Your feature expression is a tautology.";
 
-		static final String CONSTRAINT_NOT_SATISFIABLE = "Your constraint is not satisfiable.";
+		static final String CONSTRAINT_NOT_SATISFIABLE = "Your feature expression is not satisfiable.";
 
-		static final String DEFAULT_DETAILS_NEW_CONSTRAINT = "Create Propositional Constraint";
+		static final String DEFAULT_DETAILS_NEW_CONSTRAINT = "Create Propositional Feature Expression";
 
-		static final String DEFAULT_HEADER_NEW_CONSTRAINT = "Create new Constraint";
+		static final String DEFAULT_HEADER_NEW_CONSTRAINT = "Create new Feature Expression";
 
-		static final String DEFAULT_DETAILS_EDIT_CONSTRAINT = "Edit Propositional Constraint";
+		static final String DEFAULT_DETAILS_EDIT_CONSTRAINT = "Edit Propositional Feature Expression";
 
-		static final String DEFAULT_HEADER_EDIT_CONSTRAINT = "Edit your Constraint";
+		static final String DEFAULT_HEADER_EDIT_CONSTRAINT = "Edit your Feature Expression";
 
 		static final String VERB_UPDATE = "Update";
 
 		static final String VERB_CREATE = "Create";
 
-		static final String OK_BUTTON_TEXT = "%s Constraint";
+		static final String OK_BUTTON_TEXT = "%s Feature Expression";
 
 		static final String SAVE_CHANGES = "save your changes";
 
-		static final String ADD_NEW_CONSTRAINT = "add your new constraint";
+		static final String ADD_NEW_CONSTRAINT = "add your new feature expression";
 
 		static final String VERB_SAVE = "save";
 
-		static final String CONSTRAINT_IS_EMPTY = "constraint is empty";
+		static final String CONSTRAINT_IS_EMPTY = "feature expression is empty";
 
-		static final String CONSTRAINT_IS_NOT_SATISFIABLE = "constraint is unsatisfiable";
+		static final String CONSTRAINT_IS_NOT_SATISFIABLE = "feature expression is unsatisfiable";
 
 		static final String HREF_HELP_LINK = "https://github.com/1Tristan/VariantSync";
 
-		static final String PLEASE_INSERT_CONSTRAINT = "Please insert a constraint.";
+		static final String PLEASE_INSERT_CONSTRAINT = "Please insert a feature expression.";
 
 		static final String KEYSTROKE_SHORTCUT_FOR_PROPOSAL = "Ctrl+Space";
 
-		static final String CHECKING_CONSTRAINTS = "Checking constraint...";
+		static final String CHECKING_CONSTRAINTS = "Checking feature expression...";
 
-		static final String CONSTRAINT_CONTAINS_SYNTAX_ERRORS = "Your input constains syntax errors.";
+		static final String CONSTRAINT_CONTAINS_SYNTAX_ERRORS = "Your input contains syntax errors.";
 
-		static final String CONSTRAINT_CONTAINS_UNKNOWN_FEATURE = "Constraint contains one unknown feature name.";
+		static final String CONSTRAINT_CONTAINS_UNKNOWN_FEATURE = "Feature expression contains one unknown feature name.";
 
-		static final String CONSTRAINT_CONTAINS_UNKNOWN_FEATURES = "Constraint contains %s unknown feature names.";
+		static final String CONSTRAINT_CONTAINS_UNKNOWN_FEATURES = "Feature expression contains %s unknown feature names.";
 
-		static final String CONSTRAINT_CONNOT_BE_SAVED = "Your constraint is invalid and can not be saved: %s";
+		static final String CONSTRAINT_CONNOT_BE_SAVED = "Your feature expression is invalid and can not be saved: %s";
 
 	}
 
@@ -395,7 +395,7 @@ public class ConstraintDialog implements GUIDefaults {
 	/**
 	 * The dialogs title text
 	 */
-	private static final String DEFAULT_DIALOG_TITLE = "Feature-Expression Creation Dialog";
+	private static final String DEFAULT_DIALOG_TITLE = "Feature-Expression Dialog";
 
 	/**
 	 * Content proposal pop up.
@@ -708,7 +708,7 @@ public class ConstraintDialog implements GUIDefaults {
 		okButton = new Button(lastComposite, SWT.NONE);
 		autoSetOkButtonText();
 		FormData formDataOk = new FormData();
-		formDataOk.width = 120;
+		formDataOk.width = 180;
 		formDataOk.right = new FormAttachment(closeButton, -5);
 		formDataOk.bottom = new FormAttachment(100, -5);
 		okButton.setLayoutData(formDataOk);

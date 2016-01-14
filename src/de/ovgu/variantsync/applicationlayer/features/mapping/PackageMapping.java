@@ -3,27 +3,27 @@ package de.ovgu.variantsync.applicationlayer.features.mapping;
 import java.util.List;
 
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeFragment;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaPackage;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Package;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.presentationlayer.controller.data.MappingElement;
 
 public class PackageMapping extends Mapping {
 
 	@Override
-	public JavaElement createElement(String pathToProject, String elementName,
+	public Element createElement(String pathToProject, String elementName,
 			String pathToElement) {
 		return addPackage(pathToProject, elementName, pathToElement);
 	}
 
 	@Override
-	protected JavaElement computeElement(JavaElement element, String name,
+	protected Element computeElement(Element element, String name,
 			String path) {
 		return element;
 	}
 
 	@Override
-	protected void computeElement(JavaElement element, MappingElement mapping,
+	protected void computeElement(Element element, MappingElement mapping,
 			String elementName, String elementPath) {
 		if (containsElement(element.getChildren(), elementName, "", "")) {
 			element.removeChild(elementName);
@@ -33,17 +33,17 @@ public class PackageMapping extends Mapping {
 	}
 
 	@Override
-	protected JavaElement createProject(String pathToProject,
+	protected Element createProject(String pathToProject,
 			String elementName, String elementPath, MappingElement mapping) {
-		JavaElement project = new JavaProject(UtilOperations.getInstance()
+		Element project = new Variant(UtilOperations.getInstance()
 				.parseProjectName(pathToProject), pathToProject);
 		project.addChild(addPackage(pathToProject, elementName, elementPath));
 		return project;
 	}
 
 	@Override
-	protected boolean removeElement(JavaElement element,
-			List<JavaElement> elements, String elementName, String elementPath,
+	protected boolean removeElement(Element element,
+			List<Element> elements, String elementName, String elementPath,
 			CodeFragment code, boolean isFirstStep, boolean isLastStep,
 			List<String> wholeClass) {
 		String nameOfPackage = element.getName();
@@ -60,7 +60,7 @@ public class PackageMapping extends Mapping {
 	}
 
 	@Override
-	protected boolean checkElement(JavaElement element, String elementName,
+	protected boolean checkElement(Element element, String elementName,
 			String pathToElement) {
 		if (element.getName().equals(elementName)) {
 			return true;
@@ -68,10 +68,10 @@ public class PackageMapping extends Mapping {
 		return false;
 	}
 
-	private JavaPackage addPackage(String projectPath, String elementName,
+	private Package addPackage(String projectPath, String elementName,
 			String elementPath) {
 		elementPath = elementPath.substring(1);
-		JavaPackage javaPackage = new JavaPackage(elementName, elementPath);
+		Package javaPackage = new Package(elementName, elementPath);
 		javaPackage.setChildren(UtilOperations.getInstance().readClassFiles(
 				projectPath, elementPath, ""));
 		return javaPackage;

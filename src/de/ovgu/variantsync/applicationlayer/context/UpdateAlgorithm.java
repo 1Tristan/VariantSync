@@ -11,9 +11,9 @@ import de.ovgu.variantsync.VariantSyncPlugin;
 import de.ovgu.variantsync.applicationlayer.ModuleFactory;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Class;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.Diff;
 import de.ovgu.variantsync.applicationlayer.datamodel.diff.DiffIndices;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
@@ -37,11 +37,11 @@ public class UpdateAlgorithm {
 			if (c.getFeatureExpression().equals(featureExpression)) {
 				continue;
 			}
-			JavaProject jp = c.getJavaProject(projectName);
-			List<JavaClass> classes = new ArrayList<JavaClass>();
+			Variant jp = c.getJavaProject(projectName);
+			List<Class> classes = new ArrayList<Class>();
 			if (jp != null) {
 				iterate(jp.getChildren(), classes, className);
-				for (JavaClass jc : classes) {
+				for (Class jc : classes) {
 					update(jc, diffs);
 				}
 				saveContext(c);
@@ -50,7 +50,7 @@ public class UpdateAlgorithm {
 	}
 
 	// TODO test with different cases!
-	private void update(JavaClass jc, List<Diff> diffs) {
+	private void update(Class jc, List<Diff> diffs) {
 		List<CodeLine> cls = jc.getCodeLines();
 
 		// actualize (increase or decrease diff line number (see Context
@@ -114,12 +114,12 @@ public class UpdateAlgorithm {
 		}
 	}
 
-	private void iterate(List<JavaElement> elements, List<JavaClass> classes,
+	private void iterate(List<Element> elements, List<Class> classes,
 			String className) {
 		if (elements != null && !elements.isEmpty()) {
-			for (JavaElement je : elements) {
-				if (je instanceof JavaClass && je.getName().equals(className)) {
-					classes.add((JavaClass) je);
+			for (Element je : elements) {
+				if (je instanceof Class && je.getName().equals(className)) {
+					classes.add((Class) je);
 				} else {
 					iterate(je.getChildren(), classes, className);
 				}

@@ -19,14 +19,14 @@
             class="de.ovgu.variantsync.presentationlayer.view.mergeprocess.FeatureView"
             icon="icons/VariantSyncSupport.png"
             id="de.ovgu.variantsync.presentationlayer.view.mergeprocess.featureview"
-            name="Feature View">
+            name="Change View">
       </view>
       <view
             category="de.ovgu.variantsync"
             class="de.ovgu.variantsync.presentationlayer.view.mergeprocess.ProductView"
             icon="icons/VariantSyncSupport.png"
             id="de.ovgu.variantsync.presentationlayer.view.mergeprocess.productview"
-            name="Product View">
+            name="Variant View">
       </view>
    </extension>
    <extension

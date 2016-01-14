@@ -17,7 +17,7 @@ import de.ovgu.variantsync.applicationlayer.context.ContextUtils;
 import de.ovgu.variantsync.applicationlayer.features.mapping.UtilOperations;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 
-public class JavaClass extends JavaElement {
+public class Class extends Element {
 
 	private List<CodeLine> codeLines;
 	private List<CodeLine> wholeClass;
@@ -25,7 +25,7 @@ public class JavaClass extends JavaElement {
 	private CodeChange actualChange;
 	private boolean logChange;
 
-	public JavaClass() {
+	public Class() {
 		super();
 		init();
 	}
@@ -200,32 +200,32 @@ public class JavaClass extends JavaElement {
 		return formatter.format(new Date(timestamp));
 	}
 
-	public JavaClass(String name, String path, JavaElement member) {
+	public Class(String name, String path, Element member) {
 		super(name, path, JavaElements.CLASS);
 		addChild(member);
 		init();
 	}
 
-	public JavaClass(String name, String path, List<JavaElement> members) {
+	public Class(String name, String path, List<Element> members) {
 		super(name, path, JavaElements.CLASS);
 		setChildren(members);
 		init();
 	}
 
-	public JavaClass(String name, String path, List<String> code,
+	public Class(String name, String path, List<String> code,
 			int numberOfCodeLines) {
 		super(name, path, JavaElements.CLASS);
 		addCode(new CodeFragment(code, 0, numberOfCodeLines, 0));
 		init();
 	}
 
-	public JavaClass(String name, String path, CodeFragment code) {
+	public Class(String name, String path, CodeFragment code) {
 		super(name, path, JavaElements.CLASS);
 		addCode(code);
 		init();
 	}
 
-	public JavaClass(String name, String path) {
+	public Class(String name, String path) {
 		super(name, path, JavaElements.CLASS);
 		init();
 	}
@@ -249,8 +249,8 @@ public class JavaClass extends JavaElement {
 	}
 
 	@Override
-	protected JavaElement getConcreteType(String name, String path) {
-		return new JavaClass(name, path);
+	protected Element getConcreteType(String name, String path) {
+		return new Class(name, path);
 	}
 
 	public List<CodeLine> getClonedCodeLines() {
@@ -287,15 +287,15 @@ public class JavaClass extends JavaElement {
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	public JavaElement clone() throws CloneNotSupportedException {
-		List<JavaElement> children = getChildren();
-		List<JavaElement> clonedChildren = new ArrayList<JavaElement>();
+	public Element clone() throws CloneNotSupportedException {
+		List<Element> children = getChildren();
+		List<Element> clonedChildren = new ArrayList<Element>();
 		if (children != null && !children.isEmpty() && children.get(0) != null) {
-			for (JavaElement element : children) {
+			for (Element element : children) {
 				clonedChildren.add(element.clone());
 			}
 		}
-		JavaElement copy = getConcreteType(getName(), getPath());
+		Element copy = getConcreteType(getName(), getPath());
 		if (clonedChildren != null) {
 			copy.setChildren(clonedChildren);
 		}
@@ -305,7 +305,7 @@ public class JavaClass extends JavaElement {
 			for (CodeLine fragment : code) {
 				clonedCodeFragments.add(fragment.clone());
 			}
-			((JavaClass) copy).setCodeLines(clonedCodeFragments);
+			((Class) copy).setCodeLines(clonedCodeFragments);
 		}
 		List<CodeChange> changes = this.changes;
 		List<CodeChange> clonedChanges = new LinkedList<CodeChange>();
@@ -313,7 +313,7 @@ public class JavaClass extends JavaElement {
 			for (CodeChange change : changes) {
 				clonedChanges.add(change.clone());
 			}
-			((JavaClass) copy).setChanges(clonedChanges);
+			((Class) copy).setChanges(clonedChanges);
 		}
 		return copy;
 	}

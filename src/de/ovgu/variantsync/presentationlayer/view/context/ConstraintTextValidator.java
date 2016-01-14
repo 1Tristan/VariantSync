@@ -19,7 +19,6 @@ import org.sat4j.specs.TimeoutException;
 
 import de.ovgu.featureide.fm.core.Constraint;
 import de.ovgu.featureide.fm.core.Feature;
-import de.ovgu.featureide.fm.core.FeatureComparator;
 import de.ovgu.featureide.fm.core.FeatureModel;
 import de.ovgu.featureide.fm.core.FeatureStatus;
 import de.ovgu.featureide.fm.core.FunctionalInterfaces.IConsumer;
@@ -63,7 +62,8 @@ public final class ConstraintTextValidator {
 			clonedModel.handleModelDataChanged();
 		}
 
-		final SortedSet<Feature> deadFeaturesAfter = new TreeSet<Feature>(new FeatureComparator(true));
+		final SortedSet<Feature> deadFeaturesAfter = new TreeSet<Feature>(//new FeatureComparator(true)
+				);
 
 		for (Feature l : clonedModel.getAnalyser().getDeadFeatures()) {
 			if (!deadFeaturesBefore.contains(l)) {

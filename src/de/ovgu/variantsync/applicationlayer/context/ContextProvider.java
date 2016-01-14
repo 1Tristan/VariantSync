@@ -24,9 +24,9 @@ import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.Context;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaClass;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaElement;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.JavaProject;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Class;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Element;
+import de.ovgu.variantsync.applicationlayer.datamodel.context.Variant;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
 import de.ovgu.variantsync.persistencelayer.IPersistanceOperations;
 import de.ovgu.variantsync.presentationlayer.view.context.ConstraintTextValidator;
@@ -124,8 +124,8 @@ public class ContextProvider extends AbstractModel implements
 	@Override
 	public void recordFileRemoved(String projectName, String pathToProject,
 			String packageName, String className, List<String> wholeClass) {
-		// TODO Auto-generated method stub
-
+		contextHandler.recordFileRemoved(projectName, pathToProject, className,
+				packageName, wholeClass);
 	}
 
 	@Override
@@ -160,14 +160,14 @@ public class ContextProvider extends AbstractModel implements
 	}
 
 	@Override
-	public Map<String, List<JavaClass>> findJavaClass(String projectName,
+	public Map<String, List<Class>> findJavaClass(String projectName,
 			String className) {
-		Map<String, List<JavaClass>> result = new HashMap<String, List<JavaClass>>();
+		Map<String, List<Class>> result = new HashMap<String, List<Class>>();
 		Collection<Context> contexts = ContextHandler.getInstance()
 				.getAllContexts();
 		for (Context c : contexts) {
-			List<JavaClass> classes = new ArrayList<JavaClass>();
-			JavaProject jp = c.getJavaProject(projectName);
+			List<Class> classes = new ArrayList<Class>();
+			Variant jp = c.getJavaProject(projectName);
 			if (jp != null && jp.getName().equals(projectName)) {
 				Util.getClassesByClassName(jp.getChildren(), classes, className);
 			}
@@ -211,11 +211,13 @@ public class ContextProvider extends AbstractModel implements
 	@Override
 	public Collection<String> getClasses(String fe, String projectName) {
 		Context c = ContextHandler.getInstance().getContext(fe);
-		JavaProject jp = c.getJavaProjects().get(projectName);
-		List<JavaClass> classes = ContextUtils.getClasses(jp);
+		Variant jp = c.getJavaProjects().get(projectName);
+		List<Class> classes = ContextUtils.getClasses(jp);
 		List<String> classNames = new ArrayList<String>();
-		for (JavaElement e : classes) {
-			classNames.add(e.getName());
+		for (Element e : classes) {
+			if (checkSyncTarget(projectName, fe)) {
+				classNames.add(e.getName());
+			}
 		}
 		return classNames;
 	}
@@ -223,23 +225,25 @@ public class ContextProvider extends AbstractModel implements
 	@Override
 	public Collection<String> getClassesForVariant(String fe, String projectName) {
 		Context c = ContextHandler.getInstance().getContext(fe);
-		Map<String, JavaProject> projects = c.getJavaProjects();
-		Set<Entry<String, JavaProject>> entries = projects.entrySet();
-		Iterator<Entry<String, JavaProject>> it = entries.iterator();
+		Map<String, Variant> projects = c.getJavaProjects();
+		Set<Entry<String, Variant>> entries = projects.entrySet();
+		Iterator<Entry<String, Variant>> it = entries.iterator();
 		List<String> classNames = new ArrayList<String>();
 		while (it.hasNext()) {
-			Entry<String, JavaProject> e = it.next();
+			Entry<String, Variant> e = it.next();
 			if (e.getKey().equals(projectName)) {
 				continue;
 			}
-			JavaProject jp = e.getValue();
+			Variant jp = e.getValue();
 			if (jp == null || jp.getChildren() == null) {
 				continue;
 			}
-			List<JavaClass> classes = ContextUtils.getClasses(jp);
-			for (JavaClass element : classes) {
+			List<Class> classes = ContextUtils.getClasses(jp);
+			for (Class element : classes) {
 				if (!element.getChanges().isEmpty()) {
-					classNames.add(e.getKey() + ": " + element.getName());
+					if (checkSyncTarget(projectName, fe)) {
+						classNames.add(e.getKey() + ": " + element.getName());
+					}
 				}
 			}
 		}
@@ -250,12 +254,12 @@ public class ContextProvider extends AbstractModel implements
 	public Collection<CodeChange> getChanges(String fe, String projectName,
 			String className) {
 		Context c = ContextHandler.getInstance().getContext(fe);
-		JavaProject jp = c.getJavaProjects().get(projectName);
-		List<JavaElement> classes = new ArrayList<JavaElement>();
+		Variant jp = c.getJavaProjects().get(projectName);
+		List<Element> classes = new ArrayList<Element>();
 		ContextUtils.iterateElements(jp.getChildren(), classes);
-		for (JavaElement e : classes) {
+		for (Element e : classes) {
 			if (e.getName().equals(className)) {
-				return ((JavaClass) e).getClonedChanges();
+				return ((Class) e).getClonedChanges();
 			}
 		}
 		return null;
@@ -268,24 +272,24 @@ public class ContextProvider extends AbstractModel implements
 	public Map<String, Collection<CodeChange>> getChangesForVariant(String fe,
 			String projectName, String className) {
 		Context c = ContextHandler.getInstance().getContext(fe);
-		JavaProject jp = c.getJavaProjects().get(projectName);
-		Map<String, JavaProject> projects = c.getJavaProjects();
-		Set<Entry<String, JavaProject>> entries = projects.entrySet();
-		Iterator<Entry<String, JavaProject>> it = entries.iterator();
+		Variant jp = c.getJavaProjects().get(projectName);
+		Map<String, Variant> projects = c.getJavaProjects();
+		Set<Entry<String, Variant>> entries = projects.entrySet();
+		Iterator<Entry<String, Variant>> it = entries.iterator();
 		Map<String, Collection<CodeChange>> changes = new HashMap<String, Collection<CodeChange>>();
 		while (it.hasNext()) {
-			Entry<String, JavaProject> entry = it.next();
+			Entry<String, Variant> entry = it.next();
 			if (jp == null || !entry.getKey().equals(jp.getName())) {
-				List<JavaElement> classes = new ArrayList<JavaElement>();
-				JavaProject providingVariant = entry.getValue();
+				List<Element> classes = new ArrayList<Element>();
+				Variant providingVariant = entry.getValue();
 				if (providingVariant != null
 						&& providingVariant.getChildren() != null) {
 					ContextUtils.iterateElements(
 							providingVariant.getChildren(), classes);
-					for (JavaElement e : classes) {
+					for (Element e : classes) {
 						if (e.getName().equals(className)) {
 							changes.put(entry.getKey(),
-									((JavaClass) e).getClonedChanges());
+									((Class) e).getClonedChanges());
 						}
 					}
 				}
@@ -323,6 +327,10 @@ public class ContextProvider extends AbstractModel implements
 			String targetProject = targetInfo[0].trim();
 			String targetClass = targetInfo[1].trim();
 			List<String> right = getCodeLines(targetProject, targetClass);
+			if (right.isEmpty()) {
+				conflictFreeSyncTargets.add(target);
+				continue;
+			}
 			if (!ModuleFactory.getMergeOperations().checkConflict(
 					Util.parseCodeLinesToString(ancestor),
 					Util.parseCodeLinesToString(left), right)) {
@@ -338,6 +346,9 @@ public class ContextProvider extends AbstractModel implements
 			List<CodeLine> left) {
 		List<String> conflictFreeSyncTargets = new ArrayList<String>();
 		List<String> right = getCodeLines(targetVariant, className);
+		if (right.isEmpty()) {
+			conflictFreeSyncTargets.add(targetVariant + ": " + className);
+		}
 		if (!ModuleFactory.getMergeOperations().checkConflict(
 				Util.parseCodeLinesToString(ancestor),
 				Util.parseCodeLinesToString(left), right)) {
@@ -397,14 +408,14 @@ public class ContextProvider extends AbstractModel implements
 		}
 		try {
 			javaClass.refreshLocal(IResource.DEPTH_INFINITE, null);
-		} catch (CoreException e1) {
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		List<String> linesOfCode = null;
+		List<String> linesOfCode = new ArrayList<String>();
 		try {
 			linesOfCode = persistanceOperations.readFile(((IFile) javaClass)
 					.getContents());
-		} catch (FileOperationException | CoreException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return linesOfCode;
@@ -414,18 +425,18 @@ public class ContextProvider extends AbstractModel implements
 			String className) {
 		List<String> syncTargets = new ArrayList<String>();
 		Context c = ContextHandler.getInstance().getContext(fe);
-		Map<String, JavaProject> mapJp = c.getJavaProjects();
-		Set<Entry<String, JavaProject>> entries = mapJp.entrySet();
-		Iterator<Entry<String, JavaProject>> it = entries.iterator();
+		Map<String, Variant> mapJp = c.getJavaProjects();
+		Set<Entry<String, Variant>> entries = mapJp.entrySet();
+		Iterator<Entry<String, Variant>> it = entries.iterator();
 		Set<String> usedProjects = new HashSet<String>();
 		while (it.hasNext()) {
-			Entry<String, JavaProject> e = it.next();
+			Entry<String, Variant> e = it.next();
 			boolean isValidSyncTarget = checkSyncTarget(e.getKey(), fe);
 			if (!e.getKey().equals(projectName) && isValidSyncTarget) {
-				List<JavaElement> classes = new ArrayList<JavaElement>();
-				JavaProject jp = e.getValue();
+				List<Element> classes = new ArrayList<Element>();
+				Variant jp = e.getValue();
 				ContextUtils.iterateElements(jp.getChildren(), classes);
-				for (JavaElement element : classes) {
+				for (Element element : classes) {
 					if (element.getName().equals(className)) {
 						syncTargets
 								.add(jp.getName() + ": " + element.getName());
@@ -510,16 +521,16 @@ public class ContextProvider extends AbstractModel implements
 			String className) {
 		List<CodeLine> targetCode = new ArrayList<CodeLine>();
 		Context c = ContextHandler.getInstance().getContext(fe);
-		Map<String, JavaProject> mapJp = c.getJavaProjects();
-		Set<Entry<String, JavaProject>> entries = mapJp.entrySet();
-		Iterator<Entry<String, JavaProject>> it = entries.iterator();
+		Map<String, Variant> mapJp = c.getJavaProjects();
+		Set<Entry<String, Variant>> entries = mapJp.entrySet();
+		Iterator<Entry<String, Variant>> it = entries.iterator();
 		while (it.hasNext()) {
-			Entry<String, JavaProject> e = it.next();
+			Entry<String, Variant> e = it.next();
 			if (e.getKey().equals(projectName)) {
-				List<JavaElement> classes = new ArrayList<JavaElement>();
-				JavaProject jp = e.getValue();
+				List<Element> classes = new ArrayList<Element>();
+				Variant jp = e.getValue();
 				ContextUtils.iterateElements(jp.getChildren(), classes);
-				for (JavaElement element : classes) {
+				for (Element element : classes) {
 					if (element.getName().equals(className)) {
 						targetCode.addAll(element.getClonedCodeLines());
 					}
@@ -618,12 +629,17 @@ public class ContextProvider extends AbstractModel implements
 			long timestamp) {
 		Context c = ContextHandler.getInstance().getContext(
 				selectedFeatureExpression);
-		JavaProject jp = c.getJavaProjects().get(selectedProject);
-		List<JavaElement> classes = new ArrayList<JavaElement>();
+		if (selectedClass.contains(":")) {
+			String[] tmp = selectedClass.split(":");
+			selectedProject = tmp[0].trim();
+			selectedClass = tmp[1].trim();
+		}
+		Variant jp = c.getJavaProjects().get(selectedProject);
+		List<Element> classes = new ArrayList<Element>();
 		ContextUtils.iterateElements(jp.getChildren(), classes);
-		for (JavaElement e : classes) {
+		for (Element e : classes) {
 			if (e.getName().equals(selectedClass)) {
-				((JavaClass) e).removeChange(selectedChange);
+				((Class) e).removeChange(selectedChange);
 				break;
 			}
 		}
@@ -647,7 +663,30 @@ public class ContextProvider extends AbstractModel implements
 				} catch (CoreException e) {
 					e.printStackTrace();
 				}
-				return javaClass;
+				if (javaClass != null)
+					return javaClass;
+			}
+		}
+		for (IProject p : supportedProjects) {
+			String name = p.getName();
+			if (!name.equals(selectedProject)) {
+				IResource javaClass = null;
+				try {
+					javaClass = ContextUtils.findFileRecursively(p,
+							selectedClass);
+					if (javaClass != null) {
+						String projectName = javaClass.getLocation().toString();
+						projectName = projectName
+								.replace(name, selectedProject);
+						ModuleFactory.getPersistanceOperations().writeFile(
+								new ArrayList<CodeLine>() {
+								}, new File(projectName));
+						return getResource(selectedFeatureExpression,
+								selectedProject, selectedClass);
+					}
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return null;
@@ -710,13 +749,13 @@ public class ContextProvider extends AbstractModel implements
 		Iterator<Context> it = coll.iterator();
 		while (it.hasNext()) {
 			Context c = it.next();
-			JavaProject jp = c.getJavaProjects().get(projectName);
+			Variant jp = c.getJavaProjects().get(projectName);
 			if (jp != null) {
-				List<JavaElement> classes = new ArrayList<JavaElement>();
+				List<Element> classes = new ArrayList<Element>();
 				ContextUtils.iterateElements(jp.getChildren(), classes);
-				for (JavaElement e : classes) {
+				for (Element e : classes) {
 					if (e.getName().equals(className)) {
-						((JavaClass) e).removeContent();
+						((Class) e).removeContent();
 						IResource res = ContextUtils.findResource(projectName,
 								className);
 						MarkerHandler.getInstance().clearAllMarker(res);
@@ -734,20 +773,20 @@ public class ContextProvider extends AbstractModel implements
 		Iterator<Context> itC = contexts.iterator();
 		while (itC.hasNext()) {
 			Context c = itC.next();
-			Map<String, JavaProject> projects = c.getJavaProjects();
-			Set<Entry<String, JavaProject>> entries = projects.entrySet();
-			Iterator<Entry<String, JavaProject>> it = entries.iterator();
+			Map<String, Variant> projects = c.getJavaProjects();
+			Set<Entry<String, Variant>> entries = projects.entrySet();
+			Iterator<Entry<String, Variant>> it = entries.iterator();
 			while (it.hasNext()) {
-				Entry<String, JavaProject> e = it.next();
+				Entry<String, Variant> e = it.next();
 				if (e.getKey().equals(variant)) {
 					continue;
 				}
-				JavaProject jp = e.getValue();
+				Variant jp = e.getValue();
 				if (jp == null || jp.getChildren() == null) {
 					continue;
 				}
-				List<JavaClass> classes = ContextUtils.getClasses(jp);
-				for (JavaClass element : classes) {
+				List<Class> classes = ContextUtils.getClasses(jp);
+				for (Class element : classes) {
 					if (!element.getChanges().isEmpty()
 							&& !features.contains(c.getFeatureExpression())) {
 						features.add(c.getFeatureExpression());
