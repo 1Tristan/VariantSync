@@ -2,7 +2,6 @@ package de.ovgu.variantsync.presentationlayer.view.codemapping;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -18,7 +17,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import de.ovgu.variantsync.VariantSyncPlugin;
-import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.presentationlayer.controller.data.JavaElements;
 
 /**
@@ -34,8 +32,7 @@ public class CodeEditorMapping extends DynamicMapMenu {
 	@Override
 	protected IProject getProject() {
 		IWorkbench iworkbench = PlatformUI.getWorkbench();
-		IWorkbenchWindow iworkbenchwindow = iworkbench
-				.getActiveWorkbenchWindow();
+		IWorkbenchWindow iworkbenchwindow = iworkbench.getActiveWorkbenchWindow();
 		IWorkbenchPage iworkbenchpage = iworkbenchwindow.getActivePage();
 		IEditorPart ieditorpart = iworkbenchpage.getActiveEditor();
 		IEditorInput input = ieditorpart.getEditorInput();
@@ -45,8 +42,8 @@ public class CodeEditorMapping extends DynamicMapMenu {
 
 	@Override
 	protected void handleSelection(String feature) {
-		IEditorPart editorPart = VariantSyncPlugin.getDefault().getWorkbench()
-				.getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+		IEditorPart editorPart = VariantSyncPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow()
+				.getActivePage().getActiveEditor();
 		if (editorPart instanceof AbstractTextEditor) {
 			int startLine = 0;
 			int endLine = 0;
@@ -55,42 +52,40 @@ public class CodeEditorMapping extends DynamicMapMenu {
 			String selectedText = null;
 			IEditorSite iEditorSite = editorPart.getEditorSite();
 			if (iEditorSite != null) {
-				ISelectionProvider selectionProvider = iEditorSite
-						.getSelectionProvider();
+				ISelectionProvider selectionProvider = iEditorSite.getSelectionProvider();
 				if (selectionProvider != null) {
 					ISelection iSelection = selectionProvider.getSelection();
 					if (!iSelection.isEmpty()) {
 						selectedText = ((ITextSelection) iSelection).getText();
-						startLine = ((ITextSelection) iSelection)
-								.getStartLine();
-						endLine = ((ITextSelection) iSelection).getEndLine();
+						startLine = ((ITextSelection) iSelection).getStartLine() + 1;
+						endLine = ((ITextSelection) iSelection).getEndLine() + 1;
 						offset = ((ITextSelection) iSelection).getOffset();
 						length = ((ITextSelection) iSelection).getLength();
-						String title = iEditorSite.getPage().getActiveEditor()
-								.getTitle();
-						IFile file = (IFile) editorPart.getEditorInput()
-								.getAdapter(IFile.class);
+						String title = iEditorSite.getPage().getActiveEditor().getTitle();
+						IFile file = (IFile) editorPart.getEditorInput().getAdapter(IFile.class);
 						IPath path = file.getRawLocation().makeAbsolute();
+						String project = file.getProject().toString();
+						// project = project.substring(2);
 						// MarkerInformation mi = new MarkerInformation(0,
 						// startLine, endLine, offset, length);
 						// IMarker marker = null;
-						try {
-							CodeMarkerFactory.createMarker(String.valueOf(0),
-									file, offset, offset + length, feature,
-									CodeHighlighting.YELLOW);
-						} catch (CoreException e) {
-							e.printStackTrace();
-						}
+						// try {
+						// CodeMarkerFactory.createMarker(String.valueOf(0),
+						// file, offset, offset + length, feature,
+						// CodeHighlighting.YELLOW);
+						// } catch (CoreException e) {
+						// e.printStackTrace();
+						// }
 						// System.out
-						// .println("\nOOOOOOOOOOOOOOOO OFFSET OOOOOOOOOOOOOOOO = "
+						// .println("\nOOOOOOOOOOOOOOOO OFFSET OOOOOOOOOOOOOOOO
+						// = "
 						// + offset + ", " + length);
 						// MarkerHandler.getInstance().addMarker(mi, marker,
 						// file,
 						// feature);
 
-						controller.addFeatureMapping(feature, title,
-								JavaElements.CODE_FRAGMENT, path, selectedText,
-								startLine, endLine, offset);
+						controller.addFeatureMapping(feature, title, JavaElements.CODE_FRAGMENT, path, selectedText,
+								startLine, endLine, offset, project);
 					}
 				}
 			}

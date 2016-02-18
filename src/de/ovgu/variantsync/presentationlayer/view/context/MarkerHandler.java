@@ -265,11 +265,11 @@ public class MarkerHandler {
 						i++;
 					}
 				}
-				try {
-					setMarker(file, markers);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			}
+			try {
+				setMarker(file, markers);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

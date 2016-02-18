@@ -16,17 +16,17 @@
       </view> 
       <view
             category="de.ovgu.variantsync"
-            class="de.ovgu.variantsync.presentationlayer.view.mergeprocess.FeatureView"
+            class="de.ovgu.variantsync.presentationlayer.view.mergeprocess.SourceFocusedView"
             icon="icons/VariantSyncSupport.png"
-            id="de.ovgu.variantsync.presentationlayer.view.mergeprocess.featureview"
-            name="Change View">
+            id="de.ovgu.variantsync.presentationlayer.view.mergeprocess.sourceFocusedView"
+            name="Source-Focused View">
       </view>
       <view
             category="de.ovgu.variantsync"
-            class="de.ovgu.variantsync.presentationlayer.view.mergeprocess.ProductView"
+            class="de.ovgu.variantsync.presentationlayer.view.mergeprocess.TargetFocusedView"
             icon="icons/VariantSyncSupport.png"
-            id="de.ovgu.variantsync.presentationlayer.view.mergeprocess.productview"
-            name="Variant View">
+            id="de.ovgu.variantsync.presentationlayer.view.mergeprocess.targetFocusedview"
+            name="Target-Focused View">
       </view>
    </extension>
    <extension

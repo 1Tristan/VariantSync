@@ -12,30 +12,24 @@ import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 public abstract class Mapping implements IMappingOperations {
 
-	protected abstract Element computeElement(Element element,
-			String name, String path);
+	protected abstract Element computeElement(Element element, String name, String path);
 
-	protected abstract void computeElement(Element element,
-			MappingElement mapping, String elementName, String elementPath);
+	protected abstract void computeElement(Element element, MappingElement mapping, String elementName,
+			String elementPath);
 
-	protected abstract Element createProject(String pathToProject,
-			String elementName, String elementPath, MappingElement mapping);
+	protected abstract Element createProject(String pathToProject, String elementName, String elementPath,
+			MappingElement mapping);
 
-	protected abstract boolean removeElement(Element element,
-			List<Element> elements, String elementName, String elementPath,
-			CodeFragment code, boolean isFirstStep, boolean isLastStep,
-			List<String> wholeClass);
+	protected abstract boolean removeElement(Element element, List<Element> elements, String elementName,
+			String elementPath, CodeFragment code, boolean isFirstStep, boolean isLastStep, List<String> wholeClass);
 
-	protected abstract boolean checkElement(Element element,
-			String elementName, String pathToElement);
+	protected abstract boolean checkElement(Element element, String elementName, String pathToElement);
 
 	@Override
-	public Element getElement(List<Element> javaPackages,
-			String className, String classPath) {
-		String packageName = UtilOperations.getInstance().parsePackageName(
-				classPath);
+	public Element getElement(List<Element> javaPackages, String className, String classPath) {
+		String packageName = UtilOperations.getInstance().parsePackageName(classPath);
 		Element element = null;
-		if (javaPackages != null && !javaPackages.isEmpty()) {
+		if (javaPackages != null && !javaPackages.isEmpty() && javaPackages.get(0) != null) {
 			for (Element pa : javaPackages) {
 				if (pa.getName().equals(packageName)) {
 					element = computeElement(pa, className, classPath);
@@ -51,19 +45,14 @@ public abstract class Mapping implements IMappingOperations {
 		String elementPath = mapping.getPathToSelectedElement();
 		String projectPath = mapping.getPathToProject();
 		if (projectPath == null) {
-			projectPath = elementPath
-					.substring(0, elementPath.indexOf("/src/"));
+			projectPath = elementPath.substring(0, elementPath.indexOf("/src/"));
 		}
 		if (project == null) {
-			Element javaProject = createProject(projectPath, elementName,
-					elementPath, mapping);
+			Element javaProject = createProject(projectPath, elementName, elementPath, mapping);
 			try {
 				return (Variant) javaProject.clone();
 			} catch (CloneNotSupportedException e) {
-				LogOperations
-						.logError(
-								"Clone-method in class JavaProject not yet implemented.",
-								e);
+				LogOperations.logError("Clone-method in class JavaProject not yet implemented.", e);
 			}
 		} else {
 			computeElement(project, mapping, elementName, elementPath);
@@ -72,38 +61,30 @@ public abstract class Mapping implements IMappingOperations {
 	}
 
 	@Override
-	public void removeMapping(String elementName, String pathToElement,
-			CodeFragment code, Element element, boolean isFirstStep,
-			boolean isLastStep, List<String> wholeClass) {
+	public void removeMapping(String elementName, String pathToElement, CodeFragment code, Element element,
+			boolean isFirstStep, boolean isLastStep, List<String> wholeClass) {
 		List<Element> packages = element.getChildren();
-		if (packages == null && !(element instanceof Class)){
+		if (packages == null && !(element instanceof Class)) {
 			computeElementForRemove(element, elementName, pathToElement);
-			packages = element.getChildren();	
+			packages = element.getChildren();
 		}
 		if (packages != null) {
 			for (Element javaPackage : packages) {
-				removeMapping(elementName, pathToElement, code, javaPackage,
-						isFirstStep, isLastStep, wholeClass);
+				removeMapping(elementName, pathToElement, code, javaPackage, isFirstStep, isLastStep, wholeClass);
 			}
 		} else {
-			removeElement(element, packages, elementName, pathToElement, code,
-					isFirstStep, isLastStep, wholeClass);
+			removeElement(element, packages, elementName, pathToElement, code, isFirstStep, isLastStep, wholeClass);
 		}
 	}
 
-	private void computeElementForRemove(Element element, String name,
-			String path) {
-		String relativeClassPath = UtilOperations.getInstance()
-				.getRelativeClassPath(path);
-		if (new ClassMapping().containsElement(element.getChildren(), name,
-				path, "")) {
+	private void computeElementForRemove(Element element, String name, String path) {
+		String relativeClassPath = UtilOperations.getInstance().getRelativeClassPath(path);
+		if (new ClassMapping().containsElement(element.getChildren(), name, path, "")) {
 
 		} else {
-			Element packageOfClass = new PackageMapping().getElement(
-					element.getChildren(), name, relativeClassPath);
+			Element packageOfClass = new PackageMapping().getElement(element.getChildren(), name, relativeClassPath);
 			if (packageOfClass == null) {
-				String packageName = UtilOperations.getInstance()
-						.parsePackageName(path);
+				String packageName = UtilOperations.getInstance().parsePackageName(path);
 				path = UtilOperations.getInstance().parsePackagePath(path);
 				packageOfClass = new Package(packageName, path);
 				element.addChild(packageOfClass);
@@ -114,9 +95,9 @@ public abstract class Mapping implements IMappingOperations {
 	}
 
 	@Override
-	public boolean containsElement(List<Element> elements,
-			String elementName, String pathToElement, String contentOfElement) {
-		if (elements != null && !elements.isEmpty()) {
+	public boolean containsElement(List<Element> elements, String elementName, String pathToElement,
+			String contentOfElement) {
+		if (elements != null && !elements.isEmpty() && elements.get(0) != null) {
 			for (Element pa : elements) {
 				if (checkElement(pa, elementName, pathToElement)) {
 					return true;

@@ -64,4 +64,6 @@ public interface IFeatureOperations {
 	void deleteFeatureExpression(String expr);
 
 	Set<Feature> getConfiguredFeaturesOfProject(IProject project);
+
+	void addCodeFragment(MappingElement mapping, Boolean markerUpdate);
 }

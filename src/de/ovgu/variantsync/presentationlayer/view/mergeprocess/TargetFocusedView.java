@@ -5,11 +5,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.compare.CompareEditorInput;
 import org.eclipse.compare.CompareUI;
@@ -49,7 +53,6 @@ import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeChange;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeHighlighting;
 import de.ovgu.variantsync.applicationlayer.datamodel.context.CodeLine;
 import de.ovgu.variantsync.applicationlayer.datamodel.exception.FileOperationException;
-import de.ovgu.variantsync.applicationlayer.features.mapping.UtilOperations;
 import de.ovgu.variantsync.applicationlayer.merging.ResourceCompareInput;
 import de.ovgu.variantsync.presentationlayer.controller.ContextController;
 import de.ovgu.variantsync.presentationlayer.controller.ControllerHandler;
@@ -63,7 +66,7 @@ import de.ovgu.variantsync.presentationlayer.controller.SynchronizationControlle
  * @version 1.0
  * @since 20.10.2015
  */
-public class FeatureView extends ViewPart {
+public class TargetFocusedView extends ViewPart {
 
 	private ContextController cc = ControllerHandler.getInstance()
 			.getContextController();
@@ -74,84 +77,67 @@ public class FeatureView extends ViewPart {
 	private IContextOperations contextOperations = ModuleFactory
 			.getContextOperations();
 
-	private List projects;
+	private List features;
 	private List classes;
 	private List changes;
-	private List autoSyncTargets;
-	private String selectedFeatureExpression;
-	private String selectedProject;
+	private String selectedVariant;
+	private String selectedFeature;
 	private String selectedClass;
-	private int selectedChange;
+	private String selectedChange;
 	private Collection<CodeChange> collChanges;
-	private String featureExpressions[];
+	private String variants[];
 	private java.util.List<CodeLine> baseCode;
 	private java.util.List<CodeLine> syncCode;
-	private String projectNameTarget;
-	private String classNameTarget;
 	private Button btnSynchronize;
 	private Button btnManualSync;
-	private String leftClass;
-	private String rightClass;
-	private FeatureView reference;
-	private Button btnRemoveChangeEntry;
-	private java.util.List<CodeLine> codeWC;
 	private CCombo combo;
 	private Label lblMergeConflict;
-	private List manualSyncTargets;
 	private Label lblChangedCode;
 	private Table newCode;
 	private java.util.List<String> manualSyncTargetsAsList;
-	private String autoSelection;
-	private String manualSelection;
 	private long timestamp;
 	private java.util.List<CodeLine> newVersionWholeClass;
-	private List list_batchVariants;
-	private GridData gd_list_2;
+	private Map<String, Collection<CodeChange>> changeMap;
+	private String selClass;
+	private int selIn;
 
-	public FeatureView() {
+	public TargetFocusedView() {
 	}
 
 	public void dispose() {
 	}
 
 	public void setFocus() {
-		featureExpressions = fc.getFeatureExpressions().getFeatureExpressions()
-				.toArray(new String[] {});
-		combo.setItems(featureExpressions);
-		if (selectedFeatureExpression != null) {
-			contextOperations.activateContext(selectedFeatureExpression, true);
-			cc.setFeatureView(true);
-		}
+		variants = fc.getVariants().toArray(new String[] {});
+		combo.setItems(variants);
 	}
 
 	@Override
 	public void createPartControl(final Composite arg0) {
-		reference = this;
-		featureExpressions = fc.getFeatureExpressions().getFeatureExpressions()
+		variants = fc.getFeatureExpressions().getFeatureExpressions()
 				.toArray(new String[] {});
 		arg0.setLayout(new GridLayout(5, false));
 
 		Label lblSelectFeatureExpression = new Label(arg0, SWT.NONE);
-		lblSelectFeatureExpression.setText("Select Feature Expression");
+		lblSelectFeatureExpression.setText("Select Variant");
 		combo = new CCombo(arg0, SWT.BORDER);
 		GridData gd_combo = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1,
 				1);
 		gd_combo.widthHint = 189;
 		combo.setLayoutData(gd_combo);
-		combo.setItems(featureExpressions);
+		combo.setItems(variants);
 		Listener listener = new Listener() {
 			@Override
 			public void handleEvent(Event e) {
-				featureExpressions = fc.getFeatureExpressions()
-						.getFeatureExpressions().toArray(new String[] {});
-				combo.setItems(featureExpressions);
+				variants = fc.getVariants().toArray(new String[] {});
+				combo.setItems(variants);
 			}
 		};
 		combo.addListener(SWT.MouseDown, listener);
 		combo.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (autoSyncTargets != null)
-					autoSyncTargets.setItems(new String[] {});
+				btnSynchronize.setEnabled(false);
+				btnManualSync.setEnabled(false);
 				if (changes != null)
 					changes.setItems(new String[] {});
 				if (classes != null)
@@ -160,14 +146,11 @@ public class FeatureView extends ViewPart {
 					collChanges.clear();
 				if (newCode != null)
 					newCode.removeAll();
-				selectedFeatureExpression = combo.getText();
-				projects.setItems(cc.getProjects(combo.getText()).toArray(
+				selectedVariant = combo.getText();
+
+				// TODO insert features that have changes!
+				features.setItems(cc.getFeatures(combo.getText()).toArray(
 						new String[] {}));
-				list_batchVariants.setItems(cc.getProjects(combo.getText())
-						.toArray(new String[] {}));
-				contextOperations.activateContext(selectedFeatureExpression,
-						true);
-				cc.setFeatureView(true);
 			}
 		});
 		new Label(arg0, SWT.NONE);
@@ -180,7 +163,7 @@ public class FeatureView extends ViewPart {
 		new Label(arg0, SWT.NONE);
 
 		Label lblProjects = new Label(arg0, SWT.NONE);
-		lblProjects.setText("Projects");
+		lblProjects.setText("Features");
 
 		Label lblClasses = new Label(arg0, SWT.NONE);
 		lblClasses.setText("Classes");
@@ -190,53 +173,54 @@ public class FeatureView extends ViewPart {
 
 		lblChangedCode = new Label(arg0, SWT.NONE);
 		lblChangedCode.setText("Changed Code");
+		new Label(arg0, SWT.NONE);
 
-		Label lblSyncTargets = new Label(arg0, SWT.NONE);
-		lblSyncTargets.setText("automatic sync possible");
-
-		projects = new List(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.MULTI);
-		GridData gd_list = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 4);
+		features = new List(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.MULTI);
+		GridData gd_list = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 11);
 		gd_list.heightHint = 255;
 		gd_list.widthHint = 119;
-		projects.setLayoutData(gd_list);
-		projects.addSelectionListener(new SelectionListener() {
+		features.setLayoutData(gd_list);
+		features.addSelectionListener(new SelectionListener() {
 
 			public void widgetSelected(SelectionEvent event) {
-				if (autoSyncTargets != null)
-					autoSyncTargets.setItems(new String[] {});
+				btnSynchronize.setEnabled(false);
+				btnManualSync.setEnabled(false);
 				if (changes != null)
 					changes.setItems(new String[] {});
 				if (classes != null)
 					classes.setItems(new String[] {});
 				if (newCode != null)
 					newCode.removeAll();
-				selectedProject = projects.getSelection()[0];
-				classes.setItems(cc.getClasses(selectedFeatureExpression,
-						selectedProject).toArray(new String[] {}));
+				selectedFeature = features.getSelection()[0];
+				classes.setItems(cc.getClassesForVariant(selectedFeature,
+						selectedVariant).toArray(new String[] {}));
+				contextOperations.activateContext(selectedFeature, true);
+				cc.setProductView(true);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent event) {
 			}
 		});
-		final Menu menu = new Menu(projects);
-		projects.setMenu(menu);
+		final Menu menu = new Menu(features);
+		features.setMenu(menu);
 		menu.addMenuListener(new MenuAdapter() {
 			public void menuShown(MenuEvent e) {
-				int[] selection = projects.getSelectionIndices();
+				int[] selection = features.getSelectionIndices();
 				MenuItem[] items = menu.getItems();
 				for (int i = 0; i < items.length; i++) {
 					items[i].dispose();
 				}
 				final java.util.List<String> variants = new ArrayList<String>();
 				for (int selected : selection) {
-					if (selected < 0 || selected >= projects.getItemCount())
+					if (selected < 0 || selected >= features.getItemCount())
 						return;
-					variants.add(projects.getItem(selected));
+					variants.add(features.getItem(selected));
 				}
 				MenuItem newItem = new MenuItem(menu, SWT.NONE);
 				newItem.setText("Start Batch Synchronization");
 				newItem.addListener(SWT.Selection, new Listener() {
 					public void handleEvent(Event e) {
+						// TODO
 						startBatchSync(variants.toArray(new String[] {}));
 					}
 				});
@@ -245,21 +229,18 @@ public class FeatureView extends ViewPart {
 
 		classes = new List(arg0, SWT.BORDER | SWT.H_SCROLL);
 		GridData gd_list_1 = new GridData(SWT.FILL, SWT.FILL, false, false, 1,
-				4);
+				11);
 		gd_list_1.heightHint = 259;
 		gd_list_1.widthHint = 83;
 		classes.setLayoutData(gd_list_1);
 		classes.addSelectionListener(new SelectionListener() {
 
 			public void widgetSelected(SelectionEvent event) {
-				if (autoSyncTargets != null)
-					autoSyncTargets.setItems(new String[] {});
-				if (manualSyncTargets != null)
-					manualSyncTargets.setItems(new String[] {});
+				btnSynchronize.setEnabled(false);
+				btnManualSync.setEnabled(false);
 				if (newCode != null)
 					newCode.removeAll();
 				selectedClass = classes.getSelection()[0];
-				leftClass = selectedProject + " - " + selectedClass;
 				setChanges();
 			}
 
@@ -269,7 +250,7 @@ public class FeatureView extends ViewPart {
 
 		changes = new List(arg0, SWT.H_SCROLL | SWT.BORDER);
 		GridData gd_changes = new GridData(SWT.FILL, SWT.FILL, false, false, 1,
-				4);
+				11);
 		gd_changes.heightHint = 256;
 		gd_changes.widthHint = 165;
 		changes.setLayoutData(gd_changes);
@@ -278,18 +259,33 @@ public class FeatureView extends ViewPart {
 			public void widgetSelected(SelectionEvent event) {
 				if (newCode != null)
 					newCode.removeAll();
-				selectedChange = changes.getSelectionIndex();
-				btnRemoveChangeEntry.setEnabled(true);
+				selectedChange = changes.getSelection()[0];
+				selIn = changes.getSelectionIndex();
+				// btnRemoveChangeEntry.setEnabled(true);
+				String time = changes.getSelection()[0].trim();
+				SimpleDateFormat formatter = new SimpleDateFormat(
+						"HH:mm:ss 'at' dd.MM.yyyy");
+				String dateInString = time;
+				Date date = null;
+				try {
+					date = formatter.parse(dateInString);
+					System.out.println(date);
+					System.out.println(formatter.format(date));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				Collection<CodeChange> collChanges = changeMap.get(selClass);
 				Iterator<CodeChange> it = collChanges.iterator();
-				int i = 0;
 				newCode.removeAll();
-				CodeHighlighting ccolor = cc
-						.getContextColor(selectedFeatureExpression);
+				CodeHighlighting ccolor = cc.getContextColor(selectedFeature);
 				while (it.hasNext()) {
 					CodeChange ch = it.next();
-					if (i == selectedChange) {
+					formatter = new SimpleDateFormat("HH:mm:ss 'at' dd.MM.yyyy");
+					String s = formatter.format(new Date(ch.getTimestamp()));
+					if (time.equals(s)) {
 						timestamp = ch.getTimestamp();
 						baseCode = ch.getBaseVersionWholeClass();
+						syncCode = ch.getNewVersionWholeClass();
 						java.util.List<CodeLine> mappedCode = ch
 								.getBaseVersion();
 						for (CodeLine clWC : baseCode) {
@@ -325,10 +321,9 @@ public class FeatureView extends ViewPart {
 										.getSystemColor(SWT.COLOR_DARK_RED));
 							}
 						}
-						refreshSyncTargets();
+						refreshSyncTargets(selectedClass);
 						break;
 					}
-					i++;
 				}
 			}
 
@@ -338,186 +333,98 @@ public class FeatureView extends ViewPart {
 
 		newCode = new Table(arg0, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
 				| SWT.CANCEL);
-		GridData gd_text_1 = new GridData(SWT.FILL, SWT.FILL, false, false, 1,
-				2);
-		gd_text_1.widthHint = 157;
+		GridData gd_text_1 = new GridData(SWT.LEFT, SWT.FILL, false, false, 1,
+				11);
+		gd_text_1.heightHint = 227;
+		gd_text_1.widthHint = 149;
 		newCode.setLayoutData(gd_text_1);
+						new Label(arg0, SWT.NONE);
+								new Label(arg0, SWT.NONE);
+								
+										Label lblSyncTargets = new Label(arg0, SWT.NONE);
+										GridData gd_lblSyncTargets = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+										gd_lblSyncTargets.heightHint = 26;
+										lblSyncTargets.setLayoutData(gd_lblSyncTargets);
+										lblSyncTargets.setText("automatic sync possible");
+								
+										btnSynchronize = new Button(arg0, SWT.NONE);
+										btnSynchronize.addSelectionListener(new SelectionAdapter() {
+											@Override
+											public void widgetSelected(SelectionEvent e) {
+											}
+										});
+										btnSynchronize.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
+												false, false, 1, 1));
+										btnSynchronize.setText("Auto Sync");
+										btnSynchronize.setEnabled(false);
+										btnSynchronize.addListener(SWT.Selection, new Listener() {
+											public void handleEvent(Event e) {
+												switch (e.type) {
+												case SWT.Selection: {
+													ModuleFactory.getContextOperations().activateContext(selectedFeature);
+													solveChange(syncCode, selectedFeature, selectedVariant,
+															selectedClass.split(":")[1].trim(), true);
+													// setChanges();
+													btnSynchronize.setEnabled(false);
+													if (newCode != null)
+														newCode.removeAll();
 
-		autoSyncTargets = new List(arg0, SWT.BORDER | SWT.H_SCROLL
-				| SWT.V_SCROLL);
-		GridData gd_syncTargets = new GridData(SWT.FILL, SWT.TOP, false, false,
-				1, 1);
-		gd_syncTargets.heightHint = 89;
-		gd_syncTargets.widthHint = 143;
-		autoSyncTargets.setLayoutData(gd_syncTargets);
-		autoSyncTargets.addSelectionListener(new SelectionListener() {
+													// Problem: only changes of merged feature
+													// expression is mapped, changes of other feature
+													// expressions are lost
+													// cc.refreshContext(true, selectedFeatureExpression,
+													// projectNameTarget, classNameTarget, codeWC,
+													// syncCode);
 
-			public void widgetSelected(SelectionEvent event) {
-				autoSelection = autoSyncTargets.getSelection()[0];
-				String[] tmp = autoSelection.split(":");
-				projectNameTarget = tmp[0].trim();
-				classNameTarget = tmp[1].trim();
-				rightClass = projectNameTarget + " - " + classNameTarget;
-				java.util.List<CodeLine> code = cc.getTargetCode(
-						selectedFeatureExpression, projectNameTarget,
-						classNameTarget);
-				codeWC = cc.getTargetCodeWholeClass(selectedFeatureExpression,
-						projectNameTarget, classNameTarget);
-				for (CodeLine clWC : codeWC) {
-					for (CodeLine cl : code) {
-						if (cl.getLine() == clWC.getLine()) {
-							clWC.setMapped(true);
-						}
-					}
-				}
-				CodeHighlighting ccolor = cc
-						.getContextColor(selectedFeatureExpression);
-				syncCode = sc.doAutoSync(getNewCode(), baseCode, codeWC);
-				if (syncCode != null && !syncCode.isEmpty()) {
-					btnSynchronize.setEnabled(true);
-				} else {
-					btnManualSync.setEnabled(true);
-				}
-
-			}
-
-			public void widgetDefaultSelected(SelectionEvent event) {
-			}
-		});
-
-		btnSynchronize = new Button(arg0, SWT.NONE);
-		btnSynchronize.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
-				false, false, 1, 1));
-		btnSynchronize.setText("Auto Sync");
-		btnSynchronize.setEnabled(false);
-		btnSynchronize.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				switch (e.type) {
-				case SWT.Selection: {
-					solveChange(syncCode, selectedFeatureExpression,
-							projectNameTarget, classNameTarget, true);
-					// setChanges();
-					btnSynchronize.setEnabled(false);
-					if (newCode != null)
-						newCode.removeAll();
-
-					// Problem: only changes of merged feature
-					// expression is mapped, changes of other feature
-					// expressions are lost
-					// cc.refreshContext(true, selectedFeatureExpression,
-					// projectNameTarget, classNameTarget, codeWC,
-					// syncCode);
-
-					cc.addSynchronizedChange(selectedFeatureExpression,
-							timestamp, selectedProject, autoSelection);
-					setChanges();
-					break;
-				}
-				}
-			}
-		});
-
-		lblMergeConflict = new Label(arg0, SWT.NONE);
-		lblMergeConflict.setText("conflict - manual sync necessary");
-
-		manualSyncTargets = new List(arg0, SWT.BORDER | SWT.H_SCROLL
-				| SWT.V_SCROLL);
-		gd_list_2 = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
-		gd_list_2.heightHint = 89;
-		gd_list_2.widthHint = 191;
-		manualSyncTargets.setLayoutData(gd_list_2);
-		manualSyncTargets.addSelectionListener(new SelectionListener() {
-
-			public void widgetSelected(SelectionEvent event) {
-				int selectedTargetIndex = manualSyncTargets.getSelectionIndex();
-				int i = 0;
-				for (String target : manualSyncTargetsAsList) {
-					if (i == selectedTargetIndex) {
-						btnManualSync.setEnabled(true);
-						String[] targetInfo = target.split(":");
-						projectNameTarget = targetInfo[0].trim();
-						classNameTarget = targetInfo[1].trim();
-						manualSelection = target;
-						break;
-					}
-					i++;
-				}
-			}
-
-			public void widgetDefaultSelected(SelectionEvent event) {
-			}
-		});
-
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-
-		btnRemoveChangeEntry = new Button(arg0, SWT.NONE);
-		btnRemoveChangeEntry.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,
-				false, false, 1, 1));
-		btnRemoveChangeEntry.setText("Remove Change Entry");
-		btnRemoveChangeEntry.setVisible(false);
-		btnRemoveChangeEntry.setEnabled(false);
-		btnRemoveChangeEntry.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				switch (e.type) {
-				case SWT.Selection: {
-					contextOperations.removeChange(selectedFeatureExpression,
-							selectedProject, selectedClass, selectedChange,
-							timestamp);
-					btnRemoveChangeEntry.setEnabled(false);
-					setChanges();
-					if (newCode != null)
-						newCode.removeAll();
-				}
-				}
-			}
-		});
-		new Label(arg0, SWT.NONE);
-
-		btnManualSync = new Button(arg0, SWT.NONE);
-		btnManualSync.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false,
-				false, 1, 1));
-		btnManualSync.setText("Manual Sync");
-		btnManualSync.setEnabled(false);
-		btnManualSync.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				switch (e.type) {
-				case SWT.Selection:
-					// ManualMerge m = new ManualMerge(reference, left,
-					// leftClass,
-					// right, rightClass, syncCode);
-					// m.open();
-					btnManualSync.setEnabled(false);
-					try {
-						syncWithEclipse(baseCode, getNewCode(),
-								selectedProject, selectedClass,
-								projectNameTarget, classNameTarget);
-					} catch (FileOperationException | CoreException ex) {
-						ex.printStackTrace();
-					}
-					cc.addSynchronizedChange(selectedFeatureExpression,
-							timestamp, selectedProject, manualSelection);
-					refreshSyncTargets();
-					setChanges();
-					break;
-				}
-			}
-		});
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-		new Label(arg0, SWT.NONE);
-
-		Button btnSyncPreview = new Button(arg0, SWT.CHECK);
-		btnSyncPreview.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
-				false, false, 1, 1));
-		btnSyncPreview.setText("sync preview");
-		btnSyncPreview.setVisible(false);
+													cc.addSynchronizedChange(selectedFeature, timestamp,
+															selectedClass.split(":")[0].trim(), selectedVariant);
+													setChanges();
+													btnSynchronize.setEnabled(false);
+													break;
+												}
+												}
+											}
+										});
+						new Label(arg0, SWT.NONE);
+						new Label(arg0, SWT.NONE);
+						new Label(arg0, SWT.NONE);
+										new Label(arg0, SWT.NONE);
+								
+										lblMergeConflict = new Label(arg0, SWT.NONE);
+										GridData gd_lblMergeConflict = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+										gd_lblMergeConflict.heightHint = 24;
+										lblMergeConflict.setLayoutData(gd_lblMergeConflict);
+										lblMergeConflict.setText("conflict - manual sync");
+						
+								btnManualSync = new Button(arg0, SWT.NONE);
+								btnManualSync.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false,
+										false, 1, 1));
+								btnManualSync.setText("Manual Sync");
+								btnManualSync.setEnabled(false);
+								btnManualSync.addListener(SWT.Selection, new Listener() {
+									public void handleEvent(Event e) {
+										switch (e.type) {
+										case SWT.Selection:
+											btnManualSync.setEnabled(false);
+											try {
+												syncWithEclipse(baseCode, getNewCode(),
+														selectedClass.split(":")[0].trim(),
+														selectedClass.split(":")[1].trim(),
+														selectedVariant,
+														selectedClass.split(":")[1].trim());
+											} catch (FileOperationException | CoreException ex) {
+												ex.printStackTrace();
+											}
+											cc.addSynchronizedChange(selectedFeature, timestamp,
+													selectedClass.split(":")[0].trim(), selectedVariant);
+											refreshSyncTargets(selectedClass);
+											setChanges();
+											btnManualSync.setEnabled(false);
+											break;
+										}
+									}
+								});
+						new Label(arg0, SWT.NONE);
 	}
 
 	private java.util.List<CodeLine> getDifference(
@@ -538,103 +445,111 @@ public class FeatureView extends ViewPart {
 		return diff;
 	}
 
-	private void startBatchSync(String[] variantBatchSelection) {
-		for (String s : variantBatchSelection) {
-			String[] classes = cc.getClasses(selectedFeatureExpression, s)
+	private void startBatchSync(String[] featureBatchSelection) {
+		for (String s : featureBatchSelection) {
+			String[] classes = cc.getClassesForVariant(s, selectedVariant)
 					.toArray(new String[] {});
 			for (String c : classes) {
-				Collection<CodeChange> collChanges = cc.getChanges(
-						selectedFeatureExpression, s, c);
-				Iterator<CodeChange> it = collChanges.iterator();
+				Map<String, Collection<CodeChange>> collChanges = cc
+						.getChangesForVariant(selectedFeature, s, c);
+				Set<Entry<String, Collection<CodeChange>>> entry = collChanges
+						.entrySet();
+				Iterator<Entry<String, Collection<CodeChange>>> it = entry
+						.iterator();
+				// Iterator<CodeChange> it = collChanges.iterator();
 				while (it.hasNext()) {
-					CodeChange ch = it.next();
-					long timestamp = ch.getTimestamp();
-					java.util.List<CodeLine> baseCode = ch
-							.getBaseVersionWholeClass();
-					java.util.List<CodeLine> mappedCode = ch.getBaseVersion();
-					for (CodeLine clWC : baseCode) {
-						for (CodeLine cl : mappedCode) {
-							if (cl.getLine() == clWC.getLine()) {
-								clWC.setMapped(true);
-							}
-						}
-					}
-					java.util.List<CodeLine> newVersionWholeClass = ch
-							.getNewVersionWholeClass();
-					mappedCode = ch.getNewVersion();
-					for (CodeLine clWC : newVersionWholeClass) {
-						for (CodeLine cl : mappedCode) {
-							if (cl.getLine() == clWC.getLine()) {
-								clWC.setMapped(true);
-							}
-						}
-					}
-					String[] autoItems = cc.getAutoSyncTargets(
-							selectedFeatureExpression, s, c, baseCode,
-							newVersionWholeClass).toArray(new String[] {});
-					java.util.List<String> checkedItems = new ArrayList<String>();
-					for (String target : autoItems) {
-						if (!contextOperations.isAlreadySynchronized(
-								selectedFeatureExpression, timestamp,
-								selectedProject, target)) {
-							checkedItems.add(target);
-						}
-					}
-					for (String target : checkedItems) {
-						String t[] = target.split(":");
-						String targetProject = t[0].trim();
-						String targetClass = t[1].trim();
-						java.util.List<CodeLine> code = cc.getTargetCode(
-								selectedFeatureExpression, targetProject,
-								targetClass);
-						java.util.List<CodeLine> codeWC = cc
-								.getTargetCodeWholeClass(
-										selectedFeatureExpression,
-										targetProject, targetClass);
-						for (CodeLine clWC : codeWC) {
-							for (CodeLine cl : code) {
+					Entry<String, Collection<CodeChange>> en = it.next();
+					String project = en.getKey();
+					Iterator<CodeChange> itC = en.getValue().iterator();
+					while (itC.hasNext()) {
+						CodeChange ch = itC.next();
+						long timestamp = ch.getTimestamp();
+						baseCode = ch.getBaseVersionWholeClass();
+						java.util.List<CodeLine> mappedCode = ch
+								.getBaseVersion();
+						for (CodeLine clWC : baseCode) {
+							for (CodeLine cl : mappedCode) {
 								if (cl.getLine() == clWC.getLine()) {
 									clWC.setMapped(true);
 								}
 							}
 						}
-						java.util.List<CodeLine> syncCode = sc.doAutoSync(
-								ch.getNewVersionWholeClass(), baseCode, codeWC);
-						solveChange(syncCode, selectedFeatureExpression,
-								targetProject, targetClass, false);
-						cc.addSynchronizedChange(selectedFeatureExpression,
-								timestamp, selectedProject, target);
-					}
+						newVersionWholeClass = ch.getNewVersionWholeClass();
+						mappedCode = ch.getNewVersion();
+						for (CodeLine clWC : newVersionWholeClass) {
+							for (CodeLine cl : mappedCode) {
+								if (cl.getLine() == clWC.getLine()) {
+									clWC.setMapped(true);
+								}
+							}
+						}
+						String[] autoItems = cc.getAutoSyncTargetsForVariant(s,
+								selectedVariant, c, baseCode,
+								newVersionWholeClass).toArray(new String[] {});
+						java.util.List<String> checkedItems = new ArrayList<String>();
+						for (String target : autoItems) {
+							if (!contextOperations.isAlreadySynchronized(
+									selectedFeature, timestamp,
+									c.split(":")[0].trim(), target)) {
+								checkedItems.add(target);
+							}
+						}
+						for (String target : checkedItems) {
+							String t[] = target.split(":");
+							String targetProject = t[0].trim();
+							String targetClass = t[1].trim();
+							java.util.List<CodeLine> code = cc.getTargetCode(s,
+									targetProject, targetClass);
+							java.util.List<CodeLine> codeWC = cc
+									.getTargetCodeWholeClass(s, targetProject,
+											targetClass);
+							for (CodeLine clWC : codeWC) {
+								for (CodeLine cl : code) {
+									if (cl.getLine() == clWC.getLine()) {
+										clWC.setMapped(true);
+									}
+								}
+							}
+							ModuleFactory.getContextOperations().activateContext(selectedFeature);
+							java.util.List<CodeLine> syncCode = sc.doAutoSync(
+									ch.getNewVersionWholeClass(), baseCode,
+									codeWC);
+							solveChange(syncCode, s, targetProject,
+									targetClass, false);
+							cc.addSynchronizedChange(s, timestamp,
+									c.split(":")[0].trim(), targetProject);
+						}
 
-					// manueller Anteil
-					java.util.List<String> manualSyncTargetsAsList = cc
-							.getConflictedSyncTargets(
-									selectedFeatureExpression, s, c, baseCode,
-									newVersionWholeClass);
-					String[] manualItems = manualSyncTargetsAsList
-							.toArray(new String[] {});
-					checkedItems = new ArrayList<String>();
-					for (String target : manualItems) {
-						if (!contextOperations.isAlreadySynchronized(
-								selectedFeatureExpression, timestamp,
-								selectedProject, target)) {
-							checkedItems.add(target);
+						// manueller Anteil
+						java.util.List<String> manualSyncTargetsAsList = cc
+								.getConflictedSyncForVariant(s,
+										selectedVariant, c, baseCode,
+										newVersionWholeClass);
+						String[] manualItems = manualSyncTargetsAsList
+								.toArray(new String[] {});
+						checkedItems = new ArrayList<String>();
+						for (String target : manualItems) {
+							if (!contextOperations.isAlreadySynchronized(s,
+									timestamp, c.split(":")[0].trim(), target)) {
+								checkedItems.add(target);
+							}
 						}
-					}
-					for (String target : checkedItems) {
-						String t[] = target.split(":");
-						String targetProject = t[0].trim();
-						String targetClass = t[1].trim();
-						try {
-							syncWithEclipse(baseCode, newVersionWholeClass, s,
-									c, targetProject, targetClass);
-						} catch (FileOperationException | CoreException e1) {
-							e1.printStackTrace();
+						for (String target : checkedItems) {
+							target = c.split(":")[0].trim();
+							String className = c.split(":")[1].trim();
+							try {
+								syncWithEclipse(baseCode, newVersionWholeClass,
+										target, className, selectedVariant,
+										className);
+							} catch (FileOperationException | CoreException e1) {
+								e1.printStackTrace();
+							}
+							cc.addSynchronizedChange(s, timestamp, target,
+									selectedVariant);
+							refreshSyncTargets(selectedVariant + ": "
+									+ className);
+							setChanges();
 						}
-						cc.addSynchronizedChange(selectedFeatureExpression,
-								timestamp, selectedProject, targetProject);
-						// refreshSyncTargets();
-						// setChanges();
 					}
 				}
 			}
@@ -644,13 +559,16 @@ public class FeatureView extends ViewPart {
 	private java.util.List<CodeLine> getNewCode() {
 		Iterator<CodeChange> it = collChanges.iterator();
 		java.util.List<CodeLine> newCode = null;
-		int i = 0;
 		while (it.hasNext()) {
 			CodeChange cc = it.next();
-			if (i == selectedChange) {
+			String time = selectedChange.trim();
+			SimpleDateFormat formatter = new SimpleDateFormat(
+					"HH:mm:ss 'at' dd.MM.yyyy");
+			String s = formatter.format(new Date(cc.getTimestamp()));
+			if (time.equals(s)) {
 				newCode = cc.getNewVersionWholeClass();
+				break;
 			}
-			i++;
 		}
 		return newCode;
 	}
@@ -730,10 +648,6 @@ public class FeatureView extends ViewPart {
 		compconf.setLeftEditable(false);
 		compconf.setRightEditable(true);
 
-		// ApplyPatchOperation a = new ApplyPatchOperation(this, null, left,
-		// compconf);
-		// a.openWizard();
-		// new ViewerPane();
 		CompareEditorInput rci = new ResourceCompareInput(compconf, base, left,
 				right);
 
@@ -777,6 +691,8 @@ public class FeatureView extends ViewPart {
 		}
 
 		java.util.List<String> source = new ArrayList<String>();
+		if (code.isEmpty())
+			code = baseCode;
 		for (CodeLine line : code) {
 			source.add(line.getCode() + "\n");
 		}
@@ -802,88 +718,76 @@ public class FeatureView extends ViewPart {
 		}
 		// ModuleFactory.getDeltaOperations().createPatch(f);
 		if (refreshGUI)
-			refreshSyncTargets();
+			refreshSyncTargets(selectedClass);
 		// contextOperations.removeChange(selectedFeatureExpression,
 		// selectedProject, selectedClass, selectedChange);
 		// btnRemoveChangeEntry.setEnabled(false);
 	}
 
-	private void refreshSyncTargets() {
+	private void refreshSyncTargets(String selectedClass) {
 		boolean isAutoSyncPossible = false;
-		String[] autoItems = cc.getAutoSyncTargets(selectedFeatureExpression,
-				selectedProject, selectedClass, baseCode, newVersionWholeClass)
+		String[] autoItems = cc.getAutoSyncTargetsForVariant(selectedFeature,
+				selectedVariant, selectedClass, baseCode, newVersionWholeClass)
 				.toArray(new String[] {});
 		java.util.List<String> checkedItems = new ArrayList<String>();
 		for (String target : autoItems) {
-			if (!contextOperations.isAlreadySynchronized(
-					selectedFeatureExpression, timestamp, selectedProject,
-					target)) {
+			if (!contextOperations.isAlreadySynchronized(selectedFeature,
+					timestamp, selectedClass.split(":")[0].trim(), target)) {
 				checkedItems.add(target);
 			}
 		}
-		autoSyncTargets.setItems(checkedItems.toArray(new String[] {}));
-		if (!checkedItems.isEmpty())
+		if (!checkedItems.isEmpty()) {
 			isAutoSyncPossible = true;
+			btnSynchronize.setEnabled(true);
+		}
 
 		boolean isManualSyncPossible = false;
-		manualSyncTargetsAsList = cc.getConflictedSyncTargets(
-				selectedFeatureExpression, selectedProject, selectedClass,
-				baseCode, newVersionWholeClass);
+		manualSyncTargetsAsList = cc.getConflictedSyncForVariant(
+				selectedFeature, selectedVariant, selectedClass, baseCode,
+				newVersionWholeClass);
 		String[] manualItems = manualSyncTargetsAsList.toArray(new String[] {});
 		checkedItems = new ArrayList<String>();
 		for (String target : manualItems) {
-			if (!contextOperations.isAlreadySynchronized(
-					selectedFeatureExpression, timestamp, selectedProject,
-					target)) {
+			if (!contextOperations.isAlreadySynchronized(selectedFeature,
+					timestamp, selectedClass.split(":")[0].trim(), target)) {
 				checkedItems.add(target);
 			}
 		}
-		manualSyncTargets.setItems(checkedItems.toArray(new String[] {}));
 		manualSyncTargetsAsList = checkedItems;
-		if (!checkedItems.isEmpty())
+		if (!checkedItems.isEmpty()) {
 			isManualSyncPossible = true;
+			btnManualSync.setEnabled(true);
+		}
 
 		if (!isAutoSyncPossible && !isManualSyncPossible) {
 			// TODO
-			contextOperations.removeChange(selectedFeatureExpression,
-					selectedProject, selectedClass, selectedChange, timestamp);
+			// contextOperations.removeChange(selectedFeature, selectedVariant,
+			// selectedClass, selectedChange, timestamp);
 		}
 	}
 
 	public void setChanges() {
-		collChanges = cc.getChanges(selectedFeatureExpression, selectedProject,
-				selectedClass);
+		collChanges = new ArrayList<CodeChange>();
 		java.util.List<String> timestamps = new ArrayList<String>();
-		SimpleDateFormat formatter = new SimpleDateFormat(
-				"hh:mm:ss 'at' dd.MM.yyyy");
-		for (CodeChange ch : collChanges) {
-			timestamps.add(formatter.format(new Date(ch.getTimestamp())));
-		}
-		changes.setItems(timestamps.toArray(new String[] {}));
-	}
-
-	public void checkManualMerge(java.util.List<CodeLine> mergeResult) {
-		boolean manualMergeIsNeeded = false;
-		for (CodeLine cl : mergeResult) {
-			if (cl.getCode().contains("<<<<<<<")) {
-				manualMergeIsNeeded = true;
-				break;
+		changeMap = cc.getChangesForVariant(selectedFeature, selectedVariant,
+				selectedClass);
+		Set<Entry<String, Collection<CodeChange>>> entries = changeMap
+				.entrySet();
+		Iterator<Entry<String, Collection<CodeChange>>> it = entries.iterator();
+		while (it.hasNext()) {
+			Entry<String, Collection<CodeChange>> entry = it.next();
+			Collection<CodeChange> c = entry.getValue();
+			selClass = selectedClass.split(":")[0].trim();
+			for (CodeChange ch : c) {
+				if (entry.getKey().equals(selClass)) {
+					collChanges.add(ch);
+					SimpleDateFormat formatter = new SimpleDateFormat(
+							"HH:mm:ss 'at' dd.MM.yyyy");
+					timestamps
+							.add(formatter.format(new Date(ch.getTimestamp())));
+				}
 			}
 		}
-		if (manualMergeIsNeeded) {
-			UtilOperations.getInstance().printCode(mergeResult);
-			ManualMerge m = new ManualMerge(reference, mergeResult, leftClass,
-					mergeResult, rightClass, syncCode);
-			m.open();
-		} else {
-			btnManualSync.setEnabled(false);
-			if (newCode != null)
-				newCode.removeAll();
-			cc.refreshContext(false, selectedFeatureExpression,
-					projectNameTarget, classNameTarget, codeWC, syncCode);
-			solveChange(mergeResult, selectedFeatureExpression,
-					projectNameTarget, classNameTarget, true);
-			setChanges();
-		}
+		changes.setItems(timestamps.toArray(new String[] {}));
 	}
 }

@@ -93,8 +93,7 @@ public class Class extends Element {
 				baseVersion.add(cl.clone());
 			}
 			List<CodeLine> baseVersionWholeClass = new ArrayList<CodeLine>();
-			this.wholeClass = ModuleFactory.getContextOperations()
-					.getLinesOfActualFile(getName());
+			this.wholeClass = ModuleFactory.getContextOperations().getLinesOfActualFile(getName());
 			if (this.wholeClass != null) {
 				for (CodeLine cl : this.wholeClass) {
 					CodeLine baseLine = cl.clone();
@@ -115,8 +114,7 @@ public class Class extends Element {
 			}
 			List<CodeLine> newVersionWholeClass = new ArrayList<CodeLine>();
 			if (this.wholeClass == null || this.wholeClass.isEmpty()) {
-				this.wholeClass = ModuleFactory.getContextOperations()
-						.getLinesOfActualFile(getName());
+				this.wholeClass = ModuleFactory.getContextOperations().getLinesOfActualFile(getName());
 			}
 			int i = 1;
 			for (String s : list) {
@@ -146,8 +144,7 @@ public class Class extends Element {
 		}
 	}
 
-	public void addChange(List<CodeLine> newLines, String projectName,
-			String className) {
+	public void addChange(List<CodeLine> newLines, String projectName, String className) {
 		if (logChange) {
 			List<CodeLine> newVersion = new ArrayList<CodeLine>();
 			for (CodeLine cl : newLines) {
@@ -163,10 +160,8 @@ public class Class extends Element {
 			}
 			if (actualChange == null) {
 				actualChange = new CodeChange();
-				IResource res = ContextUtils.findResource(projectName,
-						className);
-				List<String> his = ModuleFactory.getPersistanceOperations()
-						.getHistoryFileLines(res);
+				IResource res = ContextUtils.findResource(projectName, className);
+				List<String> his = ModuleFactory.getPersistanceOperations().getHistoryFileLines(res);
 				List<CodeLine> base = new ArrayList<CodeLine>();
 				int i = 0;
 				for (String line : his) {
@@ -178,12 +173,9 @@ public class Class extends Element {
 			actualChange.setNewVersion(newVersion);
 			actualChange.setNewVersionWholeClass(newVersionWholeClass);
 			actualChange.createTimeStamp();
-			if (!changes.isEmpty()
-					&& timestampToString(actualChange.getTimestamp()).equals(
-							timestampToString(changes.get(changes.size() - 1)
-									.getTimestamp()))) {
-				List<CodeLine> base = changes.get(changes.size() - 1)
-						.getBaseVersion();
+			if (!changes.isEmpty() && timestampToString(actualChange.getTimestamp())
+					.equals(timestampToString(changes.get(changes.size() - 1).getTimestamp()))) {
+				List<CodeLine> base = changes.get(changes.size() - 1).getBaseVersion();
 				changes.set(changes.size() - 1, actualChange);
 				changes.get(changes.size() - 1).setBaseVersion(base);
 			} else
@@ -195,8 +187,7 @@ public class Class extends Element {
 	}
 
 	private String timestampToString(long timestamp) {
-		SimpleDateFormat formatter = new SimpleDateFormat(
-				"hh:mm:ss 'at' dd.MM.yyyy");
+		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss 'at' dd.MM.yyyy");
 		return formatter.format(new Date(timestamp));
 	}
 
@@ -212,8 +203,7 @@ public class Class extends Element {
 		init();
 	}
 
-	public Class(String name, String path, List<String> code,
-			int numberOfCodeLines) {
+	public Class(String name, String path, List<String> code, int numberOfCodeLines) {
 		super(name, path, JavaElements.CLASS);
 		addCode(new CodeFragment(code, 0, numberOfCodeLines, 0));
 		init();
@@ -278,8 +268,7 @@ public class Class extends Element {
 	}
 
 	public void removeCode(int start, int end) {
-		codeLines = UtilOperations.getInstance().removeCode(start, end,
-				codeLines);
+		codeLines = UtilOperations.getInstance().removeCode(start, end, codeLines);
 	}
 
 	/*
@@ -339,10 +328,11 @@ public class Class extends Element {
 	public void setLinesOfWholeClass(List<String> lines) {
 		wholeClass = new ArrayList<CodeLine>();
 		int i = 1;
-		for (String line : lines) {
-			wholeClass.add(new CodeLine(line, i));
-			i++;
-		}
+		if (lines != null)
+			for (String line : lines) {
+				wholeClass.add(new CodeLine(line, i));
+				i++;
+			}
 	}
 
 	/**

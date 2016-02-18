@@ -72,11 +72,13 @@ public class FeatureController extends AbstractController {
 
 	public void addFeatureMapping(String feature, String elementName,
 			JavaElements elementType, IPath elementPath, String code,
-			int startLineOfSelection, int endLineOfSelection, int offset) {
-		setModelProperty(ControllerProperties.CODE_EDITOR_ELEMENT_PROPERTY
-				.getProperty(), new MappingElement(feature, elementName,
+			int startLineOfSelection, int endLineOfSelection, int offset, String projectPath) {
+		MappingElement mapping = new MappingElement(feature, elementName,
 				elementType, elementPath.toString(), code,
-				startLineOfSelection, endLineOfSelection, offset));
+				startLineOfSelection, endLineOfSelection, offset);
+		mapping.setPathToProject(projectPath);
+		setModelProperty(ControllerProperties.CODE_EDITOR_ELEMENT_PROPERTY
+				.getProperty(), mapping, new Boolean(true));
 	}
 
 	public void removeMapping(MappingElement mapping) {

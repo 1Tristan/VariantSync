@@ -76,13 +76,13 @@ public class FeatureContextActivity extends AbstractHandler implements
 		isEnabled = true;
 		StringBuilder context = new StringBuilder(
 				controller.getActiveFeatureContext());
-		String project = controller.getActiveProject();
-		if ((context.length() + project.length()) <= 20) {
-			context.append("/");
-			context.append(project);
-		} else {
-			staticElement.setTooltip("Project: " + project);
-		}
+		// String project = controller.getActiveProject();
+		// if ((context.length() + project.length()) <= 20) {
+		// context.append("/");
+		// context.append(project);
+		// } else {
+		// staticElement.setTooltip("Project: " + project);
+		// }
 		if (context == null || context.capacity() == 0) {
 			context.append("default context active");
 		}

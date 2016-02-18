@@ -94,7 +94,7 @@ public class FeatureView_Old extends ViewPart {
 	private String leftClass;
 	private java.util.List<CodeLine> right;
 	private String rightClass;
-	private FeatureView reference;
+	private SourceFocusedView reference;
 	private Button btnRemoveChangeEntry;
 	private java.util.List<CodeLine> codeWC;
 	private CCombo combo;

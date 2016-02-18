@@ -49,14 +49,13 @@ import de.ovgu.variantsync.utilitylayer.UtilityModel;
 import de.ovgu.variantsync.utilitylayer.log.LogOperations;
 
 /**
- * Entry point to start plugin variantsync. Variantsync supports developers to
+ * Entry point to start the plug-in called VariantSync. VariantSync supports developers to
  * synchronize similar software projects which are developed in different
- * variants. This version is based on first version of variantsync which was
+ * variants. This version is based on first version of VariantSync which was
  * developed by Lei Luo in 2012.
  * 
  * @author Tristan Pfofe (tristan.pfofe@st.ovgu.de)
  * @version 2.0
- * @since 14.05.2015
  */
 public class VariantSyncPlugin extends AbstractUIPlugin {
 

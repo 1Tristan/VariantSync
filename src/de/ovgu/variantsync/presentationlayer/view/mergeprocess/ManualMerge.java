@@ -29,7 +29,7 @@ public class ManualMerge {
 	private String selectedCode;
 	private boolean isLeftChosen;
 	private boolean isRightChosen;
-	private FeatureView featureView;
+	private SourceFocusedView featureView;
 	private List<CodeLine> syncCode;
 
 	/**
@@ -41,7 +41,7 @@ public class ManualMerge {
 	 * @param parent
 	 * @param style
 	 */
-	public ManualMerge(FeatureView reference, java.util.List<CodeLine> left,
+	public ManualMerge(SourceFocusedView reference, java.util.List<CodeLine> left,
 			String classLeft, java.util.List<CodeLine> right,
 			String classRight, List<CodeLine> syncCode) {
 		shell = new Shell(Display.getCurrent(), SWT.APPLICATION_MODAL
